@@ -6,6 +6,7 @@ import { IconButton } from "@/kits/components/IconButton";
 import { Icons } from "@/kits/components/Icons";
 import { UserMenu } from "../UserMenu";
 import React from "react";
+import { useAuthContext } from "@/contexts/auth.context";
 
 interface UserHeaderProps {
   name: string;
@@ -24,7 +25,11 @@ export const UserHeader = (props: UserHeaderProps) => {
   const [now, controls] = useTick({ unit: "minute" });
 
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
-
+  
+  const authStore = useAuthContext();
+  const tenant = authStore.use.tenant();
+  const project = authStore.use.project();
+  
   React.useEffect(() => {
     if (isMenuOpen) {
       controls.on();
@@ -32,7 +37,7 @@ export const UserHeader = (props: UserHeaderProps) => {
       controls.off();
     }
   }, [controls, isMenuOpen]);
-
+  const logoUrl = project?.logo_url || tenant?.logo_url || "/images/nextsystem-logo.webp";
   return (
     <>
       <UserMenu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
@@ -42,8 +47,8 @@ export const UserHeader = (props: UserHeaderProps) => {
             <div className="flex flex-1 items-center gap-4">
               <div className="flex items-center gap-2">
                 <Image
-                  src="/images/Vinamilk_new_logo.webp"
-                  alt="Vinamilk Logo"
+                  src={logoUrl}
+                  alt={project?.name || tenant?.name || "Logo"}
                   width={90}
                   height={27}
                 />

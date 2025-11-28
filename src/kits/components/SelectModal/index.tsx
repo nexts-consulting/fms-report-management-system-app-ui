@@ -48,6 +48,7 @@ const styles = {
 type Option = {
   label: string;
   value: any;
+  key?: string | number;
 };
 
 export interface SelectModalProps {
@@ -177,7 +178,7 @@ export const SelectModal = React.memo((props: SelectModalProps) => {
             {displayOptions.length > 0 &&
               displayOptions.map((option, index) => (
                 <Option
-                  key={option.value}
+                  key={option.key ?? `${instanceId.current}-option-${index}`}
                   id={ids.current.option(index)}
                   option={option}
                   isSelected={option.value === selectedOption?.value}

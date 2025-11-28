@@ -20,9 +20,17 @@ export const useProjectTheme = () => {
       // Set primary color (use for buttons, links, etc.)
       if (project.primary_color) {
         root.style.setProperty("--project-primary-color", project.primary_color);
-        // Generate shades for primary color (simplified - you can enhance this)
+        // Generate shades for primary color
         root.style.setProperty("--project-primary-hover", adjustBrightness(project.primary_color, -10));
         root.style.setProperty("--project-primary-active", adjustBrightness(project.primary_color, -20));
+        // Generate lighter shades for text and other uses
+        root.style.setProperty("--project-primary-10", adjustBrightness(project.primary_color, 80));
+        root.style.setProperty("--project-primary-20", adjustBrightness(project.primary_color, 60));
+        root.style.setProperty("--project-primary-30", adjustBrightness(project.primary_color, 40));
+        root.style.setProperty("--project-primary-40", adjustBrightness(project.primary_color, 20));
+        root.style.setProperty("--project-primary-50", adjustBrightness(project.primary_color, 10));
+        root.style.setProperty("--project-primary-90", adjustBrightness(project.primary_color, -30));
+        root.style.setProperty("--project-primary-100", adjustBrightness(project.primary_color, -40));
       }
 
       // Set secondary color
@@ -36,6 +44,13 @@ export const useProjectTheme = () => {
       root.style.removeProperty("--project-primary-color");
       root.style.removeProperty("--project-primary-hover");
       root.style.removeProperty("--project-primary-active");
+      root.style.removeProperty("--project-primary-10");
+      root.style.removeProperty("--project-primary-20");
+      root.style.removeProperty("--project-primary-30");
+      root.style.removeProperty("--project-primary-40");
+      root.style.removeProperty("--project-primary-50");
+      root.style.removeProperty("--project-primary-90");
+      root.style.removeProperty("--project-primary-100");
       root.style.removeProperty("--project-secondary-color");
       root.style.removeProperty("--project-secondary-hover");
       root.style.removeProperty("--project-secondary-active");

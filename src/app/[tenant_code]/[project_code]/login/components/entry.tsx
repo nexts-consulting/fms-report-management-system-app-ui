@@ -322,7 +322,7 @@ export const Entry = () => {
       if (!projectAuthConfig) {
         notification.error({
           title: "Đăng nhập thất bại!",
-          description: "Cấu hình xác thực dự án không tồn tại!",
+          description: "Cấu hình xác thực dự án không hợp lệ!",
         });
         return;
       }

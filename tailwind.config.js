@@ -17,17 +17,17 @@ export default {
         "project-secondary": "var(--project-secondary-color, #3c52ff)",
         "project-secondary-hover": "var(--project-secondary-hover, #1d35e0)",
         "project-secondary-active": "var(--project-secondary-active, #1426b5)",
-        // Primary (Blue-based) - fallback colors
-        "primary-10": "#e5e8ff",  // Very light tint
-        "primary-20": "#bcc3ff",  // Light tint
-        "primary-30": "#929dff",  // Soft mid-light
-        "primary-40": "#6778ff",  // More saturated
-        "primary-50": "#3c52ff",  // Main / base highlight
-        "primary-60": "#1d35e0",  // Strong base (default)
-        "primary-70": "#1426b5",  // Darker core tone
-        "primary-80": "#0f1e95",  // Very dark blue
-        "primary-90": "#0a1672",  // Near base color
-        "primary-100": "#0113af", // Deep base color
+        // Primary (Blue-based) - use project theme colors with fallback
+        "primary-10": "var(--project-primary-10, #e5e8ff)",  // Very light tint
+        "primary-20": "var(--project-primary-20, #bcc3ff)",  // Light tint
+        "primary-30": "var(--project-primary-30, #929dff)",  // Soft mid-light
+        "primary-40": "var(--project-primary-40, #6778ff)",  // More saturated
+        "primary-50": "var(--project-primary-50, #3c52ff)",  // Main / base highlight
+        "primary-60": "var(--project-primary-color, #1d35e0)",  // Strong base (uses project primary)
+        "primary-70": "var(--project-primary-hover, #1426b5)",  // Darker core tone (uses project primary hover)
+        "primary-80": "var(--project-primary-active, #0f1e95)",  // Very dark blue (uses project primary active)
+        "primary-90": "var(--project-primary-90, #0a1672)",  // Near base color
+        "primary-100": "var(--project-primary-100, #0113af)", // Deep base color
 
         // Cool Gray
         "cool-gray-10": "#f2f4f8",

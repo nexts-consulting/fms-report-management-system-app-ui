@@ -15,6 +15,7 @@ import { LoadingOverlay } from "@/kits/components/LoadingOverlay";
 import { CheckoutMap } from "@/kits/widgets/CheckoutMap";
 import { useMutationAttendanceCheckout } from "@/services/api/attendance/checkout";
 import { useQueryClient } from "react-query";
+import { useTenantProjectPath } from "@/hooks/use-tenant-project-path";
 
 export const Entry = () => {
   const authStore = useAuthContext();
@@ -26,6 +27,7 @@ export const Entry = () => {
   const router = useRouter();
   const notification = useNotification();
   const queryClient = useQueryClient();
+  const { buildPath } = useTenantProjectPath();
 
   const [step, setStep] = React.useState<"localize" | "capture" | "submit">("localize");
 
@@ -61,7 +63,7 @@ export const Entry = () => {
           });
           notification.clear();
           setAllbeDone(false);
-          router.replace("/lobby?force=true");
+          router.replace(buildPath("/lobby?force=true"));
         }, 3000);
       },
       onError: (error) => {

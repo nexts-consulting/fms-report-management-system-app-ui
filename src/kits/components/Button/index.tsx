@@ -10,8 +10,8 @@ const constants = {
 const variants = cva(
   StyleUtil.cn(
     "text-sm border relative",
-    "enabled:active:shadow-[inset_0_0_0_1px_#1d35e0,inset_0_0_0_2px_white] enabled:active:border-primary-60",
-    "enabled:focus:shadow-[inset_0_0_0_1px_#1d35e0,inset_0_0_0_2px_white] enabled:focus:border-primary-60",
+    "enabled:active:shadow-[inset_0_0_0_1px_var(--project-primary-color,#1d35e0),inset_0_0_0_2px_white] enabled:active:border-project-primary",
+    "enabled:focus:shadow-[inset_0_0_0_1px_var(--project-primary-color,#1d35e0),inset_0_0_0_2px_white] enabled:focus:border-project-primary",
     "disabled:opacity-50 disabled:cursor-not-allowed",
   ),
   {

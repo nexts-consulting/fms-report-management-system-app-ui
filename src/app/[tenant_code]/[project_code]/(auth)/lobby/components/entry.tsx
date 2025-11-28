@@ -9,6 +9,7 @@ import { StyleUtil } from "@/kits/utils";
 import { EUserAccountRole } from "@/types/model";
 import { useRouter, useSearchParams } from "next/navigation";
 import React from "react";
+import { useTenantProjectPath } from "@/hooks/use-tenant-project-path";
 
 export const Entry = () => {
   const authStore = useAuthContext();
@@ -22,6 +23,7 @@ export const Entry = () => {
   const searchParams = useSearchParams();
 
   const router = useRouter();
+  const { buildPath } = useTenantProjectPath();
 
   React.useEffect(() => {
     if (searchParams.get("force") === "true") {
@@ -33,21 +35,15 @@ export const Entry = () => {
     }
 
     if (currentAttendance) {
-      router.replace("/attendance/tracking");
+      router.replace(buildPath("/attendance/tracking"));
     }
   }, [currentAttendance]);
 
   React.useEffect(() => {
     if (!selectedProvince || !selectedOutlet) {
-      router.replace("/outlet");
+      router.replace(buildPath("/outlet"));
     }
   }, [selectedProvince, selectedOutlet]);
-
-  React.useEffect(() => {
-    if (user && user?.account?.role === EUserAccountRole.SALE) {
-      router.replace("/sale/lobby");
-    }
-  }, [user]);
 
   return (
     <>
@@ -67,7 +63,7 @@ export const Entry = () => {
               "outline outline-1 -outline-offset-1 outline-gray-30",
               "focus:bg-gray-10 focus:outline-primary-60",
             )}
-            onClick={() => router.push("/shift")}
+            onClick={() => router.push(buildPath("/shift"))}
           >
             <div className="mb-8">
               <p className="text-sm">Bắt đầu ca làm việc</p>
@@ -85,7 +81,7 @@ export const Entry = () => {
               "outline outline-1 -outline-offset-1 outline-gray-30",
               "focus:bg-gray-10 focus:outline-primary-60",
             )}
-            onClick={() => router.push("/outlet")}
+            onClick={() => router.push(buildPath("/outlet"))}
           >
             <div className="mb-8">
               <p className="text-sm">Thay đổi địa điểm</p>

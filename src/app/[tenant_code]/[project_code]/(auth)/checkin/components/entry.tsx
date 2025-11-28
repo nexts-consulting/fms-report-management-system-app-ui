@@ -15,6 +15,7 @@ import { AnimatedEllipsis } from "@/kits/components/AnimatedEllipsis";
 import { useMutationAttendanceCheckin } from "@/services/api/attendance/checkin";
 import { LoadingOverlay } from "@/kits/components/LoadingOverlay";
 import { EUserAccountRole } from "@/types/model";
+import { useTenantProjectPath } from "@/hooks/use-tenant-project-path";
 
 export const Entry = () => {
   const authStore = useAuthContext();
@@ -25,6 +26,7 @@ export const Entry = () => {
 
   const router = useRouter();
   const notification = useNotification();
+  const { buildPath } = useTenantProjectPath();
 
   const [step, setStep] = React.useState<"localize" | "capture" | "submit">(
     "localize",
@@ -223,15 +225,15 @@ export const Entry = () => {
 
   React.useEffect(() => {
     if (!selectedWorkingShift) {
-      router.replace("/shift");
+      router.replace(buildPath("/shift"));
     }
   }, [selectedWorkingShift]);
 
   React.useEffect(() => {
     if (user?.account?.role === EUserAccountRole.SALE) {
-      router.replace("/sale/lobby");
+      router.replace(buildPath("/sale/lobby"));
     }
-  }, [user]);
+  }, [user, buildPath]);
 
   if (!selectedWorkingShift) {
     return <></>;

@@ -1,5 +1,17 @@
 import { supabaseFmsService } from "@/services/supabase";
 
+// Location Category Assignment
+export interface ILocationCategoryAssignment {
+  location_id: number;
+  category_id: number;
+}
+
+// Location Admin Division Assignment
+export interface ILocationAdminDivision {
+  location_id: number;
+  admin_division_id: number;
+}
+
 /**
  * Get location categories assigned to a location
  */

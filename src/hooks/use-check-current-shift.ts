@@ -3,19 +3,23 @@ import { useGlobalContext } from "@/contexts/global.context";
 import { useQueryCurrentShift } from "@/services/api/attendance/current-shift";
 import { EUserAccountRole } from "@/types/model";
 import React from "react";
+import { useParams } from "next/navigation";
 
 export const useCheckCurrentShift = () => {
   const authStore = useAuthContext();
   const user = authStore.use.user();
+  const params = useParams();
+  const projectCode = params?.project_code as string;
 
   const globalStore = useGlobalContext();
 
   const currentAttendanceQuery = useQueryCurrentShift({
     params: {
-      staffId: user?.id!,
+      username: user?.account?.username || "",
+      project_code: projectCode || "",
     },
     config: {
-      enabled: !!user?.id && user.account?.role !== EUserAccountRole.SALE,
+      enabled: !!user?.account?.username && !!projectCode && user.account?.role !== EUserAccountRole.SALE,
       onSuccess: (data) => {
         if (data.data) {
           globalStore.setState({

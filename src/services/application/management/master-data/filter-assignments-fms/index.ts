@@ -1,5 +1,27 @@
 import { supabaseFmsService } from "@/services/supabase";
 
+// Filter Group Filter Assignment
+export interface IFilterGroupFilter {
+  id: number;
+  group_code: string;
+  project_code: string;
+  filter_definition_id: number;
+  metadata: Record<string, any>;
+  created_at: string;
+  updated_at: string;
+}
+
+// Filter User Filter Assignment
+export interface IFilterUserFilter {
+  id: number;
+  username: string;
+  project_code: string;
+  filter_definition_id: number;
+  metadata: Record<string, any>;
+  created_at: string;
+  updated_at: string;
+}
+
 /**
  * Get filter definitions assigned to a group
  */
