@@ -21,6 +21,7 @@ import { EUserAccountRole, IStaffProfile, IUserAccount } from "@/types/model";
 import { httpRequestGetTenantByCode } from "@/services/application/master-data/tenants";
 import { httpRequestGetProjectByCode } from "@/services/application/master-data/tenant-projects";
 import { httpRequestLoadAllProjectConfigs } from "@/services/application/management/projects/configs/load-all";
+import { getUserFromAccessToken } from "@/utils/auth";
 
 export const Entry = () => {
   const authStore = useAuthContext();
@@ -31,6 +32,7 @@ export const Entry = () => {
   const globalStore = useGlobalContext();
   const selectedProvince = globalStore.use.selectedProvince();
   const selectedOutlet = globalStore.use.selectedOutlet();
+  const projectAuthConfig = globalStore.use.projectAuthConfig();
 
   const router = useRouter();
   const params = useParams();
@@ -210,19 +212,47 @@ export const Entry = () => {
   const authLoginMutation = useMutationAuthLogin({
     config: {
       onSuccess(data, variables, context) {
-        if (!data.profile) {
+        // Calculate token expiration timestamp
+        const expiresAt = Date.now() + data.expiresIn * 1000;
+
+        // Decode access_token to get user info
+        const userFromAccessToken = getUserFromAccessToken(data.accessToken);
+
+        if (!userFromAccessToken) {
           notification.error({
             title: "Đăng nhập thất bại!",
-            description: "Profile không tồn tại!",
+            description: "Không thể lấy thông tin người dùng từ token!",
           });
           return;
         }
+
+        // Transform to match AuthStore user format
+        // Note: We may need to call backend API to get full profile
+        // For now, we'll use basic info from token with default values for required fields
+        const now = new Date().toISOString();
+        const userId = parseInt(userFromAccessToken.id) || 0;
+        const userInfo: IStaffProfile & { account: IUserAccount } = {
+          id: userId,
+          staffCode: userFromAccessToken.username || "",
+          fullName: userFromAccessToken.fullName || userFromAccessToken.username || "",
+          profileImage: "",
+          trainingDate: now,
+          startDate: now,
+          passProbationDate: now,
+          updatedAt: now,
+          account: {
+            id: userId,
+            username: userFromAccessToken.username || "",
+            role: (userFromAccessToken.roles?.[0] as EUserAccountRole) || EUserAccountRole.STAFF,
+            createdAt: now,
+          },
+        };
 
         notification.success({
           title: "Đăng nhập thành công!",
           description: (
             <>
-              Xin chào <span className="font-medium">{data.profile.fullName}</span>
+              Xin chào <span className="font-medium">{userInfo.fullName}</span>
             </>
           ),
           options: {
@@ -232,17 +262,48 @@ export const Entry = () => {
 
         authStore.setState({
           authenticated: true,
-          token: data.token,
-          user: data.profile as IStaffProfile & { account: IUserAccount },
+          token: data.accessToken, // Keep for backward compatibility
+          accessToken: data.accessToken,
+          refreshToken: data.refreshToken,
+          idToken: data.idToken,
+          tokenExpiresAt: expiresAt,
+          user: userInfo,
         });
 
         // Redirect will be handled by the useEffect below
       },
       onError(error, variables, context) {
-        console.log(error);
+        console.log(`[🔒] error: `, error);
+        authStore.setState({
+          authenticated: false,
+          user: null,
+          token: null,
+          accessToken: null,
+          refreshToken: null,
+          idToken: null,
+          tokenExpiresAt: null,
+        });
+
+        // Extract error message from Keycloak response
+        let errorMessage = "Tên đăng nhập hoặc mật khẩu không chính xác!";
+        if (error && typeof error === "object" && "response" in error) {
+          const axiosError = error as any;
+          if (axiosError.response?.data) {
+            const keycloakError = axiosError.response.data as {
+              error_description?: string;
+              error?: string;
+            };
+            if (keycloakError.error_description) {
+              errorMessage = keycloakError.error_description;
+            } else if (keycloakError.error) {
+              errorMessage = keycloakError.error;
+            }
+          }
+        }
+
         notification.error({
           title: "Đăng nhập thất bại!",
-          description: "Tên đăng nhập hoặc mật khẩu không chính xác!",
+          description: errorMessage,
         });
       },
     },
@@ -250,7 +311,31 @@ export const Entry = () => {
 
   const handleFormSubmitOnValid: SubmitHandler<LoginSchema> = (data) => {
     CommonUtil.startAsyncFn(async () => {
-      await authLoginMutation.mutateAsync(data);
+      if (!tenant) {
+        notification.error({
+          title: "Đăng nhập thất bại!",
+          description: "Thông tin tenant không tồn tại!",
+        });
+        return;
+      }
+
+      if (!projectAuthConfig) {
+        notification.error({
+          title: "Đăng nhập thất bại!",
+          description: "Cấu hình xác thực dự án không tồn tại!",
+        });
+        return;
+      }
+
+      await authLoginMutation.mutateAsync({
+        username: data.username,
+        password: data.password,
+        tenantCode: tenant.code,
+        keycloakBaseUrl: tenant.keycloak_base_url,
+        keycloakRealm: tenant.keycloak_realm,
+        keycloakClientId: projectAuthConfig.keycloak_client_id,
+        keycloakClientSecret: projectAuthConfig.keycloak_client_secret,
+      });
     });
   };
 
@@ -329,10 +414,12 @@ export const Entry = () => {
           </div>
 
           {/* Heading */}
-          <Heading as="h1" level="h3" className="mb-8">
+          <Heading as="h1" level="h3">
             Đăng nhập hệ thống báo cáo
           </Heading>
-
+          <Heading as="h3" level="h5" className="mb-8">
+            {tenant?.name} - {project?.name}
+          </Heading>
           {/* Fields */}
           <div className={"space-y-4"}>
             <div>
@@ -379,6 +466,10 @@ export const Entry = () => {
             Đăng nhập
           </Button>
         </form>
+        <div className="mt-12 text-center text-sm text-gray-600">
+          <p>Powered by Nexts</p>
+          <p>Copyright © {new Date().getFullYear()} FMS. All rights reserved.</p>
+        </div>
       </div>
     </>
   );

@@ -26,13 +26,13 @@ const Providers = (props: ProvidersProps) => {
       <ErrorBoundary FallbackComponent={() => <></>}>
         <QueryClientProvider client={queryClient}>
           <NotificationProvider placement="top-center">
-            <AuthContextProvider>
-              <GlobalContextProvider>
+            <GlobalContextProvider>
+              <AuthContextProvider>
                 <ProjectThemeProvider>
                   <Content>{children}</Content>
                 </ProjectThemeProvider>
-              </GlobalContextProvider>
-            </AuthContextProvider>
+              </AuthContextProvider>
+            </GlobalContextProvider>
           </NotificationProvider>
         </QueryClientProvider>
       </ErrorBoundary>

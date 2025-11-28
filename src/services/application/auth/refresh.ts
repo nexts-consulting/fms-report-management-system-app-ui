@@ -7,6 +7,8 @@ type HttpRequestAuthRefreshParams = {
   tenantCode: string;
   keycloakBaseUrl: string;
   keycloakRealm: string;
+  keycloakClientId: string;
+  keycloakClientSecret?: string | null;
 };
 
 type KeycloakTokenResponse = {
@@ -41,16 +43,21 @@ type AuthRefreshResponseData = {
 const httpRequestAuthRefresh = async (
   params: HttpRequestAuthRefreshParams,
 ): Promise<AuthRefreshResponseData> => {
-  const { refreshToken, tenantCode, keycloakBaseUrl } = params;
+  const { refreshToken, keycloakBaseUrl, keycloakRealm, keycloakClientId, keycloakClientSecret } = params;
 
   // Build Keycloak token endpoint URL
-  const tokenEndpoint = `${keycloakBaseUrl}`;
+  const tokenEndpoint = `${keycloakBaseUrl}/realms/${keycloakRealm}/protocol/openid-connect/token`;
 
   // Prepare form data for Keycloak
   const formData = new URLSearchParams();
-  formData.append("client_id", tenantCode);
+  formData.append("client_id", keycloakClientId);
   formData.append("grant_type", "refresh_token");
   formData.append("refresh_token", refreshToken);
+
+  // Add client_secret if provided
+  if (keycloakClientSecret) {
+    formData.append("client_secret", keycloakClientSecret);
+  }
 
   try {
     const res = await Axios.post<KeycloakTokenResponse>(tokenEndpoint, formData, {
