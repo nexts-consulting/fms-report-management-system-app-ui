@@ -9,6 +9,14 @@
   font-family: "IBM Plex Sans", sans-serif;
   // font-family: "Open Sans", sans-serif;
   font-optical-sizing: auto;
+  
+  // Project theme colors (default values, will be overridden by useProjectTheme hook)
+  --project-primary-color: #1d35e0;
+  --project-primary-hover: #1426b5;
+  --project-primary-active: #0f1e95;
+  --project-secondary-color: #3c52ff;
+  --project-secondary-hover: #1d35e0;
+  --project-secondary-active: #1426b5;
 }
 
 input:focus {

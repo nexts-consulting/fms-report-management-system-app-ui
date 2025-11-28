@@ -1,6 +1,14 @@
 import { IOutlet, IProvince, IWorkingShift, IStaffAttendance } from "@/types/model";
 import { createStore } from "zustand";
 import { persist, devtools } from "zustand/middleware";
+import {
+  IProjectAuthConfig,
+  IProjectCheckinFlow,
+  IProjectGpsConfig,
+  IProjectAttendancePhotoConfig,
+  IProjectWorkshiftConfig,
+  IProjectMetadata,
+} from "@/services/application/management/projects/configs/types";
 
 export type GlobalStore = {
   navigatorOnline: boolean;
@@ -14,6 +22,13 @@ export type GlobalStore = {
   showLogoutConfirmation: boolean;
   showLeaveConfirmation: boolean;
   showLeaveEndConfirmation: boolean;
+  // Project configs
+  projectMetadata: IProjectMetadata[] | null | undefined;
+  projectAuthConfig: IProjectAuthConfig | null | undefined;
+  projectCheckinFlow: IProjectCheckinFlow | null | undefined;
+  projectGpsConfig: IProjectGpsConfig | null | undefined;
+  projectAttendancePhotoConfig: IProjectAttendancePhotoConfig | null | undefined;
+  projectWorkshiftConfig: IProjectWorkshiftConfig | null | undefined;
 };
 
 export const createGlobalStore = () => {
@@ -33,6 +48,12 @@ export const createGlobalStore = () => {
           showLogoutConfirmation: false,
           showLeaveConfirmation: false,
           showLeaveEndConfirmation: false,
+          projectMetadata: undefined,
+          projectAuthConfig: undefined,
+          projectCheckinFlow: undefined,
+          projectGpsConfig: undefined,
+          projectAttendancePhotoConfig: undefined,
+          projectWorkshiftConfig: undefined,
           actions: {},
         }),
         {

@@ -18,13 +18,13 @@ const variants = cva(
     variants: {
       variant: {
         primary:
-          "bg-primary-60 border-primary-60 text-white hover:bg-primary-70 active:bg-primary-80",
+          "bg-project-primary border-project-primary text-white hover:bg-project-primary-hover active:bg-project-primary-active",
         secondary: "bg-gray-80 border-gray-80 text-white hover:bg-gray-70 active:bg-gray-60",
         tertiary: StyleUtil.cn(
-          "bg-white border-primary-60 text-primary-60",
-          "enabled:hover:bg-primary-60 enabled:hover:text-white",
-          "enabled:active:bg-primary-70 enabled:active:text-white",
-          "enabled:focus:bg-primary-60 enabled:focus:text-white",
+          "bg-white border-project-primary text-project-primary",
+          "enabled:hover:bg-project-primary enabled:hover:text-white",
+          "enabled:active:bg-project-primary-hover enabled:active:text-white",
+          "enabled:focus:bg-project-primary enabled:focus:text-white",
         ),
         danger: "bg-red-60 border-red-60 text-white hover:bg-red-70 active:bg-red-80",
         "danger-tertiary": StyleUtil.cn(
@@ -71,7 +71,7 @@ const getSpinnerColor = (variant: VariantProps<typeof variants>["variant"]) => {
     case "danger":
       return "#fff";
     case "tertiary":
-      return "#1d35e0";
+      return "var(--project-primary-color, #1d35e0)";
     case "danger-tertiary":
       return "#DC2626";
     default:

@@ -10,13 +10,20 @@ export default {
         "vnm-sans-display": ["var(--font-vnm-sans-display)"],
       },
       colors: {
-        // Primary (Blue-based)
+        // Project dynamic colors (from CSS variables)
+        "project-primary": "var(--project-primary-color, #1d35e0)",
+        "project-primary-hover": "var(--project-primary-hover, #1426b5)",
+        "project-primary-active": "var(--project-primary-active, #0f1e95)",
+        "project-secondary": "var(--project-secondary-color, #3c52ff)",
+        "project-secondary-hover": "var(--project-secondary-hover, #1d35e0)",
+        "project-secondary-active": "var(--project-secondary-active, #1426b5)",
+        // Primary (Blue-based) - fallback colors
         "primary-10": "#e5e8ff",  // Very light tint
         "primary-20": "#bcc3ff",  // Light tint
         "primary-30": "#929dff",  // Soft mid-light
         "primary-40": "#6778ff",  // More saturated
         "primary-50": "#3c52ff",  // Main / base highlight
-        "primary-60": "#1d35e0",  // Strong base
+        "primary-60": "#1d35e0",  // Strong base (default)
         "primary-70": "#1426b5",  // Darker core tone
         "primary-80": "#0f1e95",  // Very dark blue
         "primary-90": "#0a1672",  // Near base color

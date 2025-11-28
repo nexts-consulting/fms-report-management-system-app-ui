@@ -8,7 +8,7 @@ const ProvidersDynamic = dynamic(() => import("@/layouts/providers"), {
 });
 
 export const metadata: Metadata = {
-  title: "Vinamilk",
+  title: "Nexts System - FMS Report",
   description: "Provided by Nexts",
 };
 

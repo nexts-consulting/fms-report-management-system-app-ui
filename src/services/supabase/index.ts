@@ -71,7 +71,7 @@ class SupabaseService {
           try {
             const authStorage = localStorage.getItem("auth-storage");
             const authData = JSON.parse(authStorage || "{}");
-            token = authData.state?.accessToken;
+            token = authData.state?.token || authData.state?.accessToken;
             tenantCode = authData.state?.tenant?.code;
           } catch (error) {
             console.warn("⚠️ Failed to read auth storage:", error);
