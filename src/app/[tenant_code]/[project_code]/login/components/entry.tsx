@@ -30,8 +30,8 @@ export const Entry = () => {
   const project = authStore.use.project();
 
   const globalStore = useGlobalContext();
-  const selectedProvince = globalStore.use.selectedProvince();
-  const selectedOutlet = globalStore.use.selectedOutlet();
+  const selectedAdminDivision = globalStore.use.selectedAdminDivision();
+  const selectedLocation = globalStore.use.selectedLocation();
   const projectAuthConfig = globalStore.use.projectAuthConfig();
 
   const router = useRouter();
@@ -347,13 +347,13 @@ export const Entry = () => {
     if (user) {
       if (user?.account?.role === EUserAccountRole.SALE) {
         router.replace(`/${tenantCode}/${projectCode}/sale/lobby`);
-      } else if (!selectedProvince || !selectedOutlet) {
+      } else if (!selectedAdminDivision || !selectedLocation) {
         router.replace(`/${tenantCode}/${projectCode}/outlet`);
       } else {
         router.replace(`/${tenantCode}/${projectCode}/lobby`);
       }
     }
-  }, [user, tenantCode, projectCode, router, selectedProvince, selectedOutlet]);
+  }, [user, tenantCode, projectCode, router, selectedAdminDivision, selectedLocation]);
 
   // Show loading while fetching tenant/project
   if (isLoadingTenant || isLoadingProject || isLoadingConfigs) {

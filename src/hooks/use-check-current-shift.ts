@@ -1,7 +1,9 @@
 import { useAuthContext } from "@/contexts/auth.context";
 import { useGlobalContext } from "@/contexts/global.context";
 import { useQueryCurrentShift } from "@/services/api/attendance/current-shift";
-import { EUserAccountRole } from "@/types/model";
+import { EUserAccountRole, IProvince, IOutlet } from "@/types/model";
+import { IAdminDivision } from "@/services/application/management/master-data/admin-divisions-fms";
+import { ILocation } from "@/services/application/management/master-data/locations-fms";
 import React from "react";
 import { useParams } from "next/navigation";
 
@@ -52,9 +54,41 @@ export const useCheckCurrentShift = () => {
     // Only update state if query is not loading
     if (!currentAttendanceQuery.isLoading) {
       if (currentAttendanceQuery.data?.data) {
+        // Map IProvince to IAdminDivision for backward compatibility
+        const province: IProvince = currentAttendanceQuery.data.data.shift.outlet.province;
+        const adminDivision: IAdminDivision = {
+          id: province.id,
+          project_code: projectCode || "",
+          code: null,
+          name: province.name,
+          level: 0,
+          type: "AREA",
+          parent_id: null,
+          metadata: {},
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        };
+
+        // Map IOutlet to ILocation for backward compatibility
+        const outlet: IOutlet = currentAttendanceQuery.data.data.shift.outlet;
+        const location: ILocation = {
+          id: outlet.id,
+          project_code: projectCode || "",
+          code: outlet.code,
+          name: outlet.name,
+          address: outlet.address || null,
+          latitude: outlet.latitude || null,
+          longitude: outlet.longitude || null,
+          checkin_radius_meters: outlet.checkinRadiusMeters,
+          admin_division_id: adminDivision.id,
+          metadata: {},
+          created_at: outlet.createdAt,
+          updated_at: outlet.updatedAt,
+        };
+
         globalStore.setState({
-          selectedProvince: currentAttendanceQuery.data.data.shift.outlet.province,
-          selectedOutlet: currentAttendanceQuery.data.data.shift.outlet,
+          selectedAdminDivision: adminDivision,
+          selectedLocation: location,
           selectedWorkingShift: currentAttendanceQuery.data.data.shift,
           currentAttendance: currentAttendanceQuery.data.data,
         });
@@ -68,6 +102,7 @@ export const useCheckCurrentShift = () => {
     }
   }, [
     user,
+    projectCode,
     currentAttendanceQuery.data,
     currentAttendanceQuery.isLoading,
     currentAttendanceQuery.isError,

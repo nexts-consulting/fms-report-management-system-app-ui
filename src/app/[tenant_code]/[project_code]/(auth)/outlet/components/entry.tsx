@@ -18,7 +18,7 @@ import {
   getAllChildDivisionIds,
 } from "@/services/application/management/master-data/admin-divisions-fms";
 import { ILocation } from "@/services/application/management/master-data/locations-fms";
-import { IProvince, EUserAccountRole } from "@/types/model";
+import { EUserAccountRole } from "@/types/model";
 import { useRouter, useParams } from "next/navigation";
 import React from "react";
 import { useGlobalContext } from "@/contexts/global.context";
@@ -215,32 +215,11 @@ export const Entry = () => {
   ]);
 
   const handleConfirm = () => {
-    // Map ILocation to IOutlet format for backward compatibility
+    // Set IAdminDivision and ILocation directly to store
     if (selectedLocation && finalSelectedDivision) {
-      const province: IProvince = {
-        id: finalSelectedDivision.value.id,
-        name: finalSelectedDivision.value.name,
-      };
-
-      const outlet = {
-        id: selectedLocation.id,
-        code: selectedLocation.code,
-        name: selectedLocation.name,
-        address: selectedLocation.address || "",
-        latitude: selectedLocation.latitude || 0,
-        longitude: selectedLocation.longitude || 0,
-        checkinRadiusMeters: selectedLocation.checkin_radius_meters,
-        createdAt: selectedLocation.created_at,
-        updatedAt: selectedLocation.updated_at,
-        province: province,
-        saleRep: {} as any,
-        saleSupervisor: {} as any,
-        keyAccountManager: {} as any,
-      };
-
       globalStore.setState({
-        selectedProvince: province,
-        selectedOutlet: outlet as any,
+        selectedAdminDivision: finalSelectedDivision.value,
+        selectedLocation: selectedLocation,
       });
     }
 
@@ -338,11 +317,11 @@ export const Entry = () => {
       <Modal
         isOpen={!!selectedLocation}
         onClose={() => setSelectedLocation(null)}
-        title='XÁC NHẬN ĐỊA ĐIỂM'
+        title='Xác nhận địa điểm'
       >
         {selectedLocation && (
           <div className="bg-gray-10 p-4">
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col mb-4" >
               <header className="flex items-center gap-2">
                 <p className="text-sm font-medium">Tên địa điểm: </p>
                 <p className="text-sm text-gray-70">{selectedLocation.name}</p>
@@ -351,7 +330,7 @@ export const Entry = () => {
                 Địa chỉ: {selectedLocation.address || "Không có địa chỉ"}
               </p>
             </div>
-            {selectedLocation.latitude && selectedLocation.longitude && (
+            {/* {selectedLocation.latitude && selectedLocation.longitude && (
               <div className="aspect-square h-auto w-full bg-white p-4">
                 <OutletMap
                   gps={{
@@ -361,7 +340,7 @@ export const Entry = () => {
                   radius={selectedLocation.checkin_radius_meters}
                 />
               </div>
-            )}
+            )} */}
           </div>
         )}
 

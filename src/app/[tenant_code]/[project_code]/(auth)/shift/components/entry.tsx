@@ -23,7 +23,7 @@ import React from "react";
 
 export const Entry = () => {
   const globalStore = useGlobalContext();
-  const selectedOutlet = globalStore.use.selectedOutlet();
+  const selectedLocation = globalStore.use.selectedLocation();
 
   const router = useRouter();
   const notification = useNotification();
@@ -35,10 +35,10 @@ export const Entry = () => {
 
   const workingShiftListByOutletQuery = useQueryWorkingShiftListByOutlet({
     params: {
-      outletId: selectedOutlet?.id ?? 0,
+      outletId: selectedLocation?.id ?? 0,
     },
     config: {
-      enabled: !!selectedOutlet,
+      enabled: !!selectedLocation,
       onError: (error) => {
         notification.error({
           title: "Lỗi hệ thống",

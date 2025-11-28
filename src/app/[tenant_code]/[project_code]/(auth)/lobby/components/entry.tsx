@@ -16,8 +16,8 @@ export const Entry = () => {
   const user = authStore.use.user();
 
   const globalStore = useGlobalContext();
-  const selectedProvince = globalStore.use.selectedProvince();
-  const selectedOutlet = globalStore.use.selectedOutlet();
+  const selectedAdminDivision = globalStore.use.selectedAdminDivision();
+  const selectedLocation = globalStore.use.selectedLocation();
   const currentAttendance = globalStore.use.currentAttendance();
 
   const searchParams = useSearchParams();
@@ -40,10 +40,10 @@ export const Entry = () => {
   }, [currentAttendance]);
 
   React.useEffect(() => {
-    if (!selectedProvince || !selectedOutlet) {
+    if (!selectedAdminDivision || !selectedLocation) {
       router.replace(buildPath("/outlet"));
     }
-  }, [selectedProvince, selectedOutlet]);
+  }, [selectedAdminDivision, selectedLocation]);
 
   return (
     <>
@@ -55,7 +55,15 @@ export const Entry = () => {
 
       <div className="px-4">
         {/* Tile */}
-        <div className="mt-4 w-full bg-white px-4 py-12">
+        <div className="mt-4 w-full bg-white px-4 py-6">
+          {(selectedAdminDivision && selectedLocation) && (
+            <div className="mb-4">
+              <p className="text-sm"> <span className="font-bold">Khu vực:</span> {selectedAdminDivision?.name}</p>
+              <p className="text-sm"> <span className="font-bold">Địa điểm:</span> {selectedLocation?.name}</p>
+              <p className="text-sm"> <span className="font-bold">Địa chỉ:</span> {selectedLocation?.address}</p>
+            </div>
+          )}
+          {}
           <button
             type="button"
             className={StyleUtil.cn(
