@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import React from "react";
 import { useAuthContext } from "@/contexts/auth.context";
 import { LoadingOverlay } from "@/kits/components/LoadingOverlay";
+import { useTenantProjectPath } from "@/hooks/use-tenant-project-path";
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -15,7 +16,7 @@ export const AuthGuard = (props: AuthGuardProps) => {
   const authContext = useAuthContext();
   const authenticated = authContext.use.authenticated();
   const user = authContext.use.user();
-
+  const {buildPath} = useTenantProjectPath();
   React.useEffect(() => {
     if (authenticated === undefined) return;
 
@@ -44,7 +45,7 @@ export const AuthGuard = (props: AuthGuardProps) => {
   }
 
   if (!authenticated) {
-    redirect("/login");
+    redirect(buildPath("/login"));
   }
 
   return authenticated && children;

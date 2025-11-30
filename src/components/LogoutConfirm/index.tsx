@@ -8,6 +8,7 @@ import React from "react";
 import { LoadingOverlay } from "@/kits/components/LoadingOverlay";
 import { useNotification } from "@/kits/components/Notification";
 import { useRouter } from "next/navigation";
+import { useTenantProjectPath } from "@/hooks/use-tenant-project-path";
 
 export const LogoutConfirm = () => {
   const authStore = useAuthContext();
@@ -17,7 +18,7 @@ export const LogoutConfirm = () => {
   const router = useRouter();
   const notification = useNotification();
   const [fakeLoading, setFakeLoading] = React.useState(false);
-
+  const {buildPath} = useTenantProjectPath();
   const handleLogout = React.useCallback(() => {
     setFakeLoading(true);
     // Reset all states at once
@@ -41,12 +42,12 @@ export const LogoutConfirm = () => {
       ]).then(() => {
         notification.clear();
         setFakeLoading(false);
-        router.replace("/login");
+        router.replace(buildPath("/login"));
       });
     };
 
     setTimeout(resetStates, 2000);
-  }, [authStore, globalStore, notification, router]);
+  }, [authStore, globalStore, notification, router, buildPath]);
 
   const handleClose = React.useCallback(() => {
     globalStore.setState({ showLogoutConfirmation: false });
@@ -74,5 +75,5 @@ export const LogoutConfirm = () => {
         <p className="text-sm">Bạn có chắc chắn muốn đăng xuất?</p>
       </Dialog>
     </>
-  );
+     );
 };
