@@ -1,9 +1,5 @@
 import { LogoutConfirm } from "@/components/LogoutConfirm";
-import dynamic from "next/dynamic";
-
-const AuthGuardDynamic = dynamic(() => import("@/layouts/auth-guard"), {
-  ssr: false,
-});
+import { AuthGuardWrapper } from "@/layouts/auth-guard-wrapper";
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -14,7 +10,7 @@ export default function AuthLayout(props: AuthLayoutProps) {
 
   return (
     <>
-      <AuthGuardDynamic>{children}</AuthGuardDynamic>
+      <AuthGuardWrapper>{children}</AuthGuardWrapper>
       <LogoutConfirm />
     </>
   );

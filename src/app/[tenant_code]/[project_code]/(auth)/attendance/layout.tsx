@@ -1,9 +1,5 @@
-import dynamic from "next/dynamic";
 import { LeaveEndConfirm } from "@/components/LeaveEndConfirm";
-
-const AttendanceGuardDynamic = dynamic(() => import("@/layouts/attendance-guard"), {
-  ssr: false,
-});
+import { AttendanceGuardWrapper } from "@/layouts/attendance-guard-wrapper";
 
 interface AttendanceLayoutProps {
   children: React.ReactNode;
@@ -14,7 +10,7 @@ export default function AttendanceLayout(props: AttendanceLayoutProps) {
 
   return (
     <>
-      <AttendanceGuardDynamic>{children}</AttendanceGuardDynamic>
+      <AttendanceGuardWrapper>{children}</AttendanceGuardWrapper>
       <LeaveEndConfirm />
     </>
   );

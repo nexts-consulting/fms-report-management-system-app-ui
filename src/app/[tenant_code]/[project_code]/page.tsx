@@ -1,13 +1,13 @@
 import { redirect } from "next/navigation";
 
 interface RootPageProps {
-  params: {
+  params: Promise<{
     tenant_code: string;
     project_code: string;
-  };
+  }>;
 }
 
-export default function RootPage({ params }: RootPageProps) {
-  const { tenant_code, project_code } = params;
+export default async function RootPage({ params }: RootPageProps) {
+  const { tenant_code, project_code } = await params;
   return redirect(`/${tenant_code}/${project_code}/lobby`);
 }

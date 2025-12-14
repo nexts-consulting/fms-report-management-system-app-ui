@@ -361,7 +361,7 @@ export const Entry = () => {
     return (
       <>
         <LoadingOverlay active={true} />
-        <div className="flex min-h-screen mt-12 justify-center">
+        <div className="mt-12 flex min-h-screen justify-center">
           <div className="text-center">
             <p className="text-gray-600">Đang tải thông tin dự án...</p>
           </div>
@@ -373,9 +373,9 @@ export const Entry = () => {
   // Show 404 if tenant or project not found
   if (isTenantNotFound || isProjectNotFound) {
     return (
-      <div className="flex min-h-screen mt-12 justify-center">
+      <div className="mt-12 flex min-h-screen justify-center">
         <div className="text-center">
-          <h1 className="text-3xl text-gray-800 mb-4">404</h1>
+          <h1 className="mb-4 text-3xl text-gray-800">404</h1>
           <p className="text-gray-600">
             {isTenantNotFound
               ? "Tenant không tồn tại hoặc không hoạt động"
@@ -387,8 +387,7 @@ export const Entry = () => {
   }
 
   // Get logo URL - prioritize project logo, fallback to tenant logo, then default
-  const logoUrl =
-    project?.logo_url || tenant?.logo_url || "/images/nextsystem-logo.webp";
+  const logoUrl = project?.logo_url || tenant?.logo_url || "/images/nextsystem-logo.webp";
 
   return (
     <>
@@ -404,13 +403,13 @@ export const Entry = () => {
           )}
         >
           {/* Logo */}
-          <div className={"mb-12 flex items-center justify-center"}>
+          <div className={"mx-auto mb-12 flex max-w-lg items-center justify-center"}>
             <Image
               src={logoUrl}
               alt={project?.name || tenant?.name || "Logo"}
               width={360}
               height={108}
-              className="w-full h-auto object-contain"
+              className="h-auto w-full object-contain"
             />
           </div>
 
