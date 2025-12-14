@@ -22,6 +22,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "colord": "^2.9.3",
+    "dayjs": "^1.11.19",
     "eventemitter3": "^5.0.1",
     "firebase": "^11.10.0",
     "framer-motion": "^12.23.26",
