@@ -58,12 +58,20 @@ export const useCheckinSubmit = ({
     [checkinFlow, availableSteps, globalStore, router, buildPath, onStepChange, onSuccess],
   );
 
+  /**
+   * Extract error message from error object
+   */
+  const getErrorMessage = (error: any): string => {
+    const responseMessage = error?.response?.data?.message;
+    const errorMessage = error?.message;
+    return responseMessage || errorMessage || "Không xác định";
+  };
+
   // Handle checkin error
   const handleCheckinError = React.useCallback(
     (error: any) => {
       console.error("Checkin error:", error);
-      const errorMessage =
-        (error?.response?.data as any)?.message || error?.message || "Không xác định";
+      const errorMessage = getErrorMessage(error);
 
       notification.error({
         title: "Lỗi hệ thống",

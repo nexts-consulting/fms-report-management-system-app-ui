@@ -32,6 +32,37 @@ export const calculateAvailableSteps = (
 };
 
 /**
+ * Check if GPS mode requires GPS coordinates
+ */
+const isGpsModeRequiringCoordinates = (mode: string): boolean => {
+  return (
+    mode === "REQUIRED_AT_LOCATION" ||
+    mode === "REQUIRED_BUT_NOT_STRICT" ||
+    mode === "VISIBLE_OPTIONAL"
+  );
+};
+
+/**
+ * Determine if GPS is required based on config
+ */
+const isGpsRequired = (
+  gpsConfig: IProjectGpsConfig | null | undefined,
+  checkinFlow: IProjectCheckinFlow | null | undefined,
+): boolean => {
+  if (gpsConfig) {
+    // is_required: whether user needs to have GPS coordinates (not about strict mode)
+    // If is_required is explicitly set, use it; otherwise check if mode requires GPS
+    return gpsConfig.is_required ?? isGpsModeRequiringCoordinates(gpsConfig.mode);
+  }
+
+  if (checkinFlow) {
+    return checkinFlow.require_gps_at_location ?? false;
+  }
+
+  return false;
+};
+
+/**
  * Get checkin location based on GPS config and user location
  */
 export const getCheckinLocation = (
@@ -40,24 +71,10 @@ export const getCheckinLocation = (
   userGeolocation: UserGeolocation | null,
   workingShift: IWorkingShift,
 ): CheckinLocation => {
-  // Priority: Use GPS config if available, otherwise fallback to checkinFlow
-  let isGpsRequired = false;
-
-  if (gpsConfig) {
-    // is_required: whether user needs to have GPS coordinates (not about strict mode)
-    // If is_required is explicitly set, use it; otherwise check if mode requires GPS
-    isGpsRequired =
-      gpsConfig.is_required ??
-      (gpsConfig.mode === "REQUIRED_AT_LOCATION" ||
-        gpsConfig.mode === "REQUIRED_BUT_NOT_STRICT" ||
-        gpsConfig.mode === "VISIBLE_OPTIONAL");
-  } else if (checkinFlow) {
-    // Fallback to checkinFlow
-    isGpsRequired = checkinFlow.require_gps_at_location ?? false;
-  }
+  const requiresGps = isGpsRequired(gpsConfig, checkinFlow);
 
   // Use user GPS location if GPS is required and available
-  if (isGpsRequired && userGeolocation) {
+  if (requiresGps && userGeolocation) {
     return {
       lat: userGeolocation.lat,
       lng: userGeolocation.lng,
@@ -74,6 +91,13 @@ export const getCheckinLocation = (
 };
 
 /**
+ * Check if photo mode requires face verification
+ */
+const isFaceVerificationMode = (mode: string | undefined): boolean => {
+  return mode === "REQUIRE_IDENTITY_VERIFICATION" || mode === "REQUIRE_FACE_PHOTO";
+};
+
+/**
  * Get photo capture description based on photo config mode
  */
 export const getPhotoCaptureDescription = (
@@ -81,7 +105,7 @@ export const getPhotoCaptureDescription = (
 ): string => {
   const mode = photoConfig?.mode;
 
-  if (mode === "REQUIRE_IDENTITY_VERIFICATION" || mode === "REQUIRE_FACE_PHOTO") {
+  if (isFaceVerificationMode(mode)) {
     return "Vui lòng chụp rõ khuôn mặt của bạn để xác thực";
   }
 

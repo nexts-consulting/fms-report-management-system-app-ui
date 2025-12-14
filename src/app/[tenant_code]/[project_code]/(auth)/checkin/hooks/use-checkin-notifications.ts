@@ -82,14 +82,17 @@ export const useCheckinNotifications = ({
     };
   }, [notification]);
 
+  /**
+   * Check if GPS config is in strict mode
+   */
+  const isStrictGpsMode = React.useMemo(() => {
+    return gpsConfig?.mode === "REQUIRED_AT_LOCATION";
+  }, [gpsConfig?.mode]);
+
   // Handle GPS range warning - only show when GPS mode is strict (REQUIRED_AT_LOCATION)
   const showRangeWarning = React.useCallback(() => {
-    // Only show warning if GPS config mode is REQUIRED_AT_LOCATION (strict mode)
-    // Strict mode means user MUST be at location to check in
-    const isStrictMode = gpsConfig?.mode === "REQUIRED_AT_LOCATION";
-
     // If not strict mode, remove any existing warning
-    if (!isStrictMode) {
+    if (!isStrictGpsMode) {
       if (rangeWarningNotificationIdRef.current) {
         notification.remove(rangeWarningNotificationIdRef.current);
         rangeWarningNotificationIdRef.current = null;
@@ -107,7 +110,7 @@ export const useCheckinNotifications = ({
         },
       });
     }
-  }, [notification, gpsConfig]);
+  }, [notification, isStrictGpsMode]);
 
   const hideRangeWarning = React.useCallback(() => {
     if (rangeWarningNotificationIdRef.current) {
@@ -147,13 +150,11 @@ export const useCheckinNotifications = ({
 
   // Auto-remove range warning when GPS config changes to non-strict mode
   React.useEffect(() => {
-    const isStrictMode = gpsConfig?.mode === "REQUIRED_AT_LOCATION";
-
-    if (!isStrictMode && rangeWarningNotificationIdRef.current) {
+    if (!isStrictGpsMode && rangeWarningNotificationIdRef.current) {
       notification.remove(rangeWarningNotificationIdRef.current);
       rangeWarningNotificationIdRef.current = null;
     }
-  }, [gpsConfig, notification]);
+  }, [isStrictGpsMode, notification]);
 
   return {
     showRangeWarning,

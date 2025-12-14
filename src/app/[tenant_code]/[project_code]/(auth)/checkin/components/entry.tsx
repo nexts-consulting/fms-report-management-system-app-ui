@@ -20,7 +20,7 @@ import { useCheckinSubmit } from "../hooks/use-checkin-submit";
 import { useCheckinNotifications } from "../hooks/use-checkin-notifications";
 import { getCheckinLocation } from "../common/utils";
 import { CHECKIN_TIPS } from "../common/config";
-import type { UserGeolocation } from "../common/types";
+import type { UserGeolocation, CheckinStep } from "../common/types";
 import { Survey } from "@/components/Survey";
 
 export const Entry = () => {
@@ -132,7 +132,8 @@ export const Entry = () => {
   // Update error handler to use updateGpsError
   React.useEffect(() => {
     if (error) {
-      updateGpsError(error.message || "Không thể xác định vị trí");
+      const errorMessage = error.message || "Không thể xác định vị trí";
+      updateGpsError(errorMessage);
     }
   }, [error, updateGpsError]);
 
@@ -233,17 +234,24 @@ export const Entry = () => {
       <LoadingOverlay active={allbeDone} />
 
       <div className="flex min-h-dvh flex-col">
-        {currentStep !== "submit" &&
-          currentStep !== "survey" &&
-          currentStep !== "pre_shift_task" &&
-          currentStep !== "post_shift_task" && (
+        {(() => {
+          const stepsWithoutHeader: CheckinStep[] = [
+            "submit",
+            "survey",
+            "pre_shift_task",
+            "post_shift_task",
+          ];
+          const shouldShowHeader = !stepsWithoutHeader.includes(currentStep);
+
+          return shouldShowHeader ? (
             <ScreenHeader
               title="Check in"
               loading={isLocalizing}
               onBack={goToPreviousStep}
               containerClassName="mb-0"
             />
-          )}
+          ) : null;
+        })()}
 
         {currentStep === "gps" && projectCheckinFlow?.require_gps_at_location && (
           <div className="flex flex-1">
