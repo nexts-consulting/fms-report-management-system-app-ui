@@ -3,11 +3,14 @@
 import { CheckInConfirm } from "@/components/CheckInConfirm";
 import { ScreenFooter } from "@/components/ScreenFooter";
 import { ScreenHeader } from "@/components/ScreenHeader";
+import { useAuthContext } from "@/contexts/auth.context";
 import { useGlobalContext } from "@/contexts/global.context";
+import { useProjectConfigs } from "@/hooks/use-project-configs";
 import { useShiftDurationFormated } from "@/hooks/use-shift-duration-formated";
 import { useShiftStatus } from "@/hooks/use-shift-status";
 import { useShiftTime } from "@/hooks/use-shift-time";
 import { useShiftUpcoming } from "@/hooks/use-shift-upcoming";
+import { useCheckinTimeAllowed } from "@/hooks/use-checkin-time-allowed";
 import { Button } from "@/kits/components/Button";
 import { Icons } from "@/kits/components/Icons";
 import { LoadingOverlay } from "@/kits/components/LoadingOverlay";
@@ -15,30 +18,61 @@ import { Modal } from "@/kits/components/Modal";
 import { useNotification } from "@/kits/components/Notification";
 import { NotificationBanner } from "@/kits/components/NotificationBanner";
 import { StringUtil, StyleUtil } from "@/kits/utils";
-import { useQueryWorkingShiftListByOutlet } from "@/services/api/working-shift/list-by-outlet";
+import { useQueryWorkingShiftListByLocationToday } from "@/services/api/working-shift/list-by-location-today";
+import { useQueryWorkingShiftListByUserToday } from "@/services/api/working-shift/list-by-user-today";
+import { createWorkingShiftFromDefaultTime } from "@/services/api/working-shift/create-from-default-time";
+import { createFlexibleWorkingShift } from "@/services/api/working-shift/create-flexible-shift";
 import { IWorkingShift } from "@/types/model";
+import {
+  IProjectWorkshiftConfig,
+} from "@/services/application/management/projects/configs/types";
 import moment from "moment";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import React from "react";
+import { useTenantProjectPath } from "@/hooks/use-tenant-project-path";
 
 export const Entry = () => {
   const globalStore = useGlobalContext();
   const selectedLocation = globalStore.use.selectedLocation();
 
+  const authStore = useAuthContext();
+  const user = authStore.use.user();
+  const project = authStore.use.project();
+
+  // Use useProjectConfigs hook to ensure configs are loaded
+  const { projectWorkshiftConfig, isLoading: isLoadingConfigs } = useProjectConfigs();
+
   const router = useRouter();
+  const params = useParams();
+  const { buildPath } = useTenantProjectPath();
+
+  const projectCode = (params?.project_code as string) || project?.code || "";
+  const username = user?.account?.username || "";
+
   const notification = useNotification();
 
+  
+  
   const [selectedWorkingShift, setSelectedWorkingShift] = React.useState<IWorkingShift | null>(
     null,
   );
   const [confirmLoading, setConfirmLoading] = React.useState(false);
+  const [workshiftList, setWorkshiftList] = React.useState<IWorkingShift[]>([]);
+  const [isLoadingWorkshifts, setIsLoadingWorkshifts] = React.useState(false);
 
-  const workingShiftListByOutletQuery = useQueryWorkingShiftListByOutlet({
+  // Query for FIXED_TIME_WITHIN_WORKSHIFT mode
+  const locationWorkshiftsQuery = useQueryWorkingShiftListByLocationToday({
     params: {
-      outletId: selectedLocation?.id ?? 0,
+      projectCode,
+      locationId: selectedLocation?.id ?? 0,
+      location: selectedLocation || undefined,
     },
     config: {
-      enabled: !!selectedLocation,
+      enabled:
+        !!projectWorkshiftConfig &&
+        projectWorkshiftConfig.mode === "FIXED_TIME_WITHIN_WORKSHIFT" &&
+        !!selectedLocation &&
+        !!projectCode,
       onError: (error) => {
         notification.error({
           title: "Lỗi hệ thống",
@@ -51,7 +85,170 @@ export const Entry = () => {
     },
   });
 
-  const upcomingShifts = useShiftUpcoming(workingShiftListByOutletQuery.data?.data ?? []);
+  // Query for FIXED_TIME_WITH_ASSIGNED mode
+  const userWorkshiftsQuery = useQueryWorkingShiftListByUserToday({
+    params: {
+      projectCode,
+      username,
+    },
+    config: {
+      enabled:
+        !!projectWorkshiftConfig &&
+        projectWorkshiftConfig.mode === "FIXED_TIME_WITH_ASSIGNED" &&
+        !!username &&
+        !!projectCode,
+      onError: (error) => {
+        notification.error({
+          title: "Lỗi hệ thống",
+          description: "Không thể tải danh sách ca làm việc",
+          options: {
+            duration: 5000,
+          },
+        });
+      },
+    },
+  });
+
+  // Load workshifts based on config mode
+  React.useEffect(() => {
+    const loadWorkshifts = async () => {
+      // Wait for config to be loaded
+      if (projectWorkshiftConfig === undefined) {
+        // Config is still loading, don't do anything yet
+        return;
+      }
+
+      // Config is explicitly null (not loaded or error)
+      if (projectWorkshiftConfig === null) {
+        setWorkshiftList([]);
+        setIsLoadingWorkshifts(false);
+        return;
+      }
+
+      setIsLoadingWorkshifts(true);
+
+      try {
+        let shifts: IWorkingShift[] = [];
+
+        switch (projectWorkshiftConfig.mode) {
+          case "FIXED_TIME_WITHIN_WORKSHIFT":
+            // Load from location workshifts query
+            // Wait for query to complete if it's enabled
+            if (
+              !!projectWorkshiftConfig &&
+              projectWorkshiftConfig.mode === "FIXED_TIME_WITHIN_WORKSHIFT" &&
+              !!selectedLocation &&
+              !!projectCode
+            ) {
+              if (locationWorkshiftsQuery.data?.data) {
+                shifts = locationWorkshiftsQuery.data.data;
+              } else if (
+                !locationWorkshiftsQuery.isLoading &&
+                !locationWorkshiftsQuery.isFetching
+              ) {
+                // Query completed but no data
+                shifts = [];
+              } else {
+                // Still loading, don't update yet
+                return;
+              }
+            }
+            break;
+
+          case "FIXED_TIME_WITH_ASSIGNED":
+            // Load from user workshifts query
+            // Wait for query to complete if it's enabled
+            if (
+              !!projectWorkshiftConfig &&
+              projectWorkshiftConfig.mode === "FIXED_TIME_WITH_ASSIGNED" &&
+              !!username &&
+              !!projectCode
+            ) {
+              if (userWorkshiftsQuery.data?.data) {
+                shifts = userWorkshiftsQuery.data.data;
+              } else if (
+                !userWorkshiftsQuery.isLoading &&
+                !userWorkshiftsQuery.isFetching
+              ) {
+                // Query completed but no data
+                shifts = [];
+              } else {
+                // Still loading, don't update yet
+                return;
+              }
+            }
+            break;
+
+          case "FIXED_TIME_BY_DEFAULT_TIME":
+            // Create workshift from default time config
+            if (selectedLocation) {
+              const shift = createWorkingShiftFromDefaultTime({
+                projectCode,
+                config: projectWorkshiftConfig,
+                location: selectedLocation,
+              });
+              if (shift) {
+                shifts = [shift];
+              }
+            }
+            break;
+
+          case "FLEXIBLE_TIME":
+            // Create flexible workshift (00:00 to 23:59:59 today)
+            if (selectedLocation) {
+              const shift = createFlexibleWorkingShift({
+                location: selectedLocation,
+              });
+              shifts = [shift];
+            }
+            break;
+
+          default:
+            console.warn("Unknown workshift mode:", projectWorkshiftConfig.mode);
+            shifts = [];
+        }
+
+        setWorkshiftList(shifts);
+      } catch (error) {
+        console.error("Error loading workshifts:", error);
+        notification.error({
+          title: "Lỗi hệ thống",
+          description: "Không thể tải danh sách ca làm việc",
+          options: {
+            duration: 5000,
+          },
+        });
+        setWorkshiftList([]);
+      } finally {
+        setIsLoadingWorkshifts(false);
+      }
+    };
+
+    loadWorkshifts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    projectWorkshiftConfig,
+    locationWorkshiftsQuery.data,
+    locationWorkshiftsQuery.isLoading,
+    locationWorkshiftsQuery.isFetching,
+    userWorkshiftsQuery.data,
+    userWorkshiftsQuery.isLoading,
+    userWorkshiftsQuery.isFetching,
+    selectedLocation,
+    projectCode,
+    username,
+  ]);
+
+  // Determine loading state
+  const isLoading =
+    projectWorkshiftConfig === undefined || // Config is still loading
+    isLoadingWorkshifts ||
+    (projectWorkshiftConfig?.mode === "FIXED_TIME_WITHIN_WORKSHIFT" &&
+      (locationWorkshiftsQuery.isLoading || locationWorkshiftsQuery.isFetching)) ||
+    (projectWorkshiftConfig?.mode === "FIXED_TIME_WITH_ASSIGNED" &&
+      (userWorkshiftsQuery.isLoading || userWorkshiftsQuery.isFetching));
+
+  const upcomingShifts = useShiftUpcoming(workshiftList);
 
   const handleConfirm = React.useCallback(() => {
     globalStore.setState({
@@ -62,7 +259,7 @@ export const Entry = () => {
 
     setTimeout(() => {
       setConfirmLoading(false);
-      router.push("/checkin");
+      router.push(buildPath("/checkin"));
     }, 1000);
   }, [selectedWorkingShift]);
 
@@ -76,27 +273,34 @@ export const Entry = () => {
 
       <ScreenHeader
         title="Ca làm việc"
-        loading={
-          workingShiftListByOutletQuery.isLoading || workingShiftListByOutletQuery.isFetching
-        }
+        loading={isLoading}
         onBack={() => router.back()}
       />
 
       <div className="px-4">
-        {(workingShiftListByOutletQuery.data?.data.length ?? 0) > 0 && (
+        {projectWorkshiftConfig === null && (
           <NotificationBanner
-            type="info"
-            title="Tips"
-            description="Bạn có thể tham gia ca làm việc sớm trước 60 phút!"
+            type="warning"
+            title="Cảnh báo"
+            description="Không thể tải cấu hình ca làm việc. Vui lòng thử lại sau."
           />
         )}
 
-        {workingShiftListByOutletQuery.isSuccess &&
-          (workingShiftListByOutletQuery.data?.data.length ?? 0) === 0 && (
+        {projectWorkshiftConfig &&
+          projectWorkshiftConfig !== null &&
+          !isLoading &&
+          workshiftList.length === 0 &&
+          projectWorkshiftConfig.mode !== "FLEXIBLE_TIME" && (
             <NotificationBanner
               type="warning"
               title="Nhàn rỗi"
-              description="Địa điểm làm việc hiện tại không có ca làm việc nào..."
+              description={
+                projectWorkshiftConfig.mode === "FIXED_TIME_WITHIN_WORKSHIFT"
+                  ? "Địa điểm làm việc hiện tại không có ca làm việc nào..."
+                  : projectWorkshiftConfig.mode === "FIXED_TIME_WITH_ASSIGNED"
+                    ? "Bạn không có ca làm việc nào được gán trong ngày hôm nay..."
+                    : "Không có ca làm việc nào trong ngày hôm nay..."
+              }
             />
           )}
 
@@ -104,16 +308,18 @@ export const Entry = () => {
           <div className="mb-8 mt-4 divide-y divide-gray-30">
             <StandOutWorkingShiftCard
               workingShift={upcomingShifts[0]}
+              config={projectWorkshiftConfig}
               onClick={() => setSelectedWorkingShift(upcomingShifts[0])}
             />
           </div>
         )}
-        {(workingShiftListByOutletQuery.data?.data.length ?? 0) > 0 && (
+        {workshiftList.length > 0 && (
           <div className="mt-4 divide-y divide-gray-30">
-            {workingShiftListByOutletQuery.data?.data.map((workingShift) => (
+            {workshiftList.map((workingShift, index) => (
               <WorkingShiftCard
-                key={workingShift.id}
+                key={workingShift.id || `workshift-${index}`}
                 workingShift={workingShift}
+                config={projectWorkshiftConfig}
                 onClick={() => setSelectedWorkingShift(workingShift)}
               />
             ))}
@@ -154,11 +360,12 @@ const shiftStatusMapping = {
 
 interface StandOutWorkingShiftCardProps {
   workingShift: IWorkingShift;
+  config: IProjectWorkshiftConfig | null | undefined;
   onClick: () => void;
 }
 
 const StandOutWorkingShiftCard = (props: StandOutWorkingShiftCardProps) => {
-  const { workingShift, onClick } = props;
+  const { workingShift, config, onClick } = props;
 
   const shiftStatus = useShiftStatus({
     startTime: new Date(workingShift.startTime),
@@ -171,6 +378,12 @@ const StandOutWorkingShiftCard = (props: StandOutWorkingShiftCardProps) => {
     endTime: new Date(workingShift.endTime),
   });
 
+  const checkinTimeAllowed = useCheckinTimeAllowed({
+    startTime: new Date(workingShift.startTime),
+    endTime: new Date(workingShift.endTime),
+    config,
+  });
+
   const shiftStatusMapped =
     shiftStatusMapping[
     shiftStatus.notYetStarted
@@ -180,8 +393,8 @@ const StandOutWorkingShiftCard = (props: StandOutWorkingShiftCardProps) => {
         : "hasEnded"
     ];
 
-  const isDisabled =
-    !shiftStatus.isOngoing && (!shiftStatus.isStartingSoon || shiftStatus.hasEnded);
+  // Check if button should be disabled based on check-in time restrictions
+  const isDisabled = !checkinTimeAllowed.isAllowed;
 
   const workingDurationFormated = useShiftDurationFormated({
     startTime: new Date(workingShift.startTime),
@@ -232,8 +445,8 @@ const StandOutWorkingShiftCard = (props: StandOutWorkingShiftCardProps) => {
           <div className="flex items-center justify-start">
             <Icons.Location className="h-4 w-4 text-gray-70" />
             <p className="ml-2 line-clamp-1 text-xs text-gray-70">
-              {workingShift.outlet.name} <span className="px-1">•</span>
-              {workingShift.outlet.address}
+              {workingShift.location.name} <span className="px-1">•</span>
+              {workingShift.location.address}
             </p>
           </div>
         </div>
@@ -263,9 +476,12 @@ const StandOutWorkingShiftCard = (props: StandOutWorkingShiftCardProps) => {
           Tham gia
         </Button>
 
-        {!shiftStatus.hasEnded && (
-          <p className="mt-2 text-center text-xs text-gray-50">
-            {getShiftTimeMessage(shiftStatus, shiftTime)}
+        {(checkinTimeAllowed.reason || (!shiftStatus.hasEnded && getShiftTimeMessage(shiftStatus, shiftTime))) && (
+          <p className={StyleUtil.cn(
+            "mt-2 text-xs",
+            checkinTimeAllowed.reason ? "text-red-50" : "text-gray-50"
+          )}>
+            {checkinTimeAllowed.reason || getShiftTimeMessage(shiftStatus, shiftTime)}
           </p>
         )}
       </div>
@@ -275,16 +491,23 @@ const StandOutWorkingShiftCard = (props: StandOutWorkingShiftCardProps) => {
 
 interface WorkingShiftCardProps {
   workingShift: IWorkingShift;
+  config: IProjectWorkshiftConfig | null | undefined;
   onClick: () => void;
 }
 
 const WorkingShiftCard = (props: WorkingShiftCardProps) => {
-  const { workingShift, onClick } = props;
+  const { workingShift, config, onClick } = props;
 
   const shiftStatus = useShiftStatus({
     startTime: new Date(workingShift.startTime),
     endTime: new Date(workingShift.endTime),
     threshold: { upcoming: 120, startingSoon: 60 },
+  });
+
+  const checkinTimeAllowed = useCheckinTimeAllowed({
+    startTime: new Date(workingShift.startTime),
+    endTime: new Date(workingShift.endTime),
+    config,
   });
 
   const shiftStatusMapped =
@@ -296,8 +519,8 @@ const WorkingShiftCard = (props: WorkingShiftCardProps) => {
         : "hasEnded"
     ];
 
-  const isDisabled =
-    !shiftStatus.isOngoing && (!shiftStatus.isStartingSoon || shiftStatus.hasEnded);
+  // Check if button should be disabled based on check-in time restrictions
+  const isDisabled = !checkinTimeAllowed.isAllowed;
 
   const workingDurationFormated = useShiftDurationFormated({
     startTime: new Date(workingShift.startTime),
@@ -337,23 +560,29 @@ const WorkingShiftCard = (props: WorkingShiftCardProps) => {
         <p className="line-clamp-1 text-xs text-gray-50">{shiftDateFormated()}</p>
         <p className="line-clamp-1 text-xs text-gray-50">{workingDurationFormated}</p>
       </div>
-
+      {checkinTimeAllowed.reason && (
+          <p className="mt-2 text-xs text-red-50">
+            {checkinTimeAllowed.reason}
+          </p>
+        )}
       {/* Location & Join Button */}
-      <div className="mt-6 flex items-center justify-between">
-        <div className="flex items-center justify-start">
-          <Icons.Location className="h-4 w-4 text-gray-70" />
-          <p className="ml-2 text-xs text-gray-70">{workingShift.outlet.name}</p>
-        </div>
+      <div className="mt-6">
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center justify-start">
+            <Icons.Location className="h-4 w-4 text-gray-70" />
+            <p className="ml-2 text-xs text-gray-70">{workingShift.location.name}</p>
+          </div>
 
-        <Button
-          variant={isDisabled ? "secondary" : "primary"}
-          size="small"
-          icon={Icons.ArrowRight}
-          disabled={isDisabled}
-          onClick={onClick}
-        >
-          Tham gia
-        </Button>
+          <Button
+            variant={isDisabled ? "secondary" : "primary"}
+            size="small"
+            icon={Icons.ArrowRight}
+            disabled={isDisabled}
+            onClick={onClick}
+          >
+            Tham gia
+          </Button>
+        </div>
       </div>
     </div>
   );

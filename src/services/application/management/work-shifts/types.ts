@@ -54,6 +54,14 @@ export interface ILocationWorkshift {
   // Joined data
   location_name?: string;
   location_code?: string;
+  location_address?: string;
+  location_latitude?: number;
+  location_longitude?: number;
+  location_checkin_radius_meters?: number;
+  location_admin_division_id?: number;
+  location_metadata?: Record<string, any>;
+  location_created_at?: string;
+  location_updated_at?: string;
   workshift_name?: string;
   workshift_start_time?: string;
   workshift_end_time?: string;

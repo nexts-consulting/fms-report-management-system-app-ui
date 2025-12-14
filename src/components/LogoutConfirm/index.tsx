@@ -34,10 +34,19 @@ export const LogoutConfirm = () => {
           selectedWorkingShift: null,
           currentAttendance: null,
           showNavigation: false,
+          currentProjectId: null,
+          projectMetadata: null,
+          projectAuthConfig: null,
+          projectCheckinFlow: null,
+          projectGpsConfig: null,
+          projectAttendancePhotoConfig: null,
+          projectWorkshiftConfig: null,
         }),
         authStore.setState({
           authenticated: false,
           user: null,
+          accessToken: null,
+          refreshToken: null,
         }),
       ]).then(() => {
         notification.clear();

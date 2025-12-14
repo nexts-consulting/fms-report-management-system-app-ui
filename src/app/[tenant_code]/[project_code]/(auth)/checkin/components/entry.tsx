@@ -269,14 +269,14 @@ export const Entry = () => {
                   : null
               }
               location={{
-                name: selectedWorkingShift.outlet.name,
-                address: selectedWorkingShift.outlet.address,
-                province: selectedWorkingShift.outlet.province.name,
+                name: selectedWorkingShift.location.name,
+                address: selectedWorkingShift.location.address,
+                province: selectedWorkingShift.location.province.name,
                 gps: {
-                  lat: selectedWorkingShift.outlet.latitude,
-                  lng: selectedWorkingShift.outlet.longitude,
+                  lat: selectedWorkingShift.location.latitude,
+                  lng: selectedWorkingShift.location.longitude,
                 },
-                radius: selectedWorkingShift.outlet.checkinRadiusMeters,
+                radius: selectedWorkingShift.location.checkinRadiusMeters,
               }}
               shift={{
                 name: selectedWorkingShift.name,
@@ -307,8 +307,8 @@ export const Entry = () => {
               <div className="aspect-[3/2] w-full flex-1">
                 <CheckinMap
                   gps={{
-                    lat: selectedWorkingShift.outlet.latitude,
-                    lng: selectedWorkingShift.outlet.longitude,
+                        lat: selectedWorkingShift.location.latitude,
+                    lng: selectedWorkingShift.location.longitude,
                   }}
                 />
               </div>

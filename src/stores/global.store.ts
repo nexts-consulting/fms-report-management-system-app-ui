@@ -31,6 +31,8 @@ export type GlobalStore = {
   projectGpsConfig: IProjectGpsConfig | null | undefined;
   projectAttendancePhotoConfig: IProjectAttendancePhotoConfig | null | undefined;
   projectWorkshiftConfig: IProjectWorkshiftConfig | null | undefined;
+  // Store project ID to validate configs on reload
+  currentProjectId: string | null | undefined;
 };
 
 export const createGlobalStore = () => {
@@ -56,6 +58,7 @@ export const createGlobalStore = () => {
           projectGpsConfig: undefined,
           projectAttendancePhotoConfig: undefined,
           projectWorkshiftConfig: undefined,
+          currentProjectId: undefined,
           actions: {},
         }),
         {
@@ -65,6 +68,14 @@ export const createGlobalStore = () => {
             selectedLocation: state.selectedLocation ?? null,
             selectedWorkingShift: state.selectedWorkingShift ?? null,
             currentAttendance: state.currentAttendance ?? null,
+            // Persist project configs to local storage along with project ID
+            projectMetadata: state.projectMetadata ?? null,
+            projectAuthConfig: state.projectAuthConfig ?? null,
+            projectCheckinFlow: state.projectCheckinFlow ?? null,
+            projectGpsConfig: state.projectGpsConfig ?? null,
+            projectAttendancePhotoConfig: state.projectAttendancePhotoConfig ?? null,
+            projectWorkshiftConfig: state.projectWorkshiftConfig ?? null,
+            currentProjectId: state.currentProjectId ?? null,
           }),
           onRehydrateStorage: (state) => {
             if (state) {
@@ -72,6 +83,14 @@ export const createGlobalStore = () => {
               state.selectedLocation = state.selectedLocation ?? null;
               state.selectedWorkingShift = state.selectedWorkingShift ?? null;
               state.currentAttendance = state.currentAttendance ?? null;
+              // Restore project configs from local storage
+              state.projectMetadata = state.projectMetadata ?? undefined;
+              state.projectAuthConfig = state.projectAuthConfig ?? undefined;
+              state.projectCheckinFlow = state.projectCheckinFlow ?? undefined;
+              state.projectGpsConfig = state.projectGpsConfig ?? undefined;
+              state.projectAttendancePhotoConfig = state.projectAttendancePhotoConfig ?? undefined;
+              state.projectWorkshiftConfig = state.projectWorkshiftConfig ?? undefined;
+              state.currentProjectId = state.currentProjectId ?? undefined;
             }
           },
         },

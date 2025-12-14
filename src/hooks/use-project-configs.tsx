@@ -31,6 +31,21 @@ export const useProjectConfigs = () => {
         return;
       }
 
+      const currentProjectId = globalStore.getState().currentProjectId;
+
+      // Check if project ID changed - if so, clear old configs
+      if (currentProjectId && currentProjectId !== project.id) {
+        globalStore.setState({
+          projectMetadata: undefined,
+          projectAuthConfig: undefined,
+          projectCheckinFlow: undefined,
+          projectGpsConfig: undefined,
+          projectAttendancePhotoConfig: undefined,
+          projectWorkshiftConfig: undefined,
+          currentProjectId: project.id,
+        });
+      }
+
       // Check if any config is missing (considering metadata can be empty array)
       const hasConfigs =
         projectMetadata !== undefined &&
@@ -40,13 +55,15 @@ export const useProjectConfigs = () => {
         projectAttendancePhotoConfig !== undefined &&
         projectWorkshiftConfig !== undefined;
 
-      if (!hasConfigs && !isLoading) {
+      // If configs are loaded but project ID doesn't match, reload
+      const configsMatchProject = !currentProjectId || currentProjectId === project.id;
+
+      if ((!hasConfigs || !configsMatchProject) && !isLoading) {
         setIsLoading(true);
         setError(null);
 
         try {
           const allConfigs = await httpRequestLoadAllProjectConfigs(project.id);
-
           globalStore.setState({
             projectMetadata: allConfigs.metadata,
             projectAuthConfig: allConfigs.authConfig,
@@ -54,6 +71,7 @@ export const useProjectConfigs = () => {
             projectGpsConfig: allConfigs.gpsConfig,
             projectAttendancePhotoConfig: allConfigs.attendancePhotoConfig,
             projectWorkshiftConfig: allConfigs.workshiftConfig,
+            currentProjectId: project.id,
           });
         } catch (err) {
           console.error("Error loading project configs:", err);
@@ -61,6 +79,11 @@ export const useProjectConfigs = () => {
         } finally {
           setIsLoading(false);
         }
+      } else if (!currentProjectId && hasConfigs) {
+        // Update project ID if configs exist but ID is not set
+        globalStore.setState({
+          currentProjectId: project.id,
+        });
       }
     };
 
@@ -98,6 +121,7 @@ export const useProjectConfigs = () => {
         projectGpsConfig: allConfigs.gpsConfig,
         projectAttendancePhotoConfig: allConfigs.attendancePhotoConfig,
         projectWorkshiftConfig: allConfigs.workshiftConfig,
+        currentProjectId: project.id,
       });
     } catch (err) {
       console.error("Error reloading project configs:", err);

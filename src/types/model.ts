@@ -24,19 +24,12 @@ export interface IStaffProfile {
   updatedAt: string;
 }
 
-export interface ISaleProfile {
-  id: number;
-  fullName: string;
-  role: string; // TODO: enum
-  account: IUserAccount;
-}
-
 export interface IProvince {
   id: number;
   name: string;
 }
 
-export interface IOutlet {
+export interface ILocation {
   id: number;
   code: string;
   name: string;
@@ -47,9 +40,6 @@ export interface IOutlet {
   createdAt: string;
   updatedAt: string;
   province: IProvince;
-  saleRep: ISaleProfile;
-  saleSupervisor: ISaleProfile;
-  keyAccountManager: ISaleProfile;
 }
 
 export interface IWorkingShift {
@@ -57,50 +47,9 @@ export interface IWorkingShift {
   name: string;
   startTime: string;
   endTime: string;
-  outlet: IOutlet;
+  location: ILocation;
 }
 
-export interface ISaleReport {
-  id: number;
-  data: {
-    sku: string;
-    pcs: number;
-  }[];
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface IOOSReport {
-  id: number;
-  data: {
-    sku: string;
-    pcs: number;
-  }[];
-  reportType: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface ISamplingReport {
-  id: number;
-  data: {
-    sku: string;
-    pcs: number;
-  }[];
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface IActivityReport {
-  id: number;
-  data: {
-    fileId: string;
-    fileName: string;
-    url: string;
-  }[];
-  createdAt: string;
-  updatedAt: string;
-}
 
 export interface IStaffLeave {
   id: number;
@@ -128,13 +77,6 @@ export interface IStaffAttendance {
     lng: number;
     acc: number;
   } | null;
-  saleReport: ISaleReport | null;
-  oosReport: IOOSReport | null;
-  stockInReport: IOOSReport | null;
-  stockOutReport: IOOSReport | null;
-  samplingReport: ISamplingReport | null;
-  activityReport: IActivityReport | null;
-  staffLeaves: IStaffLeave[];
 }
 
 export interface IReportItem {

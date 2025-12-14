@@ -67,19 +67,19 @@ export const CheckInConfirm = React.memo((props: CheckInConfirmProps) => {
           <div className="aspect-[3/2] h-auto w-full bg-white p-4">
             <OutletMap
               gps={{
-                lat: workingShift.outlet.latitude,
-                lng: workingShift.outlet.longitude,
+                lat: workingShift.location.latitude,
+                lng: workingShift.location.longitude,
               }}
-              radius={workingShift.outlet.checkinRadiusMeters}
+              radius={workingShift.location.checkinRadiusMeters}
             />
           </div>
           <div className="flex items-center justify-start gap-4 bg-white p-4">
             <Icons.Location className="shrink-0 text-gray-50" />
             <div>
               <p className="line-clamp-1 text-sm font-medium text-gray-100">
-                {workingShift.outlet.name}
+                {workingShift.location.name}
               </p>
-              <p className="line-clamp-1 text-xs text-gray-50">{workingShift.outlet.address}</p>
+              <p className="line-clamp-1 text-xs text-gray-50">{workingShift.location.address}</p>
             </div>
           </div>
         </div>

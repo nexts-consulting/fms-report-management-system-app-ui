@@ -141,7 +141,7 @@ export const Entry = () => {
                 setIsLoadingConfigs(true);
                 try {
                   const allConfigs = await httpRequestLoadAllProjectConfigs(projectData.id);
-
+                  console.log("allConfigs", allConfigs);
                   globalStore.setState({
                     projectMetadata: allConfigs.metadata,
                     projectAuthConfig: allConfigs.authConfig,
@@ -149,6 +149,7 @@ export const Entry = () => {
                     projectGpsConfig: allConfigs.gpsConfig,
                     projectAttendancePhotoConfig: allConfigs.attendancePhotoConfig,
                     projectWorkshiftConfig: allConfigs.workshiftConfig,
+                    currentProjectId: projectData.id,
                   });
                 } catch (error) {
                   console.error("Error loading project configs:", error);

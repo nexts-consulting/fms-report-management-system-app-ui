@@ -1,7 +1,7 @@
 import { useAuthContext } from "@/contexts/auth.context";
 import { useGlobalContext } from "@/contexts/global.context";
 import { useQueryCurrentShift } from "@/services/api/attendance/current-shift";
-import { EUserAccountRole, IProvince, IOutlet } from "@/types/model";
+import { EUserAccountRole, IProvince } from "@/types/model";
 import { IAdminDivision } from "@/services/application/management/master-data/admin-divisions-fms";
 import { ILocation } from "@/services/application/management/master-data/locations-fms";
 import React from "react";
@@ -55,7 +55,7 @@ export const useCheckCurrentShift = () => {
     if (!currentAttendanceQuery.isLoading) {
       if (currentAttendanceQuery.data?.data) {
         // Map IProvince to IAdminDivision for backward compatibility
-        const province: IProvince = currentAttendanceQuery.data.data.shift.outlet.province;
+        const province: IProvince = currentAttendanceQuery.data.data.shift.location.province;
         const adminDivision: IAdminDivision = {
           id: province.id,
           project_code: projectCode || "",
@@ -70,20 +70,20 @@ export const useCheckCurrentShift = () => {
         };
 
         // Map IOutlet to ILocation for backward compatibility
-        const outlet: IOutlet = currentAttendanceQuery.data.data.shift.outlet;
+        const locationData: any = currentAttendanceQuery.data.data.shift.location;
         const location: ILocation = {
-          id: outlet.id,
-          project_code: projectCode || "",
-          code: outlet.code,
-          name: outlet.name,
-          address: outlet.address || null,
-          latitude: outlet.latitude || null,
-          longitude: outlet.longitude || null,
-          checkin_radius_meters: outlet.checkinRadiusMeters,
-          admin_division_id: adminDivision.id,
-          metadata: {},
-          created_at: outlet.createdAt,
-          updated_at: outlet.updatedAt,
+          id: locationData.id,
+          project_code: locationData.project_code,
+          code: locationData.code,
+          name: locationData.name,
+          address: locationData.address || null,
+          latitude: locationData.latitude || null,
+          longitude: locationData.longitude || null,
+          checkin_radius_meters: locationData.checkin_radius_meters,
+          admin_division_id: locationData.admin_division_id,
+          metadata: locationData.metadata,
+          created_at: locationData.created_at,
+          updated_at: locationData.updated_at,
         };
 
         globalStore.setState({

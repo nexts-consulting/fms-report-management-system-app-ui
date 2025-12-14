@@ -1,13 +1,9 @@
-import { IOutlet, IWorkingShift } from "@/types/model";
+import { IWorkingShift } from "@/types/model";
 import moment from "moment";
 import React from "react";
 import { useTick } from "../kits/hooks/use-tick";
 
-export const useShiftUpcoming = (
-  shifts: (IWorkingShift & {
-    outlet: IOutlet;
-  })[],
-) => {
+export const useShiftUpcoming = (shifts: IWorkingShift[]) => {
   const [now, controls] = useTick({ unit: "minute" });
 
   const upcomingShiftsRealtime = React.useMemo(() => {

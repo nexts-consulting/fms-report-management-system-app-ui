@@ -289,7 +289,7 @@ export const httpRequestGetLocationWorkshiftsByDateRange = async (
       .select(
         `
         *,
-        fms_mst_locations!inner(id, name, code),
+        fms_mst_locations!inner(id, name, code, address, latitude, longitude, checkin_radius_meters, admin_division_id, metadata, created_at, updated_at),
         fms_app_data_workshifts!inner(id, name, start_time, end_time, status)
       `,
       )
@@ -304,6 +304,14 @@ export const httpRequestGetLocationWorkshiftsByDateRange = async (
       location_name: item.fms_mst_locations?.name,
       location_code: item.fms_mst_locations?.code,
       location_id: item.fms_mst_locations?.id,
+      location_address: item.fms_mst_locations?.address,
+      location_latitude: item.fms_mst_locations?.latitude,
+      location_longitude: item.fms_mst_locations?.longitude,
+      location_checkin_radius_meters: item.fms_mst_locations?.checkin_radius_meters,
+      location_admin_division_id: item.fms_mst_locations?.admin_division_id,
+      location_metadata: item.fms_mst_locations?.metadata,
+      location_created_at: item.fms_mst_locations?.created_at,
+      location_updated_at: item.fms_mst_locations?.updated_at,
       workshift_name: item.fms_app_data_workshifts?.name,
       workshift_id: item.fms_app_data_workshifts?.id,
       workshift_start_time: item.fms_app_data_workshifts?.start_time,

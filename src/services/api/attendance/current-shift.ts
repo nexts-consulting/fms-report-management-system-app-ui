@@ -93,13 +93,6 @@ const httpRequestCurrentShift = async (
             acc: 0, // TODO: Get from metadata if available
           }
         : null,
-      saleReport: null, // TODO: Query from reports table if needed
-      oosReport: null, // TODO: Query from reports table if needed
-      stockInReport: null, // TODO: Query from reports table if needed
-      stockOutReport: null, // TODO: Query from reports table if needed
-      samplingReport: null, // TODO: Query from reports table if needed
-      activityReport: null, // TODO: Query from reports table if needed
-      staffLeaves: [], // TODO: Query from staff_leaves table if needed
     };
 
     return { data: staffAttendance };
