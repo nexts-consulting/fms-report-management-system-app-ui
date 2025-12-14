@@ -16,7 +16,6 @@ import { redeemReportApi } from "@/services/api/reports/redeem-report";
 import { useNotification } from "@/kits/components/Notification";
 import { HttpStatusCode } from "axios";
 import { useGlobalContext } from "@/contexts/global.context";
-import { useMutationCustomerFindByPhoneNumber } from "@/services/api/customer/find-by-phone-numer";
 // Cấu hình sản phẩm theo dung tích
 const productConfig = {
   SCU_PROBI_TRUYEN_THONG_65ML: { size: 65, name: "SCU Probi Truyền Thống 65ml" },
@@ -29,7 +28,6 @@ const productConfig = {
   // SCU_PROBI_DAU_130ML: { size: 130, name: "SCU Probi Dâu 130ml" },
   SCU_PROBI_VIET_QUAT_130ML: { size: 130, name: "SCU Probi Việt Quất 130ml" },
   // SCU_PROBI_DUA_130ML: { size: 130, name: "SCU Probi Dứa 130ml" },
-  
 };
 
 // Hệ thống điểm
@@ -74,8 +72,6 @@ const productItems = Object.entries(productConfig).map(([id, config]) => ({
   unit: "Lốc",
 }));
 
-
-
 export const Entry = () => {
   const globalStore = useGlobalContext();
   const currentAttendance = globalStore.use.currentAttendance();
@@ -91,10 +87,10 @@ export const Entry = () => {
     reset,
     setValue,
     formState: { errors },
-  } = useForm({ 
-    defaultValues: { 
+  } = useForm({
+    defaultValues: {
       items: {},
-    } 
+    },
   });
 
   const [phone, setPhone] = useState("");
@@ -102,7 +98,6 @@ export const Entry = () => {
   const [otpSent, setOtpSent] = useState(false);
   const [otpCountdown, setOtpCountdown] = useState(0);
   const [generatedOtp, setGeneratedOtp] = useState("");
-  const [isVerifiedCustomer, setIsVerifiedCustomer] = useState(false);
   const [fullName, setFullName] = useState("");
   const [imageFile, setImageFile] = useState<File | undefined>(undefined);
   const [gifts, setGifts] = useState<Record<string, number>>({});
@@ -110,8 +105,6 @@ export const Entry = () => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSendingOtp, setIsSendingOtp] = useState(false);
-
-  const findCustomerMutation = useMutationCustomerFindByPhoneNumber({});
 
   const formValues = watch();
   const productQuantities = formValues.items || {};
@@ -423,8 +416,7 @@ export const Entry = () => {
     }
   };
 
-   const onSubmit = async (formData: any) => {
-
+  const onSubmit = async (formData: any) => {
     // Kiểm tra số điện thoại hợp lệ
     if (!phone.match(/^(0[3|5|7|8|9])+([0-9]{8})$/)) {
       notification.error({
@@ -436,13 +428,7 @@ export const Entry = () => {
       });
       return;
     }
-    if (
-      !isVerifiedCustomer &&
-      (
-        otp.length !== 6 ||
-        (otp !== generatedOtp && otp !== DEFAULT_OTP)
-      )
-    ) {
+    if (otp.length !== 6 || (otp !== generatedOtp && otp !== DEFAULT_OTP)) {
       notification.info({
         title: "Lỗi OTP",
         description: "Mã OTP chưa được nhập hoặc không chính xác",
@@ -453,8 +439,8 @@ export const Entry = () => {
       return;
     }
 
-     // Kiểm tra các trường bắt buộc
-     if (!phone || !fullName || !imageFile) {
+    // Kiểm tra các trường bắt buộc
+    if (!phone || !fullName || !imageFile) {
       notification.info({
         title: "Vui lòng điền đầy đủ thông tin và chụp ảnh hóa đơn",
         description: "Vui lòng điền đầy đủ thông tin và chụp ảnh hóa đơn",
@@ -502,12 +488,7 @@ export const Entry = () => {
 
         // Reset form sau khi gửi thành công
         reset({
-          items: Object.fromEntries(
-            Object.keys(productConfig).map((sku) => [
-              sku,
-              { pcs: "" }
-            ])
-          )
+          items: Object.fromEntries(Object.keys(productConfig).map((sku) => [sku, { pcs: "" }])),
         });
         setPhone("");
         setOtp("");
@@ -548,45 +529,6 @@ export const Entry = () => {
     }
   }, [otpCountdown]);
 
-  useEffect(() => {
-    const checkCustomer = async () => {
-      // Reset states khi số điện thoại thay đổi
-      if (phone.length !== 10) {
-        setFullName("");
-        setIsVerifiedCustomer(false);
-        return;
-      }
-
-      // Kiểm tra số điện thoại hợp lệ
-      if (!phone.match(/^(0[3|5|7|8|9])+([0-9]{8})$/)) {
-        setFullName("");
-        setIsVerifiedCustomer(false);
-        return;
-      }
-
-      try {
-        const response = await findCustomerMutation.mutateAsync(phone);
-        
-        if (response.status === HttpStatusCode.Ok && response.data.isVerified) {
-          // Khách hàng đã xác thực
-          setFullName(response.data.name);
-          setIsVerifiedCustomer(true);
-        } else {
-          // Khách hàng chưa xác thực
-          setFullName("");
-          setIsVerifiedCustomer(false);
-        }
-      } catch (error) {
-        // Xử lý lỗi
-        setFullName("");
-        setIsVerifiedCustomer(false);
-        console.error("Error checking customer:", error);
-      }
-    };
-
-    checkCustomer();
-  }, [phone]);
-
   return (
     <>
       <LoadingOverlay active={isSubmitting} />
@@ -609,40 +551,39 @@ export const Entry = () => {
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                   />
-                  {!isVerifiedCustomer &&
-                    (!otpSent ? (
-                      <Button
-                        variant="secondary"
-                        type="button"
-                        onClick={handleSendOtp}
-                        disabled={isSendingOtp}
-                      >
-                        {isSendingOtp ? "Đang gửi..." : "Gửi mã OTP"}
-                      </Button>
-                    ) : (
-                      <>
-                        <TextInput
-                          label="Mã OTP"
-                          placeholder="VD: 123456"
-                          className="w-full rounded border p-2"
-                          value={otp}
-                          onChange={(e) => setOtp(e.target.value)}
-                          type="number"
-                        />
-                        {otpCountdown > 0 ? (
-                          <p className="text-sm text-gray-500">Gửi lại sau {otpCountdown}s</p>
-                        ) : (
-                          <Button
-                            type="button"
-                            variant="secondary"
-                            onClick={handleSendOtp}
-                            disabled={isSendingOtp}
-                          >
-                            {isSendingOtp ? "Đang gửi..." : "Gửi lại mã OTP"}
-                          </Button>
-                        )}
-                      </>
-                    ))}
+                  {!otpSent ? (
+                    <Button
+                      variant="secondary"
+                      type="button"
+                      onClick={handleSendOtp}
+                      disabled={isSendingOtp}
+                    >
+                      {isSendingOtp ? "Đang gửi..." : "Gửi mã OTP"}
+                    </Button>
+                  ) : (
+                    <>
+                      <TextInput
+                        label="Mã OTP"
+                        placeholder="VD: 123456"
+                        className="w-full rounded border p-2"
+                        value={otp}
+                        onChange={(e) => setOtp(e.target.value)}
+                        type="number"
+                      />
+                      {otpCountdown > 0 ? (
+                        <p className="text-sm text-gray-500">Gửi lại sau {otpCountdown}s</p>
+                      ) : (
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          onClick={handleSendOtp}
+                          disabled={isSendingOtp}
+                        >
+                          {isSendingOtp ? "Đang gửi..." : "Gửi lại mã OTP"}
+                        </Button>
+                      )}
+                    </>
+                  )}
                 </div>
 
                 <TextInput

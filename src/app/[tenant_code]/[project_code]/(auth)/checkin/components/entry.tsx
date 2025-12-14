@@ -5,17 +5,23 @@ import { Localize } from "@/kits/widgets/Localize";
 import { useRouter } from "next/navigation";
 import React from "react";
 import { useGlobalContext } from "@/contexts/global.context";
-import { useNotification } from "@/kits/components/Notification";
 import { useWatchGeolocation, GeolocationErrorType } from "@/hooks/use-watch-geolocation";
 import { useAuthContext } from "@/contexts/auth.context";
 import { CameraCapture } from "@/kits/widgets/CameraCapture";
 import { CheckinMap } from "@/kits/widgets/CheckinMap";
 import { LoadingBar } from "@/kits/components/LoadingBar";
 import { AnimatedEllipsis } from "@/kits/components/AnimatedEllipsis";
-import { useMutationAttendanceCheckin } from "@/services/api/attendance/checkin";
 import { LoadingOverlay } from "@/kits/components/LoadingOverlay";
 import { EUserAccountRole } from "@/types/model";
 import { useTenantProjectPath } from "@/hooks/use-tenant-project-path";
+import { useProjectConfigs } from "@/hooks/use-project-configs";
+import { useCheckinFlow } from "../hooks/use-checkin-flow";
+import { useCheckinSubmit } from "../hooks/use-checkin-submit";
+import { useCheckinNotifications } from "../hooks/use-checkin-notifications";
+import { getCheckinLocation } from "../common/utils";
+import { CHECKIN_TIPS } from "../common/config";
+import type { UserGeolocation } from "../common/types";
+import { Survey } from "@/components/Survey";
 
 export const Entry = () => {
   const authStore = useAuthContext();
@@ -23,57 +29,62 @@ export const Entry = () => {
 
   const globalStore = useGlobalContext();
   const selectedWorkingShift = globalStore.use.selectedWorkingShift();
+  const {
+    projectCheckinFlow,
+    projectGpsConfig,
+    projectAttendancePhotoConfig,
+    isLoading: isLoadingConfigs,
+  } = useProjectConfigs();
 
   const router = useRouter();
-  const notification = useNotification();
   const { buildPath } = useTenantProjectPath();
 
-  const [step, setStep] = React.useState<"localize" | "capture" | "submit">(
-    "localize",
-  );
+  // Checkin flow hook
+  const {
+    availableSteps,
+    currentStep,
+    currentStepIndex,
+    goToNextStep,
+    goToPreviousStep,
+    goToStep,
+    setCurrentStepIndex,
+  } = useCheckinFlow({
+    checkinFlow: projectCheckinFlow,
+  });
 
-  // Localize
+  // State
   const [isLocalizing, setIsLocalizing] = React.useState(false);
-  const checkinStatusNotificationIdRef = React.useRef<string | null>(null);
-  const rangeWarningNotificationIdRef = React.useRef<string | null>(null);
-  const [userGeolocation, setUserGeolocation] = React.useState<{
-    lat: number;
-    lng: number;
-    accuracy: number;
-  } | null>(null);
-
-  // Capture
+  const [userGeolocation, setUserGeolocation] = React.useState<UserGeolocation | null>(null);
   const [userImageFile, setUserImageFile] = React.useState<File | null>(null);
-  const captureGuideNotificationIdRef = React.useRef<string | null>(null);
-
-  // Submit
-  const tips = ["Ca làm việc của bạn đang được tạo", "Chúc bạn có một ngày làm việc tốt lành!"];
   const [currentTipIndex, setCurrentTipIndex] = React.useState(0);
   const [allbeDone, setAllbeDone] = React.useState(false);
 
-  const attendanceCheckinMutation = useMutationAttendanceCheckin({
-    config: {
-      onSuccess: (data) => {
-        setCurrentTipIndex(1);
-        setAllbeDone(true);
-        globalStore.setState({
-          currentAttendance: data.data,
-        });
+  // Memoized checkin location
+  const checkinLocation = React.useMemo(() => {
+    if (!selectedWorkingShift) return null;
+    return getCheckinLocation(
+      projectCheckinFlow,
+      projectGpsConfig,
+      userGeolocation,
+      selectedWorkingShift,
+    );
+  }, [projectCheckinFlow, projectGpsConfig, userGeolocation, selectedWorkingShift]);
 
-        setTimeout(() => {
-          router.push("/attendance/tracking");
-        }, 3000);
-      },
-      onError: (error) => {
-        console.log(error);
-        notification.error({
-          title: "Lỗi hệ thống",
-          description: "Có lỗi xảy ra khi tạo ca làm việc, vui lòng thử lại sau. Chi tiết: " + (error?.response?.data as any).message  || error?.message,
-          options: {
-            immortal: true,
-          },
-        });
-      },
+  // Checkin submit hook
+  const {
+    submitCheckin,
+    submitWithoutPhoto,
+    isLoading: isSubmitting,
+  } = useCheckinSubmit({
+    userId: user.id,
+    workingShift: selectedWorkingShift,
+    checkinLocation,
+    checkinFlow: projectCheckinFlow,
+    availableSteps,
+    onStepChange: setCurrentStepIndex,
+    onSuccess: () => {
+      setCurrentTipIndex(1);
+      setAllbeDone(true);
     },
   });
 
@@ -85,56 +96,57 @@ export const Entry = () => {
     (error: { type: GeolocationErrorType; message: string }) => {
       setTimeout(() => {
         setIsLocalizing(false);
-        if (checkinStatusNotificationIdRef.current) {
-          notification.update(checkinStatusNotificationIdRef.current, {
-            type: "error",
-            description: error.message,
-          });
-        }
       }, 1000);
     },
-    [notification],
+    [],
   );
 
   const handleOnSuccess = React.useCallback(() => {
     setTimeout(() => {
       setIsLocalizing(false);
-      if (checkinStatusNotificationIdRef.current) {
-        notification.remove(checkinStatusNotificationIdRef.current);
-      }
     }, 1000);
-  }, [notification]);
+  }, []);
 
   const { location, error } = useWatchGeolocation({
-    active: step === "localize",
+    active: currentStep === "gps",
     onActiveChange: handleOnActive,
     onError: handleOnError,
     onSuccess: handleOnSuccess,
   });
+
+  // Notifications hook - must be after useWatchGeolocation to access location
+  const {
+    showRangeWarning,
+    hideRangeWarning,
+    updateGpsError,
+    removeGpsNotification,
+    removeCaptureNotification,
+  } = useCheckinNotifications({
+    currentStep,
+    photoConfig: projectAttendancePhotoConfig,
+    isLocalizing,
+    hasLocation: !!location,
+    gpsConfig: projectGpsConfig,
+  });
+
+  // Update error handler to use updateGpsError
+  React.useEffect(() => {
+    if (error) {
+      updateGpsError(error.message || "Không thể xác định vị trí");
+    }
+  }, [error, updateGpsError]);
 
   const handleOnUpdateGps = React.useCallback(
     (e: { isUserInLocationScope: boolean | undefined }) => {
       if (isLocalizing || error) return;
 
       if (e.isUserInLocationScope) {
-        if (rangeWarningNotificationIdRef.current) {
-          notification.remove(rangeWarningNotificationIdRef.current);
-        }
-      }
-
-      if (e.isUserInLocationScope === false) {
-        if (!rangeWarningNotificationIdRef.current) {
-          rangeWarningNotificationIdRef.current = notification.warning({
-            title: "Định vị",
-            description: "Bạn đang ở ngoài khu vực check in!",
-            options: {
-              immortal: true,
-            },
-          });
-        }
+        hideRangeWarning();
+      } else if (e.isUserInLocationScope === false) {
+        showRangeWarning();
       }
     },
-    [isLocalizing, error],
+    [isLocalizing, error, showRangeWarning, hideRangeWarning],
   );
 
   const handleConfirmLocalize = React.useCallback(() => {
@@ -145,97 +157,74 @@ export const Entry = () => {
       lng: location.longitude,
       accuracy: location.accuracy,
     });
-    setStep("capture");
-  }, [location]);
+    goToNextStep();
+  }, [location, goToNextStep]);
 
   const handleOnCapture = React.useCallback(() => {
-    if (captureGuideNotificationIdRef.current) {
-      notification.remove(captureGuideNotificationIdRef.current);
-    }
-  }, []);
+    removeCaptureNotification();
+  }, [removeCaptureNotification]);
 
   const handleConfirmCapture = React.useCallback(
     (file: File) => {
       setUserImageFile(file);
-      setStep("submit");
-
-      if (!selectedWorkingShift || !userGeolocation) return;
-
-      // Submit
-      attendanceCheckinMutation.mutate({
-        staffId: user.id,
-        shiftId: selectedWorkingShift.id,
-        location: {
-          lat: userGeolocation.lat,
-          lng: userGeolocation.lng,
-          acc: userGeolocation.accuracy,
-        },
-        file,
-      });
+      goToNextStep();
+      submitCheckin(file);
     },
-    [selectedWorkingShift, userGeolocation],
+    [goToNextStep, submitCheckin],
   );
 
-  const handleOnCameraError = React.useCallback((error: string) => {
-    if (captureGuideNotificationIdRef.current) {
-      notification.remove(captureGuideNotificationIdRef.current);
-    }
-  }, []);
+  const handleOnCameraError = React.useCallback(() => {
+    removeCaptureNotification();
+  }, [removeCaptureNotification]);
 
+  // Handle survey completion - continue to next checkin step
+  const handleSurveyComplete = React.useCallback(() => {
+    goToNextStep();
+  }, [goToNextStep]);
+
+  // Handle pre-shift task step
   React.useEffect(() => {
-    if (step === "localize" && !checkinStatusNotificationIdRef.current) {
-      checkinStatusNotificationIdRef.current = notification.pending({
-        title: "Định vị",
-        description: "Đang xác định vị trí của bạn...",
-        options: {
-          immortal: true,
-        },
-      });
+    if (currentStep === "pre_shift_task" && projectCheckinFlow?.require_pre_shift_task) {
+      // TODO: Implement pre-shift task component
+      // For now, skip to next step
+      goToNextStep();
     }
+  }, [currentStep, projectCheckinFlow, goToNextStep]);
 
-    if (step === "capture" && !captureGuideNotificationIdRef.current) {
-      captureGuideNotificationIdRef.current = notification.info({
-        title: "Chụp ảnh",
-        description: "Vui lòng chụp rõ khuôn mặt của bạn để xác thực",
-        options: {
-          immortal: true,
-        },
-      });
-    }
-  }, [step]);
-
+  // Handle post-shift task step
   React.useEffect(() => {
-    return () => {
-      // Remove notification when component unmount
-      if (checkinStatusNotificationIdRef.current) {
-        notification.remove(checkinStatusNotificationIdRef.current);
-      }
-
-      if (rangeWarningNotificationIdRef.current) {
-        notification.remove(rangeWarningNotificationIdRef.current);
-      }
-
-      if (captureGuideNotificationIdRef.current) {
-        notification.remove(captureGuideNotificationIdRef.current);
-      }
-
-      notification.clear();
-    };
-  }, []);
+    if (currentStep === "post_shift_task" && projectCheckinFlow?.require_post_shift_task) {
+      // TODO: Implement post-shift task component
+      // For now, redirect to tracking
+      router.push(buildPath("/attendance/tracking"));
+    }
+  }, [currentStep, projectCheckinFlow, router, buildPath]);
 
   React.useEffect(() => {
     if (!selectedWorkingShift) {
       router.replace(buildPath("/shift"));
     }
-  }, [selectedWorkingShift]);
+  }, [selectedWorkingShift, router, buildPath]);
 
   React.useEffect(() => {
     if (user?.account?.role === EUserAccountRole.SALE) {
       router.replace(buildPath("/sale/lobby"));
     }
-  }, [user, buildPath]);
+  }, [user, router, buildPath]);
 
-  if (!selectedWorkingShift) {
+  // Auto-submit when reaching submit step if photo is not required and no file captured
+  React.useEffect(() => {
+    if (
+      currentStep === "submit" &&
+      projectAttendancePhotoConfig?.mode === "NOT_REQUIRED" &&
+      !userImageFile
+    ) {
+      submitWithoutPhoto();
+    }
+  }, [currentStep, projectAttendancePhotoConfig, userImageFile, submitWithoutPhoto]);
+
+  // Wait for configs to load - must be after all hooks
+  if (isLoadingConfigs || !selectedWorkingShift) {
     return <></>;
   }
 
@@ -244,16 +233,19 @@ export const Entry = () => {
       <LoadingOverlay active={allbeDone} />
 
       <div className="flex min-h-dvh flex-col">
-        {step !== "submit" && (
-          <ScreenHeader
-            title="Check in"
-            loading={isLocalizing}
-            onBack={() => router.back()}
-            containerClassName="mb-0"
-          />
-        )}
+        {currentStep !== "submit" &&
+          currentStep !== "survey" &&
+          currentStep !== "pre_shift_task" &&
+          currentStep !== "post_shift_task" && (
+            <ScreenHeader
+              title="Check in"
+              loading={isLocalizing}
+              onBack={goToPreviousStep}
+              containerClassName="mb-0"
+            />
+          )}
 
-        {step === "localize" && (
+        {currentStep === "gps" && projectCheckinFlow?.require_gps_at_location && (
           <div className="flex flex-1">
             <Localize
               user={
@@ -276,47 +268,63 @@ export const Entry = () => {
                   lat: selectedWorkingShift.location.latitude,
                   lng: selectedWorkingShift.location.longitude,
                 },
-                radius: selectedWorkingShift.location.checkinRadiusMeters,
+                radius:
+                  projectGpsConfig?.gps_radius_meters ??
+                  selectedWorkingShift.location.checkinRadiusMeters,
               }}
               shift={{
                 name: selectedWorkingShift.name,
                 startTime: new Date(selectedWorkingShift.startTime),
                 endTime: new Date(selectedWorkingShift.endTime),
               }}
+              gpsConfig={
+                projectGpsConfig
+                  ? {
+                      mode: projectGpsConfig.mode,
+                      is_required: projectGpsConfig.is_required,
+                    }
+                  : undefined
+              }
               onUpdateGps={handleOnUpdateGps}
               onContinue={handleConfirmLocalize}
             />
           </div>
         )}
 
-        {step === "capture" && (
-          <div className="flex flex-1">
-            <CameraCapture
-              enableUpload={false}
-              enableCancel={false}
-              onConfirm={handleConfirmCapture}
-              onCapture={handleOnCapture}
-              onError={handleOnCameraError}
-            />
-          </div>
+        {currentStep === "capture" &&
+          projectCheckinFlow?.require_attendance &&
+          projectAttendancePhotoConfig?.mode !== "NOT_REQUIRED" && (
+            <div className="flex flex-1">
+              <CameraCapture
+                enableUpload={false}
+                enableCancel={false}
+                onConfirm={handleConfirmCapture}
+                onCapture={handleOnCapture}
+                onError={handleOnCameraError}
+              />
+            </div>
+          )}
+
+        {currentStep === "survey" && projectCheckinFlow?.require_survey && (
+          <Survey onComplete={handleSurveyComplete} onBack={goToPreviousStep} />
         )}
 
-        {step === "submit" && (
+        {currentStep === "submit" && (
           <div className="fixed left-0 right-0 top-1/2 -translate-y-2/3 p-4">
             <div className="bg-white p-4">
               <div className="aspect-[3/2] w-full flex-1">
                 <CheckinMap
                   gps={{
-                        lat: selectedWorkingShift.location.latitude,
+                    lat: selectedWorkingShift.location.latitude,
                     lng: selectedWorkingShift.location.longitude,
                   }}
                 />
               </div>
             </div>
-            <LoadingBar active={attendanceCheckinMutation.isLoading} size="medium" />
+            <LoadingBar active={isSubmitting} size="medium" />
             <div className="mt-4">
               <p className="text-center text-sm font-medium text-gray-50">
-                <span dangerouslySetInnerHTML={{ __html: tips[currentTipIndex] }} />
+                <span dangerouslySetInnerHTML={{ __html: CHECKIN_TIPS[currentTipIndex] }} />
                 {currentTipIndex === 0 && <AnimatedEllipsis className="inline-block" />}
               </p>
             </div>

@@ -54,16 +54,34 @@ export const Entry = () => {
       />
 
       <div className="px-4">
+        {/* Location Info Card */}
+        {selectedAdminDivision && selectedLocation && (
+          <div className="mt-4 w-full bg-white px-4 py-3">
+            <div className="space-y-2 divide-y divide-gray-30">
+              <div className="flex items-start gap-3 pb-2">
+                <Icons.Location className="mt-0.5 h-4 w-4 shrink-0 text-gray-50" />
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-medium text-gray-50">Địa điểm</p>
+                  <p className="mt-0.5 line-clamp-2 text-sm font-medium text-gray-100">
+                    {selectedLocation?.name}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3 pt-2">
+                <Icons.Map className="mt-0.5 h-4 w-4 shrink-0 text-gray-50" />
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-medium text-gray-50">Địa chỉ</p>
+                  <p className="mt-0.5 line-clamp-2 text-sm text-gray-70">
+                    {selectedLocation?.address}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Tile */}
         <div className="mt-4 w-full bg-white px-4 py-6">
-          {(selectedAdminDivision && selectedLocation) && (
-            <div className="mb-4">
-              <p className="text-sm"> <span className="font-bold">Khu vực:</span> {selectedAdminDivision?.name}</p>
-              <p className="text-sm"> <span className="font-bold">Địa điểm:</span> {selectedLocation?.name}</p>
-              <p className="text-sm"> <span className="font-bold">Địa chỉ:</span> {selectedLocation?.address}</p>
-            </div>
-          )}
-          {}
           <button
             type="button"
             className={StyleUtil.cn(

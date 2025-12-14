@@ -9,9 +9,7 @@ import CaroBorder from "../caro-border";
 import { useGlobalContext } from "@/contexts/global.context";
 import { useEffect, useCallback, useMemo, useState } from "react";
 import { useSurveyProgressContext } from "@/contexts/survey-progress.context";
-import { SurveyService } from "@/services/firebase/firestore/survey.service";
 import { LoadingOverlay } from "@/kits/components/LoadingOverlay";
-import { useMutationSurveySave } from "@/services/api/survey/save";
 import { Svgs } from "../svgs";
 
 interface QuestionsScreenProps {}
@@ -40,56 +38,6 @@ const questionsSchema = z
 
 type QuestionsSchema = z.infer<typeof questionsSchema>;
 
-// Helper functions để convert codes thành labels
-const getBrandLabel = (code: string): string => {
-  const brandMapping: Record<string, string> = {
-    "1": "Probi",
-    "2": "Yakult",
-    "3": "Betagen",
-    "4": "TH Probiotics",
-    "5": "Nuvi",
-    "99": "Đang không dùng các sản phẩm sữa chua uống men sống",
-  };
-  return brandMapping[code] || code;
-};
-
-const getFlavorLabel = (code: string): string => {
-  const flavorMapping: Record<string, string> = {
-    "vi-co-duong": "Vị Có đường",
-    "vi-it-duong": "Vị Ít đường",
-    "vi-khong-duong": "Vị Không đường",
-    "vi-trai-cay": "Vị trái cây",
-  };
-  return flavorMapping[code] || code;
-};
-
-const getGameLabel = (code: string): string => {
-  const gameMapping: Record<string, string> = {
-    "me-cung-tieu-hoa": "Mê Cung Tiêu Hóa",
-    "biet-doi-danh-bay-cam-cum": "Biệt đội đánh bay cảm cúm",
-    "duong-loi-khuan-khong-lo": "Đường Lợi khuẩn khổng lồ",
-  };
-  return gameMapping[code] || code;
-};
-
-const getGenderLabel = (code: string): string => {
-  const genderMapping: Record<string, string> = {
-    "1": "Nam",
-    "2": "Nữ",
-    "0": "Không muốn ghi nhận",
-  };
-  return genderMapping[code] || code;
-};
-
-const getMaritalStatusLabel = (code: string): string => {
-  const maritalMapping: Record<string, string> = {
-    "1": "Chưa lập gia đình",
-    "2": "Đã lập gia đình và có con",
-    "3": "Đã lập gia đình và chưa có con",
-  };
-  return maritalMapping[code] || code;
-};
-
 export const QuestionsScreen = (props: QuestionsScreenProps) => {
   const {} = props;
 
@@ -100,10 +48,6 @@ export const QuestionsScreen = (props: QuestionsScreenProps) => {
   const setSurveyFlow = surveyProgress.use.setSurveyFlow();
   const setCurrentStep = surveyProgress.use.setCurrentStep();
   const surveyMode = surveyProgress.use.surveyMode();
-
-  const mutationSurveySave = useMutationSurveySave();
-
-  const [loading, setLoading] = useState(false);
 
   const formMethods = useForm<QuestionsSchema>({
     resolver: zodResolver(questionsSchema),
@@ -255,106 +199,31 @@ export const QuestionsScreen = (props: QuestionsScreenProps) => {
     [globalContext],
   );
 
-  const saveNoGamesDataToFirebase = async (questionData: QuestionsSchema) => {
-    try {
-      // Lấy tất cả dữ liệu từ localStorage
-      const infoData = localStorage.getItem("surveyInfo");
-      const gamesData = localStorage.getItem("surveyGames");
-      const imageFileData = localStorage.getItem("surveyImageFile");
-      const otpData = localStorage.getItem("surveyOTP");
-
-      if (!infoData) {
-        throw new Error("Không tìm thấy thông tin cá nhân");
-      }
-
-      const info = JSON.parse(infoData);
-      const games = gamesData ? JSON.parse(gamesData) : { games: [] };
-
-      const firebaseData: any = {
-        // Thông tin cá nhân - Convert codes thành labels
-        name: info.fullName,
-        phoneNumber: info.phoneNumber,
-        extra: {
-          address: info.address,
-          gender: getGenderLabel(info.tt3_gender),
-          birthYear: info.tt4_birth_year,
-          maritalStatus: getMaritalStatusLabel(info.tt5_marital_status),
-          childrenCount: info.tt6_children_count ? info.tt6_children_count : 0,
-        },
-        // Dữ liệu khảo sát - Convert codes thành labels
-        surveyReport: {
-          surveyMode: surveyMode,
-          completedAt: new Date() as any,
-          brands: (questionData.q1_brands || []).map((code: string) => getBrandLabel(code)),
-          frequentBrand: (questionData.q1_brands || []).map((code: string) => getBrandLabel(code)),
-          mostFrequentBrand: questionData.q2_frequent_brand
-            ? getBrandLabel(questionData.q2_frequent_brand)
-            : "",
-          flavorUsage: (questionData.q3a_flavor_usage || []).map((code: string) =>
-            getFlavorLabel(code),
-          ),
-          mostUsedFlavor: questionData.q3b_most_used_flavor
-            ? getFlavorLabel(questionData.q3b_most_used_flavor)
-            : "",
-        },
-      };
-
-      if (otpData) {
-        firebaseData.otp = otpData;
-      }
-
-      if (imageFileData) {
-        firebaseData.image = imageFileData;
-      }
-
-      await mutationSurveySave.mutateAsync(firebaseData);
-
-      console.log("No-games data saved to Firebase successfully");
-    } catch (error) {
-      console.error("Error saving no-games data to Firebase:", error);
-      // Không throw error để không block navigation
-      throw error;
-    }
-  };
-
   const handleFormSubmit: SubmitHandler<QuestionsSchema> = async (data) => {
     globalContext.setState({ caroColors: ["#050ba9", "#47c9fa"] });
 
-    try {
-      setLoading(true);
+    // Lưu dữ liệu khảo sát vào localStorage
+    const existingInfo = localStorage.getItem("surveyInfo");
+    const existingImage = localStorage.getItem("surveyImageFile");
+    const surveyData = {
+      info: existingInfo ? JSON.parse(existingInfo) : null,
+      image: existingImage,
+      survey: data,
+      completedAt: new Date().toISOString(),
+    };
 
-      // Lưu dữ liệu khảo sát
-      const existingInfo = localStorage.getItem("surveyInfo");
-      const existingImage = localStorage.getItem("surveyImageFile");
-      const surveyData = {
-        info: existingInfo ? JSON.parse(existingInfo) : null,
-        image: existingImage,
-        survey: data,
-        completedAt: new Date().toISOString(),
-      };
+    localStorage.setItem("completeSurveyData", JSON.stringify(surveyData));
 
-      localStorage.setItem("completeSurveyData", JSON.stringify(surveyData));
+    // Đánh dấu step questions đã hoàn thành
+    markStepComplete("questions");
 
-      // Đánh dấu step questions đã hoàn thành
-      markStepComplete("questions");
-      // Routing logic dựa trên survey flow
-      if (surveyFlow === "no-games" || surveyMode === "qr") {
-        // No-games flow: lưu Firebase trước khi đi đến complete
-        await saveNoGamesDataToFirebase(data);
-        setTimeout(() => {
-          setCurrentStep("complete");
-          setLoading(false);
-        }, 1000);
-      } else {
-        // Full flow: đi đến lucky wheel
-        setTimeout(() => {
-          setCurrentStep("lucky-wheel");
-          setLoading(false);
-        }, 1000);
-      }
-    } catch (error) {
-      console.error("Error saving questions data to Firebase:", error);
-      setLoading(false);
+    // Routing logic dựa trên survey flow
+    if (surveyFlow === "no-games" || surveyMode === "qr") {
+      // No-games flow: đi đến complete
+      setCurrentStep("complete");
+    } else {
+      // Full flow: đi đến lucky wheel
+      setCurrentStep("lucky-wheel");
     }
   };
 
@@ -393,9 +262,8 @@ export const QuestionsScreen = (props: QuestionsScreenProps) => {
 
   return (
     <>
-      <LoadingOverlay active={loading || mutationSurveySave.isLoading} />
+      <LoadingOverlay active={false} />
       <div className="inset-0 mx-auto flex h-dvh max-w-3xl flex-col items-center justify-start space-y-8 px-4 pb-16 pt-6">
-
         <div className="relative z-[2]">
           <motion.p
             initial={{ opacity: 0 }}
@@ -580,7 +448,7 @@ export const QuestionsScreen = (props: QuestionsScreenProps) => {
                     "disabled:cursor-not-allowed disabled:opacity-50",
                   )}
                   style={{ fontSize: cssClamp(24, 36, 250, 500) }}
-                  disabled={loading || mutationSurveySave.isLoading}
+                  disabled={false}
                 >
                   Hoàn thành
                 </button>

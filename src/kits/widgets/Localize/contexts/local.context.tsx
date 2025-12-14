@@ -18,7 +18,7 @@ const LocalContext = React.createContext<
 export interface LocalContextProviderProps {
   init: Pick<
     TLocalStore,
-    "lng" | "user" | "location" | "shift" | "loading" | "onUpdateGps" | "onContinue"
+    "lng" | "user" | "location" | "shift" | "loading" | "onUpdateGps" | "onContinue" | "gpsConfig"
   >;
   children: React.ReactNode;
 }

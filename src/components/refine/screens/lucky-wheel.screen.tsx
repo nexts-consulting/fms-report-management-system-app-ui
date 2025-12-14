@@ -9,15 +9,6 @@ import Realistic from "react-canvas-confetti/dist/presets/realistic";
 import Pride from "react-canvas-confetti/dist/presets/pride";
 import { LoadingOverlay } from "@/kits/components/LoadingOverlay";
 import { useSurveyProgressContext } from "@/contexts/survey-progress.context";
-import {
-  getGenderLabel,
-  getMaritalStatusLabel,
-  getGameLabel,
-  getBrandLabel,
-  getFlavorLabel,
-} from "@/components/refine/helper";
-import { SurveyService } from "@/services/firebase/firestore/survey.service";
-import { useMutationSurveySave } from "@/services/api/survey/save";
 
 export interface LuckyWheelScreenProps {}
 
@@ -31,7 +22,7 @@ export const giftConfig: IGiftConfig[] = [
       label: "Chén sứ",
       ratio: 30,
       image_url: "",
-    }
+    },
   },
   {
     gift: {
@@ -40,7 +31,7 @@ export const giftConfig: IGiftConfig[] = [
       label: "Túi mỹ phẩm",
       ratio: 20,
       image_url: "",
-    }
+    },
   },
   {
     gift: {
@@ -49,16 +40,16 @@ export const giftConfig: IGiftConfig[] = [
       label: "Bộ dụng cụ học tập",
       ratio: 10,
       image_url: "",
-    }
+    },
   },
   {
     gift: {
       id: "4",
       code: "4",
-      label: "SCU Probi", 
+      label: "SCU Probi",
       ratio: 40,
       image_url: "",
-    }
+    },
   },
 ];
 
@@ -72,151 +63,11 @@ export const LuckyWheelScreen = (props: LuckyWheelScreenProps) => {
   const setCurrentStep = surveyProgress.use.setCurrentStep();
   const surveyMode = surveyProgress.use.surveyMode();
 
-  const [loading, setLoading] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
   const [showRewardConfetti, setShowRewardConfetti] = useState(false);
   const [spinsRemaining, setSpinsRemaining] = useState(0);
   const [rewardGifts, setRewardGifts] = useState<IGiftConfig["gift"][]>([]);
   const [currentReward, setCurrentReward] = useState<IGiftConfig["gift"] | null>(null);
   const [showCurrentReward, setShowCurrentReward] = useState(false);
-
-  const mutationSurveySave = useMutationSurveySave();
-
-  // Function để lưu dữ liệu lên Firebase
-  const saveToFirebase = async () => {
-    if (saving || saved) return;
-
-    try {
-      setSaving(true);
-
-      // Lấy tất cả dữ liệu từ localStorage
-      const infoData = localStorage.getItem("surveyInfo");
-      const gamesData = localStorage.getItem("surveyGames");
-      const questionsData = localStorage.getItem("completeSurveyData");
-      const rewardsData = localStorage.getItem("luckyWheelRewards");
-      const imageFileData = localStorage.getItem("surveyImageFile");
-      const otpData = localStorage.getItem("surveyOTP");
-
-      if (!infoData) {
-        throw new Error("Không tìm thấy thông tin cá nhân");
-      }
-
-      const info = JSON.parse(infoData);
-      const games = gamesData ? JSON.parse(gamesData) : { games: [] };
-      const questions = questionsData ? JSON.parse(questionsData) : null;
-      const rewards = rewardsData ? JSON.parse(rewardsData) : [];
-
-      // Upload ảnh lên Firebase Storage nếu có
-      let profileImageUrl = "";
-      if (imageFileData) {
-        try {
-          // Chuyển base64 thành File object
-          const base64Response = await fetch(imageFileData);
-          const blob = await base64Response.blob();
-          const imageFile = new File([blob], `profile-${Date.now()}.jpg`, { type: "image/jpeg" });
-
-          // Upload lên Firebase Storage
-          profileImageUrl = await SurveyService.uploadImage(imageFile);
-        } catch (imageError) {
-          console.error("Error uploading image:", imageError);
-          // Tiếp tục lưu dữ liệu ngay cả khi upload ảnh thất bại
-        }
-      }
-
-      // Chuẩn bị dữ liệu cho Firebase - Loại bỏ undefined fields
-      const firebaseData: any = {
-        // Thông tin cá nhân - Convert codes thành labels
-        fullName: info.fullName,
-        phoneNumber: info.phoneNumber,
-        address: info.address,
-        gender: getGenderLabel(info.tt3_gender),
-        birthYear: info.tt4_birth_year,
-        maritalStatus: getMaritalStatusLabel(info.tt5_marital_status),
-        authorizeMethod: info.authorizeMethod,
-
-        // Trò chơi đã tham gia - Convert codes thành labels
-        games: (games.games || []).map((code: string) => getGameLabel(code)),
-
-        // Quà đã nhận
-        rewards: rewards.map((reward: any, index: number) => ({
-          giftId: reward.id,
-          giftCode: reward.code,
-          giftLabel: reward.label,
-          giftImage: reward.image_url,
-          receivedAt: new Date().toISOString(),
-        })),
-
-        // Metadata
-        surveyMode: surveyMode,
-        surveyFlow: surveyFlow || "quick",
-        spinCount: rewards.length,
-        completedAt: new Date() as any, // Sẽ được override bởi Timestamp.now()
-      };
-
-      // Thêm optional fields chỉ khi có giá trị
-      if (info.tt6_children_count) {
-        firebaseData.childrenCount = info.tt6_children_count;
-      }
-
-      // Lưu OTP từ localStorage (cho OTP flow)
-      if (otpData) {
-        firebaseData.otp = otpData;
-      }
-
-      // Lưu authorize method (để phân biệt OTP vs Camera flow)
-      firebaseData.authorizeMethod = otpData ? "OTP" : "Camera";
-
-      if (profileImageUrl) {
-        firebaseData.profileImage = profileImageUrl;
-      }
-
-      // Thêm survey data chỉ khi có (full flow)
-      if (questions?.survey) {
-        const surveyData: any = {
-          brands: (questions.survey.q1_brands || []).map((code: string) => getBrandLabel(code)),
-        };
-
-        // Chỉ thêm frequentBrand nếu có giá trị
-        if (questions.survey.q2_frequent_brand) {
-          surveyData.frequentBrand = getBrandLabel(questions.survey.q2_frequent_brand);
-        }
-
-        // Chỉ thêm flavorUsage nếu có giá trị
-        if (questions.survey.q3a_flavor_usage && questions.survey.q3a_flavor_usage.length > 0) {
-          surveyData.flavorUsage = questions.survey.q3a_flavor_usage.map((code: string) =>
-            getFlavorLabel(code),
-          );
-        }
-
-        // Chỉ thêm mostUsedFlavor nếu có giá trị
-        if (questions.survey.q3b_most_used_flavor) {
-          surveyData.mostUsedFlavor = getFlavorLabel(questions.survey.q3b_most_used_flavor);
-        }
-
-        firebaseData.survey = surveyData;
-      }
-
-      // Debug: Log dữ liệu trước khi lưu
-      console.log("Firebase data to save:", JSON.stringify(firebaseData, null, 2));
-
-      // Lưu lên Firebase
-      // await SurveyService.create(firebaseData);
-      await mutationSurveySave.mutateAsync(firebaseData);
-
-      setSaved(true);
-
-      setTimeout(() => {
-        setSaving(false);
-        setCurrentStep("complete");
-      }, 1000);
-    } catch (error) {
-      console.error("Error saving to Firebase:", error);
-      setSaving(false);
-    } finally {
-      setSaving(false);
-    }
-  };
 
   // Khởi tạo số lần quay dựa trên luồng và load dữ liệu đã lưu
   useEffect(() => {
@@ -246,32 +97,24 @@ export const LuckyWheelScreen = (props: LuckyWheelScreenProps) => {
     }
   }, [rewardGifts]);
 
-  // Đánh dấu step lucky-wheel đã hoàn thành khi hết lượt quay và lưu dữ liệu
+  // Đánh dấu step lucky-wheel đã hoàn thành khi hết lượt quay
   useEffect(() => {
-    if (
-      spinsRemaining === 0 &&
-      !showCurrentReward &&
-      !currentReward &&
-      rewardGifts.length > 0 &&
-      !saved
-    ) {
+    if (spinsRemaining === 0 && !showCurrentReward && !currentReward && rewardGifts.length > 0) {
       markStepComplete("lucky-wheel");
-      // Lưu dữ liệu lên Firebase trước khi chuyển trang
-      saveToFirebase();
+      setCurrentStep("complete");
     }
   }, [
     spinsRemaining,
     rewardGifts.length,
     markStepComplete,
-    saved,
-    saving,
     showCurrentReward,
     currentReward,
+    setCurrentStep,
   ]);
 
   return (
     <>
-      <LoadingOverlay active={saving || loading || saved || mutationSurveySave.isLoading} />
+      <LoadingOverlay active={false} />
       <div className="absolute inset-0 mx-auto flex h-dvh max-w-3xl flex-col items-center justify-start space-y-4 overflow-auto px-4 pb-16 pt-4">
         <div className="w-full space-y-2">
           <div
@@ -321,9 +164,7 @@ export const LuckyWheelScreen = (props: LuckyWheelScreenProps) => {
             }}
           >
             <div className="border-2 border-[#e5ff7c] bg-black/30 px-6 py-8">
-              <p className="mb-5 text-center text-lg font-medium text-white">
-                Bạn đã nhận được!
-              </p>
+              <p className="mb-5 text-center text-lg font-medium text-white">Bạn đã nhận được!</p>
 
               <div className="flex flex-col items-center justify-center gap-4 bg-black/20 p-4">
                 <motion.img

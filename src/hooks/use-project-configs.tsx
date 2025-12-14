@@ -177,4 +177,3 @@ export const useProjectConfigs = () => {
       projectWorkshiftConfig !== undefined,
   };
 };
-

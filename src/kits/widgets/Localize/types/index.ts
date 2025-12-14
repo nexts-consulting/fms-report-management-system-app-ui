@@ -7,6 +7,18 @@ export type TLocalStore = {
   loading: boolean;
   onUpdateGps: (e: { isUserInLocationScope: boolean | undefined }) => void;
   onContinue: () => void;
+  // GPS config for controlling continue button visibility
+  gpsConfig?:
+    | {
+        mode?:
+          | "REQUIRED_AT_LOCATION"
+          | "REQUIRED_BUT_NOT_STRICT"
+          | "VISIBLE_OPTIONAL"
+          | "NOT_REQUIRED";
+        is_required?: boolean;
+      }
+    | null
+    | undefined;
 
   // States
   isExpandedSummary: boolean;

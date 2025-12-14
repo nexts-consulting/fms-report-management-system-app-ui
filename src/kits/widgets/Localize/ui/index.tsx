@@ -12,6 +12,7 @@ export interface RootProps {
   loading?: TLocalStore["loading"];
   onUpdateGps?: TLocalStore["onUpdateGps"];
   onContinue?: TLocalStore["onContinue"];
+  gpsConfig?: TLocalStore["gpsConfig"];
 }
 
 export const Root = React.memo((props: RootProps) => {
@@ -23,10 +24,13 @@ export const Root = React.memo((props: RootProps) => {
     loading = false,
     onUpdateGps = () => {},
     onContinue = () => {},
+    gpsConfig,
   } = props;
 
   return (
-    <LocalContextProvider init={{ lng, user, location, shift, loading, onUpdateGps, onContinue }}>
+    <LocalContextProvider
+      init={{ lng, user, location, shift, loading, onUpdateGps, onContinue, gpsConfig }}
+    >
       <Entry />
     </LocalContextProvider>
   );

@@ -13,8 +13,6 @@ import { useEffect, useState } from "react";
 import { requiresCameraStep, requiresOTPStep } from "@/config/survey-flow.config";
 import { useSurveyProgressContext } from "@/contexts/survey-progress.context";
 import { Svgs } from "../svgs";
-import { useMutationCustomerFindByPhoneNumber } from "@/services/api/customer/find-by-phone-numer";
-import { Dialog } from "@/kits/components/Dialog";
 
 interface InfoScreenProps {}
 
@@ -62,19 +60,7 @@ type InfoSchema = z.infer<typeof infoSchema>;
 export const InfoScreen = (props: InfoScreenProps) => {
   const {} = props;
 
-  const [showDialog, setShowDialog] = useState(false);
-  const [dialogMessage, setDialogMessage] = useState("");
-  const [nextStep, setNextStep] = useState("otp");
   const surveyProgress = useSurveyProgressContext();
-  const [isPhoneUsed, setIsPhoneUsed] = useState(false);
-
-  const findByPhoneNumber = useMutationCustomerFindByPhoneNumber({
-    config: {
-      onError: (error: any) => {
-        console.error("Error checking phone number:", error);
-      },
-    },
-  });
   const markStepComplete = surveyProgress.use.markStepComplete();
   const setCurrentStep = surveyProgress.use.setCurrentStep();
   const surveyMode = surveyProgress.use.surveyMode();
@@ -98,14 +84,13 @@ export const InfoScreen = (props: InfoScreenProps) => {
 
   const handleFormOnValid: SubmitHandler<InfoSchema> = async (data) => {
     try {
-   
       // Save form data to localStorage or state management
       localStorage.setItem("surveyInfo", JSON.stringify(data));
 
       // Đánh dấu step info đã hoàn thành
       markStepComplete("info");
 
-      setCurrentStep(nextStep as SurveyStep);
+      setCurrentStep("otp");
     } catch (error) {
       console.error("Error in form submission:", error);
     }
@@ -123,37 +108,6 @@ export const InfoScreen = (props: InfoScreenProps) => {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
-
-  const watchPhoneNumber = formMethods.watch("phoneNumber");
-  useEffect(() => {
-    const checkCustomer = async () => {
-      if (watchPhoneNumber?.length === 10 && phoneRegex.test(watchPhoneNumber)) {
-        
-        try {
-          const result = await findByPhoneNumber.mutateAsync(watchPhoneNumber);
-           if (result.data.isSurveyReported) {
-             setDialogMessage("Số điện thoại này đã được sử dụng để thực hiện khảo sát. Vui lòng sử dụng số điện thoại khác.");
-             setShowDialog(true);
-             setIsPhoneUsed(true);
-             return;
-           }
-           setIsPhoneUsed(false);
-          if (result.status === 200 && result.data && result.data.phoneNumber) {
-            formMethods.setValue("fullName", result.data.name);
-            setNextStep("questions");
-          }
-          else {
-            formMethods.setValue("fullName", "");
-            setNextStep("otp");
-          }
-        } catch (error) {
-          console.error("Error checking customer:", error);
-        }
-      }
-    };
-
-    checkCustomer();
-  }, [watchPhoneNumber]);
 
   return (
     <div className="flex h-full flex-col items-center justify-start space-y-8 px-4 pb-16 pt-6">
@@ -197,8 +151,8 @@ export const InfoScreen = (props: InfoScreenProps) => {
             onSubmit={formMethods.handleSubmit(handleFormOnValid, handleFormOnInvalid)}
           >
             <div className="space-y-4">
-            <div>
-              <Controller
+              <div>
+                <Controller
                   control={formMethods.control}
                   name="phoneNumber"
                   render={({ field }) => (
@@ -214,7 +168,7 @@ export const InfoScreen = (props: InfoScreenProps) => {
                 />
                 <FormErrorMessage name="phoneNumber" errors={formMethods.formState.errors} />
               </div>
-              
+
               <div>
                 <Controller
                   control={formMethods.control}
@@ -232,7 +186,6 @@ export const InfoScreen = (props: InfoScreenProps) => {
                 <FormErrorMessage name="fullName" errors={formMethods.formState.errors} />
               </div>
 
-              
               <div>
                 <Controller
                   control={formMethods.control}
@@ -342,8 +295,7 @@ export const InfoScreen = (props: InfoScreenProps) => {
             <div className="flex items-center justify-center">
               <button
                 type="submit"
-                disabled={isPhoneUsed}
-                className={`rounded-full bg-white px-16 py-3 font-vnm-sans-display uppercase leading-none text-blue-600 transition-all duration-200 ${!isPhoneUsed ? 'hover:bg-blue-500 hover:text-white' : 'opacity-50 cursor-not-allowed'}`}
+                className="rounded-full bg-white px-16 py-3 font-vnm-sans-display uppercase leading-none text-blue-600 transition-all duration-200 hover:bg-blue-500 hover:text-white"
                 style={{ fontSize: cssClamp(24, 36, 250, 500) }}
               >
                 Tiếp tục
@@ -352,13 +304,6 @@ export const InfoScreen = (props: InfoScreenProps) => {
           </form>
         </CaroBorder>
       </motion.div>
-      <Dialog
-        isOpen={showDialog}
-        onClose={() => setShowDialog(false)}
-        title="Lỗi"
-        description={dialogMessage}
-        children={<></>}
-      />
     </div>
   );
 };

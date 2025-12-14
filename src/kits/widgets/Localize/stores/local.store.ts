@@ -8,11 +8,12 @@ import { Icons } from "@/kits/components/Icons";
 export const createLocalStore = (
   init: Pick<
     TLocalStore,
-    "lng" | "user" | "location" | "shift" | "loading" | "onUpdateGps" | "onContinue"
+    "lng" | "user" | "location" | "shift" | "loading" | "onUpdateGps" | "onContinue" | "gpsConfig"
   >,
 ) => {
   return createStore<TLocalStore>(() => ({
     ...init,
+    gpsConfig: init.gpsConfig ?? undefined,
     isExpandedSummary: false,
     summaryTabs: [
       {
