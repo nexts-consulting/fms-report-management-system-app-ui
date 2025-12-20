@@ -1,23 +1,24 @@
-import { useShiftDurationFormated } from "@/hooks/use-shift-duration-formated";
+import { useShiftDurationFormated } from "@/hooks/shift/use-shift-duration-formated";
 import { Button } from "@/kits/components/Button";
 import { Icons } from "@/kits/components/Icons";
 import { StringUtil } from "@/kits/utils";
 import { OutletMap } from "@/kits/widgets/OutletMap";
-import { IStaffAttendance } from "@/types/model";
+import { IAttendance, ILocation } from "@/types/model";
 import moment from "moment";
 import React from "react";
 
 interface CheckoutConfirmProps {
-  attendance: IStaffAttendance;
+  attendanceDetail: IAttendance;
+  location: ILocation | null;
   onConfirm: () => void;
   onCancel: () => void;
 }
 
 export const CheckoutConfirm = React.memo((props: CheckoutConfirmProps) => {
-  const { attendance, onConfirm, onCancel } = props;
+  const { attendanceDetail, location, onConfirm, onCancel } = props;
 
   const totalTrackingTimeFormated = React.useMemo(() => {
-    const duration = moment.duration(moment().diff(moment(attendance.checkinTime)));
+    const duration = moment.duration(moment().diff(moment(attendanceDetail.checkin_time)));
     const hours = Math.floor(duration.asHours());
     const minutes = duration.minutes();
 
@@ -32,7 +33,7 @@ export const CheckoutConfirm = React.memo((props: CheckoutConfirmProps) => {
     };
 
     return formatDuration(hours, minutes);
-  }, [attendance]);
+  }, [attendanceDetail]);
 
   return (
     <>
@@ -43,16 +44,16 @@ export const CheckoutConfirm = React.memo((props: CheckoutConfirmProps) => {
             <Icons.TaskLocation className="shrink-0 text-gray-50" />
             <div>
               <p className="line-clamp-1 text-sm font-medium text-gray-100">
-                {attendance.shift.name}
+                {attendanceDetail.workshift_name}
               </p>
               <p className="line-clamp-1 text-xs text-gray-50">
                 <span>
-                  {`${StringUtil.toTitleCase(moment(attendance.shift.startTime).format("dddd, "))}${moment(attendance.shift.startTime).format("DD/MM/YYYY")}`}
+                  {`${StringUtil.toTitleCase(moment(attendanceDetail.shift_start_time).format("dddd, "))}${moment(attendanceDetail.shift_start_time).format("DD/MM/YYYY")}`}
                 </span>
                 <span className="px-1">•</span>
-                <span>{moment(attendance.shift.startTime).format("HH:mm A")}</span>
+                <span>{moment(attendanceDetail.shift_start_time).format("HH:mm A")}</span>
                 <span> → </span>
-                <span>{moment(attendance.shift.endTime).format("HH:mm A")}</span>
+                <span>{moment(attendanceDetail.shift_end_time).format("HH:mm A")}</span>
               </p>
             </div>
           </div>
@@ -63,7 +64,7 @@ export const CheckoutConfirm = React.memo((props: CheckoutConfirmProps) => {
               <div>
                 <p className="line-clamp-1 text-sm font-medium text-gray-100">Kết thúc ca</p>
                 <p className="line-clamp-1 text-xs text-gray-50">
-                  {moment(attendance.shift.endTime).format("HH:mm A")}
+                  {moment().format("HH:mm A")}
                 </p>
               </div>
             </div>
@@ -82,19 +83,19 @@ export const CheckoutConfirm = React.memo((props: CheckoutConfirmProps) => {
           <div className="aspect-[3/2] h-auto w-full bg-white p-4">
             <OutletMap
               gps={{
-                lat: attendance.shift.outlet.latitude,
-                lng: attendance.shift.outlet.longitude,
+                lat: location?.latitude ?? 0,
+                lng: location?.longitude ?? 0,
               }}
-              radius={attendance.shift.outlet.checkinRadiusMeters}
+              radius={location?.checkin_radius_meters ?? 0}
             />
           </div>
           <div className="flex items-center justify-start gap-4 bg-white p-4">
             <Icons.Location className="shrink-0 text-gray-50" />
             <div>
               <p className="line-clamp-1 text-sm font-medium text-gray-100">
-                {attendance.shift.outlet.name}
+                {location?.name}
               </p>
-              <p className="line-clamp-1 text-xs text-gray-50">{attendance.shift.outlet.address}</p>
+              <p className="line-clamp-1 text-xs text-gray-50">{location?.address ?? ""}</p>
             </div>
           </div>
         </div>

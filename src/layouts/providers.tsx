@@ -5,6 +5,7 @@ import { ErrorBoundary } from "react-error-boundary";
 import { NotificationProvider } from "@/kits/components/Notification";
 import { AuthContextProvider } from "@/contexts/auth.context";
 import { GlobalContextProvider } from "@/contexts/global.context";
+import { ProjectConfigProvider } from "@/contexts/project-config.context";
 import { Content } from "./content";
 import { ProjectThemeProvider } from "@/components/shared/project-theme-provider";
 import moment from "moment";
@@ -28,9 +29,11 @@ const Providers = (props: ProvidersProps) => {
           <NotificationProvider placement="top-center">
             <GlobalContextProvider>
               <AuthContextProvider>
-                <ProjectThemeProvider>
-                  <Content>{children}</Content>
-                </ProjectThemeProvider>
+                <ProjectConfigProvider>
+                  <ProjectThemeProvider>
+                    <Content>{children}</Content>
+                  </ProjectThemeProvider>
+                </ProjectConfigProvider>
               </AuthContextProvider>
             </GlobalContextProvider>
           </NotificationProvider>

@@ -1,5 +1,4 @@
-import type { IProjectCheckinFlow } from "@/services/application/management/projects/configs/types";
-import type { IWorkingShift } from "@/types/model";
+import type { IProjectCheckinFlow, IWorkshift } from "@/types/model";
 
 export type CheckinStep = "survey" | "pre_shift_task" | "gps" | "capture" | "submit" | "post_shift_task";
 
@@ -17,7 +16,7 @@ export interface CheckinLocation {
 
 export interface CheckinFlowContext {
   checkinFlow: IProjectCheckinFlow | null | undefined;
-  workingShift: IWorkingShift | null | undefined;
+  workingShift: IWorkshift | null | undefined;
   userGeolocation: UserGeolocation | null;
 }
 

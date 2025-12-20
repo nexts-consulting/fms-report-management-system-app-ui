@@ -1,14 +1,11 @@
 import { Icons } from "@/kits/components/Icons";
-import { EUserAccountRole, ReportMenuItem } from "@/types/model";
+import { ReportMenuItem } from "@/types/model";
 import {
   Running,
   Box,
   StoragePool,
   ReportData,
   Gift,
-  ProgressBarRound,
-  Receipt,
-  Activity,
   Image,
   RecentlyViewed,
   Information,
@@ -24,7 +21,6 @@ export const reportMenuItems: ReportMenuItem[] = [
     actionValue: "/attendance/report/stock-in",
     required: true,
     key: "isReportedStockIn",
-    role: EUserAccountRole.SUPERVISOR,
   },
   {
     label: "Báo cáo Sampling",
@@ -33,7 +29,6 @@ export const reportMenuItems: ReportMenuItem[] = [
     actionValue: "/attendance/report/sampling",
     required: true,
     key: "isReportedSampling",
-    role: EUserAccountRole.SUPERVISOR,
   },
   {
     label: "Báo cáo tồn cuối ca",
@@ -42,7 +37,6 @@ export const reportMenuItems: ReportMenuItem[] = [
     actionValue: "/attendance/report/stock-out",
     required: true,
     key: "isReportedStockOut",
-    role: EUserAccountRole.SUPERVISOR,
   },
   {
     label: "Báo cáo hoạt động",
@@ -51,7 +45,6 @@ export const reportMenuItems: ReportMenuItem[] = [
     actionValue: "/attendance/report/activity",
     required: false,
     key: "isReportedActivity",
-    role: EUserAccountRole.SUPERVISOR,
   },
   
   {

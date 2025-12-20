@@ -8,7 +8,6 @@ import { useGlobalContext } from "@/contexts/global.context";
 import { useRouter } from "next/navigation";
 import { useNotification } from "@/kits/components/Notification";
 import { useAuthContext } from "@/contexts/auth.context";
-import { EUserAccountRole } from "@/types/model";
 
 const constants = {
   INSTANCE_NAME: "UserMenu",
@@ -40,32 +39,9 @@ export const UserMenu = React.memo((props: UserMenuProps) => {
   const globalStore = useGlobalContext();
   const currentAttendance = globalStore.use.currentAttendance();
 
-  const isReportedOOS = React.useMemo(() => {
-    return currentAttendance?.oosReport !== null;
-  }, [currentAttendance]);
-
-  const isReportedStockIn = React.useMemo(() => {
-    return currentAttendance?.stockInReport !== null ;
-  }, [currentAttendance]);
-
-  const isReportedStockOut = React.useMemo(() => {
-    return currentAttendance?.stockOutReport !== null ;
-  }, [currentAttendance]);
-
-  const isReportedSales = React.useMemo(() => {
-    return currentAttendance?.saleReport !== null;
-  }, [currentAttendance]);
-
-  const isReportedSampling = React.useMemo(() => {
-    return currentAttendance?.samplingReport !== null;
-  }, [currentAttendance]);
-
   const isCheckoutAvailable = React.useMemo(() => {
-    if(user?.account?.role === EUserAccountRole.SUPERVISOR) {
-      return isReportedStockIn && isReportedStockOut && isReportedSampling;
-    }
     return true;
-  }, [isReportedStockIn, isReportedStockOut, isReportedSampling, user]);
+  }, [currentAttendance]);
 
   const router = useRouter();
   const notification = useNotification();

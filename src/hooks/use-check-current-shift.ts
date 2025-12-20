@@ -1,10 +1,10 @@
 import { useAuthContext } from "@/contexts/auth.context";
 import { useGlobalContext } from "@/contexts/global.context";
-import { useQueryCurrentShift } from "@/services/api/attendance/current-shift";
-import { EUserAccountRole, IProvince } from "@/types/model";
-import { IAdminDivision } from "@/services/application/management/master-data/admin-divisions-fms";
-import { ILocation } from "@/services/application/management/master-data/locations-fms";
-import React from "react";
+import { useQueryCurrentShift } from "@/services/api/application/attendance/current-shift";
+import { useQueryWorkshiftById } from "@/services/api/application/working-shift/get-by-id";
+import { useQueryLocationById } from "@/services/api/application/location/get-by-id";
+import { ILocation, IWorkingShiftLocation } from "@/types/model";
+import React, { useEffect } from "react";
 import { useParams } from "next/navigation";
 
 export const useCheckCurrentShift = () => {
@@ -15,96 +15,104 @@ export const useCheckCurrentShift = () => {
 
   const globalStore = useGlobalContext();
 
+  // Centralized state reset for current shift
+  const resetShiftStates = () => {
+    globalStore.setState({
+      selectedWorkingShift: null,
+      selectedLocation: null,
+      selectedAdminDivision: null,
+      currentAttendance: null,
+    });
+  };
+
   const currentAttendanceQuery = useQueryCurrentShift({
     params: {
-      username: user?.account?.username || "",
+      username: user?.username || "",
       project_code: projectCode || "",
     },
     config: {
-      enabled: !!user?.account?.username && !!projectCode && user.account?.role !== EUserAccountRole.SALE,
+      enabled: Boolean(user?.username && projectCode),
       onSuccess: (data) => {
         if (data.data) {
-          globalStore.setState({
-            selectedWorkingShift: data.data.shift,
-            currentAttendance: data.data,
-          });
+          globalStore.setState({ currentAttendance: data.data });
         } else {
-          globalStore.setState({
-            selectedWorkingShift: null,
-            currentAttendance: null,
-          });
+          resetShiftStates();
         }
       },
-      onError: (error) => {
-        globalStore.setState({
-          selectedWorkingShift: null,
-          currentAttendance: null,
-        });
+      onError: () => {
+        resetShiftStates();
       },
     },
   });
 
-  React.useEffect(() => {
+  const attendanceData = currentAttendanceQuery.data?.data;
+
+  // Query workshift by ID - only when attendance data exists and has workshift_id
+  const workshiftQuery = useQueryWorkshiftById({
+    params: { id: attendanceData?.workshift_id ?? 0 },
+    config: {
+      enabled: Boolean(attendanceData?.workshift_id && attendanceData.workshift_id > 0),
+    },
+  });
+
+  // Query location by ID - only when attendance data exists and has location_id
+  const locationQuery = useQueryLocationById({
+    params: { id: attendanceData?.location_id ?? 0 },
+    config: {
+      enabled: Boolean(attendanceData?.location_id && attendanceData.location_id > 0),
+    },
+  });
+
+  useEffect(() => {
     if (!user) return;
 
-    if (user?.account?.role === EUserAccountRole.SALE) {
+    // If query is still loading, don't update state
+    if (currentAttendanceQuery.isLoading) return;
+
+    // If there's an error or no data, reset states
+    if (currentAttendanceQuery.isError || !attendanceData) {
+      resetShiftStates();
       return;
     }
 
-    // Only update state if query is not loading
-    if (!currentAttendanceQuery.isLoading) {
-      if (currentAttendanceQuery.data?.data) {
-        // Map IProvince to IAdminDivision for backward compatibility
-        const province: IProvince = currentAttendanceQuery.data.data.shift.location.province;
-        const adminDivision: IAdminDivision = {
-          id: province.id,
-          project_code: projectCode || "",
-          code: null,
-          name: province.name,
-          level: 0,
-          type: "AREA",
-          parent_id: null,
-          metadata: {},
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        };
+    // If we have attendance data, check if workshift and location queries are ready
+    if (attendanceData) {
+      
+      globalStore.setState({
+        currentAttendance: attendanceData,
+      });
 
-        // Map IOutlet to ILocation for backward compatibility
-        const locationData: any = currentAttendanceQuery.data.data.shift.location;
-        const location: ILocation = {
-          id: locationData.id,
-          project_code: locationData.project_code,
-          code: locationData.code,
-          name: locationData.name,
-          address: locationData.address || null,
-          latitude: locationData.latitude || null,
-          longitude: locationData.longitude || null,
-          checkin_radius_meters: locationData.checkin_radius_meters,
-          admin_division_id: locationData.admin_division_id,
-          metadata: locationData.metadata,
-          created_at: locationData.created_at,
-          updated_at: locationData.updated_at,
-        };
 
+      if(locationQuery.isSuccess) {
+        const location = locationQuery.data?.data;
         globalStore.setState({
-          selectedAdminDivision: adminDivision,
           selectedLocation: location,
-          selectedWorkingShift: currentAttendanceQuery.data.data.shift,
-          currentAttendance: currentAttendanceQuery.data.data,
-        });
-      } else if (currentAttendanceQuery.isError || !currentAttendanceQuery.data) {
-        // Only set null if we got an error or explicitly got null data
-        globalStore.setState({
-          selectedWorkingShift: null,
-          currentAttendance: null,
         });
       }
+
+      if (workshiftQuery.isSuccess && locationQuery.isSuccess) {
+        const workshift = workshiftQuery.data?.data;
+        const location = locationQuery.data?.data;
+        globalStore.setState({
+          selectedWorkingShift: {
+            id: workshift?.id ?? 0,
+            name: workshift?.name ?? attendanceData?.workshift_name ?? "",
+            start_time: workshift?.start_time ?? "",
+            end_time: workshift?.end_time ?? "",
+            location: location as ILocation,
+          },
+        });
+      }
+    } else {
+      resetShiftStates();
     }
   }, [
     user,
     projectCode,
-    currentAttendanceQuery.data,
-    currentAttendanceQuery.isLoading,
-    currentAttendanceQuery.isError,
+    attendanceData,
+    currentAttendanceQuery.isSuccess,
+    workshiftQuery.isSuccess,
+    locationQuery.isSuccess,
+    globalStore,
   ]);
 };

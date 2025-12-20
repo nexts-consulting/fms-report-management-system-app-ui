@@ -6,7 +6,7 @@ import { StoreApi } from "zustand";
 import { decodeJwtPayload } from "@/utils/auth";
 import moment from "moment";
 import { useNotification } from "@/kits/components/Notification";
-import { httpRequestAuthRefresh } from "@/services/application/auth/refresh";
+import { httpRequestAuthRefresh } from "@/services/api/application/auth/refresh";
 import { useGlobalContext } from "./global.context";
 
 export interface IAuthContext extends StoreApi<AuthStore> {}

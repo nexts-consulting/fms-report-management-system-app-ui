@@ -7,6 +7,7 @@ import Realistic from "react-canvas-confetti/dist/presets/realistic";
 import Pride from "react-canvas-confetti/dist/presets/pride";
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { useTenantProjectPath } from "@/hooks/use-tenant-project-path";
 
 const giftConfig: IGiftConfig[] = [
   {
@@ -64,6 +65,7 @@ export const Entry = () => {
   const [showRewardConfetti, setShowRewardConfetti] = useState(false);
 
   const router = useRouter();
+  const { buildPath } = useTenantProjectPath();
 
   return (
     <>
@@ -72,7 +74,7 @@ export const Entry = () => {
           <ScreenHeader
             title="Lucky Wheel - Demo Feature Only"
             loading={false}
-            onBack={() => router.replace("/attendance/tracking")}
+            onBack={() => router.replace(buildPath("/attendance/tracking"))}
             containerClassName="mb-0"
           />
         </div>

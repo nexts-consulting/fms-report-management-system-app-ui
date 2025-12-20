@@ -5,12 +5,12 @@ import { ScreenFooter } from "@/components/ScreenFooter";
 import { ScreenHeader } from "@/components/ScreenHeader";
 import { useAuthContext } from "@/contexts/auth.context";
 import { useGlobalContext } from "@/contexts/global.context";
-import { useProjectConfigs } from "@/hooks/use-project-configs";
-import { useShiftDurationFormated } from "@/hooks/use-shift-duration-formated";
-import { useShiftStatus } from "@/hooks/use-shift-status";
-import { useShiftTime } from "@/hooks/use-shift-time";
-import { useShiftUpcoming } from "@/hooks/use-shift-upcoming";
-import { useCheckinTimeAllowed } from "@/hooks/use-checkin-time-allowed";
+import { useProjectConfigs } from "@/hooks/project/use-project-configs";
+import { useShiftDurationFormated } from "@/hooks/shift/use-shift-duration-formated";
+import { useShiftStatus } from "@/hooks/shift/use-shift-status";
+import { useShiftTime } from "@/hooks/shift/use-shift-time";
+import { useShiftUpcoming } from "@/hooks/shift/use-shift-upcoming";
+import { useCheckinTimeAllowed } from "@/hooks/check-in/use-checkin-time-allowed";
 import { Button } from "@/kits/components/Button";
 import { Icons } from "@/kits/components/Icons";
 import { LoadingOverlay } from "@/kits/components/LoadingOverlay";
@@ -18,18 +18,19 @@ import { Modal } from "@/kits/components/Modal";
 import { useNotification } from "@/kits/components/Notification";
 import { NotificationBanner } from "@/kits/components/NotificationBanner";
 import { StringUtil, StyleUtil } from "@/kits/utils";
-import { useQueryWorkingShiftListByLocationToday } from "@/services/api/working-shift/list-by-location-today";
-import { useQueryWorkingShiftListByUserToday } from "@/services/api/working-shift/list-by-user-today";
-import { createWorkingShiftFromDefaultTime } from "@/services/api/working-shift/create-from-default-time";
-import { createFlexibleWorkingShift } from "@/services/api/working-shift/create-flexible-shift";
-import { IWorkingShift } from "@/types/model";
+import { useQueryWorkingShiftListByLocationToday } from "@/services/api/application/working-shift/list-by-location-today";
+import { useQueryWorkingShiftListByUserToday } from "@/services/api/application/working-shift/list-by-user-today";
+import { createWorkingShiftFromDefaultProjectTime } from "@/services/api/application/working-shift/create-from-default-project-time";
+
 import {
   IProjectWorkshiftConfig,
-} from "@/services/application/management/projects/configs/types";
+  IWorkingShiftLocation,
+} from "@/types/model";
 import moment from "moment";
 import { useRouter, useParams } from "next/navigation";
 import React from "react";
 import { useTenantProjectPath } from "@/hooks/use-tenant-project-path";
+import { createFlexibleWorkingShift } from "@/services/api/application/working-shift/create-flexible-shift";
 
 export const Entry = () => {
   const globalStore = useGlobalContext();
@@ -47,17 +48,17 @@ export const Entry = () => {
   const { buildPath } = useTenantProjectPath();
 
   const projectCode = (params?.project_code as string) || project?.code || "";
-  const username = user?.account?.username || "";
+  const username = user?.username || "";
 
   const notification = useNotification();
 
   
   
-  const [selectedWorkingShift, setSelectedWorkingShift] = React.useState<IWorkingShift | null>(
+  const [selectedWorkingShift, setSelectedWorkingShift] = React.useState<IWorkingShiftLocation | null>(
     null,
   );
   const [confirmLoading, setConfirmLoading] = React.useState(false);
-  const [workshiftList, setWorkshiftList] = React.useState<IWorkingShift[]>([]);
+  const [workshiftList, setWorkshiftList] = React.useState<IWorkingShiftLocation[]>([]);
   const [isLoadingWorkshifts, setIsLoadingWorkshifts] = React.useState(false);
 
   // Query for FIXED_TIME_WITHIN_WORKSHIFT mode
@@ -128,7 +129,7 @@ export const Entry = () => {
       setIsLoadingWorkshifts(true);
 
       try {
-        let shifts: IWorkingShift[] = [];
+        let shifts: IWorkingShiftLocation[] = [];
 
         switch (projectWorkshiftConfig.mode) {
           case "FIXED_TIME_WITHIN_WORKSHIFT":
@@ -182,7 +183,7 @@ export const Entry = () => {
           case "FIXED_TIME_BY_DEFAULT_TIME":
             // Create workshift from default time config
             if (selectedLocation) {
-              const shift = createWorkingShiftFromDefaultTime({
+              const shift = createWorkingShiftFromDefaultProjectTime({
                 projectCode,
                 config: projectWorkshiftConfig,
                 location: selectedLocation,
@@ -302,10 +303,11 @@ export const Entry = () => {
                     : "Không có ca làm việc nào trong ngày hôm nay..."
               }
             />
-          )}
+          )
+        }
 
         {upcomingShifts.length > 0 && (
-          <div className="mb-8 mt-4 divide-y divide-gray-30">
+          <div className="mt-4 divide-y divide-gray-30">
             <StandOutWorkingShiftCard
               workingShift={upcomingShifts[0]}
               config={projectWorkshiftConfig}
@@ -313,6 +315,13 @@ export const Entry = () => {
             />
           </div>
         )}
+
+        <div className="my-4 flex items-center">
+          <div className="flex-1 border-t border-gray-30" />
+          <span className="mx-4 text-sm text-gray-60 font-medium">Tất cả ca làm</span>
+          <div className="flex-1 border-t border-gray-30" />
+        </div>
+
         {workshiftList.length > 0 && (
           <div className="mt-4 divide-y divide-gray-30">
             {workshiftList.map((workingShift, index) => (
@@ -334,7 +343,7 @@ export const Entry = () => {
       >
         {selectedWorkingShift && (
           <CheckInConfirm
-            workingShift={selectedWorkingShift}
+            workingShiftLocation={selectedWorkingShift}
             onConfirm={handleConfirm}
             onCancel={handleCancel}
           />
@@ -359,7 +368,7 @@ const shiftStatusMapping = {
 };
 
 interface StandOutWorkingShiftCardProps {
-  workingShift: IWorkingShift;
+  workingShift: IWorkingShiftLocation;
   config: IProjectWorkshiftConfig | null | undefined;
   onClick: () => void;
 }
@@ -368,19 +377,19 @@ const StandOutWorkingShiftCard = (props: StandOutWorkingShiftCardProps) => {
   const { workingShift, config, onClick } = props;
 
   const shiftStatus = useShiftStatus({
-    startTime: new Date(workingShift.startTime),
-    endTime: new Date(workingShift.endTime),
+    startTime: new Date(workingShift.start_time),
+    endTime: new Date(workingShift.end_time),
     threshold: { upcoming: 120, startingSoon: 60 },
   });
 
   const shiftTime = useShiftTime({
-    startTime: new Date(workingShift.startTime),
-    endTime: new Date(workingShift.endTime),
+    startTime: new Date(workingShift.start_time),
+    endTime: new Date(workingShift.end_time),
   });
 
   const checkinTimeAllowed = useCheckinTimeAllowed({
-    startTime: new Date(workingShift.startTime),
-    endTime: new Date(workingShift.endTime),
+    startTime: new Date(workingShift.start_time),
+    endTime: new Date(workingShift.end_time),
     config,
   });
 
@@ -397,8 +406,8 @@ const StandOutWorkingShiftCard = (props: StandOutWorkingShiftCardProps) => {
   const isDisabled = !checkinTimeAllowed.isAllowed;
 
   const workingDurationFormated = useShiftDurationFormated({
-    startTime: new Date(workingShift.startTime),
-    endTime: new Date(workingShift.endTime),
+    startTime: new Date(workingShift.start_time),
+    endTime: new Date(workingShift.end_time),
   });
 
   const formatTimeDisplay = (time: { hours: number; minutes: number }) => {
@@ -453,9 +462,9 @@ const StandOutWorkingShiftCard = (props: StandOutWorkingShiftCardProps) => {
 
         <div className="flex items-center justify-between gap-4">
           <p className="line-clamp-1 text-base font-medium">
-            <span>{moment(workingShift.startTime).format("HH:mm A")}</span>
+            <span>{moment(workingShift.start_time).format("HH:mm A")}</span>
             <span> → </span>
-            <span>{moment(workingShift.endTime).format("HH:mm A")}</span>
+            <span>{moment(workingShift.end_time).format("HH:mm A")}</span>
           </p>
 
           <p className="line-clamp-1 text-sm text-gray-50">{workingDurationFormated}</p>
@@ -490,7 +499,7 @@ const StandOutWorkingShiftCard = (props: StandOutWorkingShiftCardProps) => {
 };
 
 interface WorkingShiftCardProps {
-  workingShift: IWorkingShift;
+  workingShift: IWorkingShiftLocation;
   config: IProjectWorkshiftConfig | null | undefined;
   onClick: () => void;
 }
@@ -499,14 +508,14 @@ const WorkingShiftCard = (props: WorkingShiftCardProps) => {
   const { workingShift, config, onClick } = props;
 
   const shiftStatus = useShiftStatus({
-    startTime: new Date(workingShift.startTime),
-    endTime: new Date(workingShift.endTime),
+    startTime: new Date(workingShift.start_time),
+    endTime: new Date(workingShift.end_time),
     threshold: { upcoming: 120, startingSoon: 60 },
   });
 
   const checkinTimeAllowed = useCheckinTimeAllowed({
-    startTime: new Date(workingShift.startTime),
-    endTime: new Date(workingShift.endTime),
+    startTime: new Date(workingShift.start_time),
+    endTime: new Date(workingShift.end_time),
     config,
   });
 
@@ -523,13 +532,13 @@ const WorkingShiftCard = (props: WorkingShiftCardProps) => {
   const isDisabled = !checkinTimeAllowed.isAllowed;
 
   const workingDurationFormated = useShiftDurationFormated({
-    startTime: new Date(workingShift.startTime),
-    endTime: new Date(workingShift.endTime),
+    startTime: new Date(workingShift.start_time),
+    endTime: new Date(workingShift.end_time),
   });
 
   const shiftDateFormated = () => {
-    const startMoment = moment(workingShift.startTime);
-    const endMoment = moment(workingShift.endTime);
+    const startMoment = moment(workingShift.start_time);
+    const endMoment = moment(workingShift.end_time);
     const isSameDay = startMoment.isSame(endMoment, "day");
 
     if (isSameDay) {
@@ -549,9 +558,9 @@ const WorkingShiftCard = (props: WorkingShiftCardProps) => {
         </div>
 
         <p className="text-xs">
-          <span>{moment(workingShift.startTime).format("HH:mm A")}</span>
+          <span>{moment(workingShift.start_time).format("HH:mm A")}</span>
           <span> → </span>
-          <span>{moment(workingShift.endTime).format("HH:mm A")}</span>
+          <span>{moment(workingShift.end_time).format("HH:mm A")}</span>
         </p>
       </div>
 

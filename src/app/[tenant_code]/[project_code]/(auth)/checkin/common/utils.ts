@@ -1,10 +1,5 @@
 import type { CheckinStep, UserGeolocation, CheckinLocation } from "./types";
-import type {
-  IProjectCheckinFlow,
-  IProjectAttendancePhotoConfig,
-  IProjectGpsConfig,
-} from "@/services/application/management/projects/configs/types";
-import type { IWorkingShift } from "@/types/model";
+import type { IProjectAttendancePhotoConfig, IProjectCheckinFlow, IProjectGpsConfig, IWorkingShiftLocation, IWorkshift } from "@/types/model";
 import { DEFAULT_STEPS } from "./config";
 
 /**
@@ -52,7 +47,7 @@ const isGpsRequired = (
   if (gpsConfig) {
     // is_required: whether user needs to have GPS coordinates (not about strict mode)
     // If is_required is explicitly set, use it; otherwise check if mode requires GPS
-    return gpsConfig.is_required ?? isGpsModeRequiringCoordinates(gpsConfig.mode);
+    return isGpsModeRequiringCoordinates(gpsConfig.mode);
   }
 
   if (checkinFlow) {
@@ -69,7 +64,7 @@ export const getCheckinLocation = (
   checkinFlow: IProjectCheckinFlow | null | undefined,
   gpsConfig: IProjectGpsConfig | null | undefined,
   userGeolocation: UserGeolocation | null,
-  workingShift: IWorkingShift,
+  workingShift: IWorkingShiftLocation,
 ): CheckinLocation => {
   const requiresGps = isGpsRequired(gpsConfig, checkinFlow);
 
@@ -84,8 +79,8 @@ export const getCheckinLocation = (
 
   // Fallback to working shift location
   return {
-    lat: workingShift.location.latitude,
-    lng: workingShift.location.longitude,
+    lat: workingShift?.location?.latitude || 0,
+    lng: workingShift?.location?.longitude || 0,
     acc: 0,
   };
 };
@@ -110,11 +105,4 @@ export const getPhotoCaptureDescription = (
   }
 
   return "Vui lòng chụp ảnh";
-};
-
-/**
- * Create a dummy file for checkin when photo is not required
- */
-export const createDummyFile = (): File => {
-  return new File([""], "dummy.jpg", { type: "image/jpeg" });
 };

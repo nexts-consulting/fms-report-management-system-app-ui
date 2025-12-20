@@ -1,24 +1,24 @@
-import { useShiftDurationFormated } from "@/hooks/use-shift-duration-formated";
+import { useShiftDurationFormated } from "@/hooks/shift/use-shift-duration-formated";
 import { Button } from "@/kits/components/Button";
 import { Icons } from "@/kits/components/Icons";
 import { StringUtil } from "@/kits/utils";
 import { OutletMap } from "@/kits/widgets/OutletMap";
-import { IWorkingShift } from "@/types/model";
+import { IWorkingShiftLocation } from "@/types/model";
 import moment from "moment";
 import React from "react";
 
 interface CheckInConfirmProps {
-  workingShift: IWorkingShift;
+  workingShiftLocation: IWorkingShiftLocation;
   onConfirm: () => void;
   onCancel: () => void;
 }
 
 export const CheckInConfirm = React.memo((props: CheckInConfirmProps) => {
-  const { workingShift, onConfirm, onCancel } = props;
+  const { workingShiftLocation, onConfirm, onCancel } = props;
 
   const workingDurationFormated = useShiftDurationFormated({
-    startTime: new Date(workingShift.startTime),
-    endTime: new Date(workingShift.endTime),
+    startTime: new Date(workingShiftLocation.start_time),
+    endTime: new Date(workingShiftLocation.end_time),
   });
 
   return (
@@ -29,15 +29,15 @@ export const CheckInConfirm = React.memo((props: CheckInConfirmProps) => {
           <div className="flex items-center justify-start gap-4 bg-white p-4">
             <Icons.TaskLocation className="shrink-0 text-gray-50" />
             <div>
-              <p className="line-clamp-1 text-sm font-medium text-gray-100">{workingShift.name}</p>
+              <p className="line-clamp-1 text-sm font-medium text-gray-100">{workingShiftLocation.name}</p>
               <p className="line-clamp-1 text-xs text-gray-50">
                 <span>
-                  {`${StringUtil.toTitleCase(moment(workingShift.startTime).format("dddd, "))}${moment(workingShift.startTime).format("DD/MM/YYYY")}`}
+                  {`${StringUtil.toTitleCase(moment(workingShiftLocation.start_time).format("dddd, "))}${moment(workingShiftLocation.start_time).format("DD/MM/YYYY")}`}
                 </span>
                 <span className="px-1">•</span>
-                <span>{moment(workingShift.startTime).format("HH:mm A")}</span>
+                <span>{moment(workingShiftLocation.start_time).format("HH:mm A")}</span>
                 <span> → </span>
-                <span>{moment(workingShift.endTime).format("HH:mm A")}</span>
+                <span>{moment(workingShiftLocation.end_time).format("HH:mm A")}</span>
               </p>
             </div>
           </div>
@@ -48,7 +48,7 @@ export const CheckInConfirm = React.memo((props: CheckInConfirmProps) => {
               <div>
                 <p className="line-clamp-1 text-sm font-medium text-gray-100">Bắt đầu ca</p>
                 <p className="line-clamp-1 text-xs text-gray-50">
-                  {moment(workingShift.startTime).format("HH:mm A")}
+                  {moment(workingShiftLocation.start_time).format("HH:mm A")}
                 </p>
               </div>
             </div>
@@ -67,19 +67,19 @@ export const CheckInConfirm = React.memo((props: CheckInConfirmProps) => {
           <div className="aspect-[3/2] h-auto w-full bg-white p-4">
             <OutletMap
               gps={{
-                lat: workingShift.location.latitude,
-                lng: workingShift.location.longitude,
+                lat: workingShiftLocation.location.latitude ?? 0,
+                lng: workingShiftLocation.location.longitude ?? 0,
               }}
-              radius={workingShift.location.checkinRadiusMeters}
+              radius={workingShiftLocation.location.checkin_radius_meters ?? 0}
             />
           </div>
           <div className="flex items-center justify-start gap-4 bg-white p-4">
             <Icons.Location className="shrink-0 text-gray-50" />
             <div>
               <p className="line-clamp-1 text-sm font-medium text-gray-100">
-                {workingShift.location.name}
+                {workingShiftLocation.location.name}
               </p>
-              <p className="line-clamp-1 text-xs text-gray-50">{workingShift.location.address}</p>
+              <p className="line-clamp-1 text-xs text-gray-50">{workingShiftLocation.location.address}</p>
             </div>
           </div>
         </div>

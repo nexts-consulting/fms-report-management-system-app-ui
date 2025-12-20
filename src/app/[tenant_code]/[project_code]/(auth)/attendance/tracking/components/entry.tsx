@@ -6,8 +6,7 @@ import { LeaveStartConfirm } from "@/components/LeaveStartConfirm";
 import { UserHeader } from "@/components/UserHeader";
 import { useAuthContext } from "@/contexts/auth.context";
 import { useGlobalContext } from "@/contexts/global.context";
-import { useShiftDurationFormated } from "@/hooks/use-shift-duration-formated";
-import { IconButton } from "@/kits/components/IconButton";
+import { useShiftDurationFormated } from "@/hooks/shift/use-shift-duration-formated";
 import { Icons } from "@/kits/components/Icons";
 import { LoadingOverlay } from "@/kits/components/LoadingOverlay";
 import { Modal } from "@/kits/components/Modal";
@@ -17,54 +16,32 @@ import moment from "moment";
 import { useRouter } from "next/navigation";
 import React from "react";
 import { reportMenuItems } from "./menuItems";
-import { ReportMenuItem } from "@/types/model";
+import { useTenantProjectPath } from "@/hooks/use-tenant-project-path";
 
 export const Entry = () => {
   const authStore = useAuthContext();
   const user = authStore.use.user();
-
   const globalStore = useGlobalContext();
   const currentAttendance = globalStore.use.currentAttendance();
+  const selectedLocation = globalStore.use.selectedLocation();
   const showCheckoutConfirmation = globalStore.use.showCheckoutConfirmation();
   const showLeaveConfirmation = globalStore.use.showLeaveConfirmation();
 
   const router = useRouter();
-
+  
+  const { buildPath } = useTenantProjectPath();
   const [confirmCheckoutLoading, setConfirmCheckoutLoading] = React.useState(false);
 
-  const isReportedOOS = React.useMemo(() => {
-    return currentAttendance?.oosReport !== null;
-  }, [currentAttendance]);
-
-  const isReportedStockIn = React.useMemo(() => {
-    return currentAttendance?.stockInReport !== null;
-  }, [currentAttendance]);
-
-  const isReportedStockOut = React.useMemo(() => {
-    return currentAttendance?.stockOutReport !== null;
-  }, [currentAttendance]);
-
-  const isReportedSales = React.useMemo(() => {
-    return currentAttendance?.saleReport !== null;
-  }, [currentAttendance]);
-
-  const isReportedSampling = React.useMemo(() => {
-    return currentAttendance?.samplingReport !== null;
-  }, [currentAttendance]);
-
   const shiftDurationFormated = useShiftDurationFormated({
-    startTime: new Date(currentAttendance?.shift.startTime ?? ""),
-    endTime: new Date(currentAttendance?.shift.endTime ?? ""),
+    startTime: new Date(currentAttendance?.shift_start_time ?? ""),
+    endTime: new Date(currentAttendance?.shift_end_time ?? ""),
   });
 
   const reportStatus = {
-    isReportedStockIn,
-    isReportedStockOut,
-    isReportedSampling,
     leaveStart: false,
   };
 
-  const handleAction = (item: ReportMenuItem) => {
+  const handleAction = (item: any) => {
     if (item.actionType === "route") {
       router.push(item.actionValue ?? "");
     } else if (item.actionType === "modal") {
@@ -73,17 +50,9 @@ export const Entry = () => {
   };
 
   const isShiftEnded = React.useMemo(() => {
-    return moment().isAfter(moment(currentAttendance?.shift.endTime ?? ""));
+    return moment().isAfter(moment(currentAttendance?.shift_end_time ?? ""));
   }, [currentAttendance]);
 
-  const filteredReportMenuItems = React.useMemo(() => {
-    return reportMenuItems.filter((item) => {
-      if (item.role) {
-        return user?.account?.role === item.role;
-      }
-      return true;
-    });
-  }, [user]);
 
   const handleConfirmCheckout = React.useCallback(() => {
     setConfirmCheckoutLoading(true);
@@ -93,7 +62,7 @@ export const Entry = () => {
         showCheckoutConfirmation: false,
       });
       setConfirmCheckoutLoading(false);
-      router.push("/attendance/checkout");
+      router.push(buildPath("/attendance/checkout"));
     }, 1000);
   }, [router]);
 
@@ -114,9 +83,9 @@ export const Entry = () => {
       <LoadingOverlay active={confirmCheckoutLoading} />
 
       <UserHeader
-        name={user?.fullName ?? ""}
-        code={user?.staffCode ?? ""}
-        avatar={user?.profileImage ?? ""}
+        name={`${user?.firstName ?? ""} ${user?.lastName ?? ""}`}
+        code={user?.username ?? ""}
+        avatar={""}
         isOnWorking={true}
       />
 
@@ -136,9 +105,9 @@ export const Entry = () => {
 
       <div className="px-4">
         <TrackingProgress
-          startTime={new Date(currentAttendance.shift.startTime)}
-          endTime={new Date(currentAttendance.shift.endTime)}
-          startTrackingTime={new Date(currentAttendance.checkinTime)}
+          startTime={new Date(currentAttendance.shift_start_time ?? "")}
+          endTime={new Date(currentAttendance.shift_end_time ?? "")}
+          startTrackingTime={new Date(currentAttendance.checkin_time ?? "")}
         />
 
         <div className="divide-y divide-gray-30">
@@ -148,7 +117,7 @@ export const Entry = () => {
               <Icons.Login className="shrink-0 text-green-50" />
               <div>
                 <p className="line-clamp-1 text-xs font-medium text-gray-70">
-                  {moment(currentAttendance.shift.startTime).format("HH:mm A")}
+                  {moment(currentAttendance.shift_start_time ?? "").format("HH:mm A")}
                 </p>
               </div>
             </div>
@@ -156,7 +125,7 @@ export const Entry = () => {
               <Icons.Logout className="shrink-0 text-red-50" />
               <div>
                 <p className="line-clamp-1 text-xs font-medium text-gray-70">
-                  {moment(currentAttendance.shift.endTime).format("HH:mm A")}
+                  {moment(currentAttendance.shift_end_time ?? "").format("HH:mm A")}
                 </p>
               </div>
             </div>
@@ -174,7 +143,7 @@ export const Entry = () => {
             <Icons.Location className="shrink-0 text-gray-50" />
             <div>
               <p className="line-clamp-1 text-sm font-medium text-gray-100">
-                {currentAttendance.shift.outlet.name}
+                {currentAttendance.location_name ?? ""}
               </p>
             </div>
           </div>
@@ -183,7 +152,7 @@ export const Entry = () => {
 
       <div className="my-8 px-4">
         <div className="grid grid-cols-3">
-          {filteredReportMenuItems.map((item, idx) => {
+          {reportMenuItems.map((item, idx) => {
             const done = reportStatus[item.key as keyof typeof reportStatus] ?? false;
 
             const notchColor = item.required
@@ -223,7 +192,8 @@ export const Entry = () => {
       >
         {currentAttendance && (
           <CheckoutConfirm
-            attendance={currentAttendance}
+            attendanceDetail={currentAttendance}
+            location={selectedLocation}
             onConfirm={handleConfirmCheckout}
             onCancel={() => globalStore.setState({ showCheckoutConfirmation: false })}
           />

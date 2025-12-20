@@ -21,7 +21,7 @@ export const AuthGuard = (props: AuthGuardProps) => {
     if (authenticated === undefined) return;
 
     if (authenticated && user) {
-      console.log(`[🔒] Authenticated: `, user.account.username);
+      console.log(`[🔒] Authenticated: `, user.username);
     }
   }, [authenticated]);
 

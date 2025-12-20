@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useProjectTheme } from "@/hooks/use-project-theme";
+import { useProjectTheme } from "@/hooks/project/use-project-theme";
 
 interface ProjectThemeProviderProps {
   children: React.ReactNode;

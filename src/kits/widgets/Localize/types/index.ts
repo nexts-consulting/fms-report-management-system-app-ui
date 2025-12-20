@@ -47,7 +47,7 @@ export type TUser = {
 
 export type TLocation = {
   name: string;
-  province: string;
+  adminDivision: string;
   address: string;
   gps: TGPS;
   radius: number;

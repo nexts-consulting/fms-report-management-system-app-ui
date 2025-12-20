@@ -1,17 +1,16 @@
-import { IUserAccount, IStaffProfile } from "@/types/model";
+import { KeycloakUser } from "@/types/model";
 import { createStore } from "zustand";
 import { persist, devtools } from "zustand/middleware";
-import { ITenant } from "@/services/application/master-data/tenants";
-import { ITenantProject } from "@/services/application/master-data/tenant-projects";
+import { ITenant, ITenantProject } from "@/types/model";
 
 export type AuthStore = {
-  token: string | null | undefined; // Keep for backward compatibility
+  token: string | null | undefined;
   accessToken: string | null | undefined;
   refreshToken: string | null | undefined;
   idToken: string | null | undefined;
   tokenExpiresAt: number | null | undefined;
   authenticated: boolean | undefined;
-  user: (IStaffProfile & { account: IUserAccount }) | null | undefined;
+  user: KeycloakUser | null | undefined;
   tenant: ITenant | null | undefined;
   project: ITenantProject | null | undefined;
 };
@@ -35,7 +34,7 @@ export const createAuthStore = () => {
           name: "auth-storage",
           partialize: (state) => ({
             authenticated: state.authenticated,
-            token: state.token || state.accessToken, // Backward compatibility
+            token: state.token || state.accessToken,
             accessToken: state.accessToken,
             refreshToken: state.refreshToken,
             idToken: state.idToken,

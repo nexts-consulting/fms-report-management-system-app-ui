@@ -11,17 +11,17 @@ import { loginSchema, LoginSchema } from "../schemas/login.schema";
 import { Controller, SubmitErrorHandler, SubmitHandler, useForm } from "react-hook-form";
 import { FormErrorMessage } from "@/components/FormErrorMessage";
 import { useNotification } from "@/kits/components/Notification";
-import { useMutationAuthLogin } from "@/services/api/auth/login";
+import { useMutationAuthLogin } from "@/services/api/application/auth/login";
 import { CommonUtil } from "@/kits/utils";
 import { useAuthContext } from "@/contexts/auth.context";
 import { useRouter, useParams } from "next/navigation";
 import React from "react";
 import { useGlobalContext } from "@/contexts/global.context";
-import { EUserAccountRole, IStaffProfile, IUserAccount } from "@/types/model";
-import { httpRequestGetTenantByCode } from "@/services/application/master-data/tenants";
-import { httpRequestGetProjectByCode } from "@/services/application/master-data/tenant-projects";
-import { httpRequestLoadAllProjectConfigs } from "@/services/application/management/projects/configs/load-all";
+import { KeycloakUser } from "@/types/model";
+import { httpRequestGetTenantByCode } from "@/services/api/application/master-data/tenants";
+import { httpRequestGetProjectByCode } from "@/services/api/application/master-data/tenant-projects";
 import { getUserFromAccessToken } from "@/utils/auth";
+import { useTenantProjectPath } from "@/hooks/use-tenant-project-path";
 
 export const Entry = () => {
   const authStore = useAuthContext();
@@ -39,11 +39,11 @@ export const Entry = () => {
   const tenantCode = params?.tenant_code as string;
   const projectCode = params?.project_code as string;
   const notification = useNotification();
+  const { buildPath } = useTenantProjectPath();
 
   // State to track loading and errors
   const [isLoadingTenant, setIsLoadingTenant] = React.useState(true);
   const [isLoadingProject, setIsLoadingProject] = React.useState(true);
-  const [isLoadingConfigs, setIsLoadingConfigs] = React.useState(true);
   const [isTenantNotFound, setIsTenantNotFound] = React.useState(false);
   const [isProjectNotFound, setIsProjectNotFound] = React.useState(false);
   const previousTenantCodeRef = React.useRef<string | undefined>(undefined);
@@ -55,7 +55,6 @@ export const Entry = () => {
       if (!tenantCode || !projectCode) {
         setIsLoadingTenant(false);
         setIsLoadingProject(false);
-        setIsLoadingConfigs(false);
         return;
       }
 
@@ -84,6 +83,7 @@ export const Entry = () => {
           projectGpsConfig: undefined,
           projectAttendancePhotoConfig: undefined,
           projectWorkshiftConfig: undefined,
+          currentProjectId: undefined,
         });
       }
 
@@ -126,7 +126,6 @@ export const Entry = () => {
           if (isAuthenticated && currentProjectInState?.code === currentProjectCode) {
             previousProjectCodeRef.current = currentProjectCode;
             setIsLoadingProject(false);
-            setIsLoadingConfigs(false);
           } else {
             const projectData = await httpRequestGetProjectByCode(currentProjectCode);
             if (projectData) {
@@ -136,26 +135,7 @@ export const Entry = () => {
                 authStore.setState({ project: projectData });
                 previousProjectCodeRef.current = currentProjectCode;
                 setIsProjectNotFound(false);
-
-                // Load all project configs
-                setIsLoadingConfigs(true);
-                try {
-                  const allConfigs = await httpRequestLoadAllProjectConfigs(projectData.id);
-                  console.log("allConfigs", allConfigs);
-                  globalStore.setState({
-                    projectMetadata: allConfigs.metadata,
-                    projectAuthConfig: allConfigs.authConfig,
-                    projectCheckinFlow: allConfigs.checkinFlow,
-                    projectGpsConfig: allConfigs.gpsConfig,
-                    projectAttendancePhotoConfig: allConfigs.attendancePhotoConfig,
-                    projectWorkshiftConfig: allConfigs.workshiftConfig,
-                    currentProjectId: projectData.id,
-                  });
-                } catch (error) {
-                  console.error("Error loading project configs:", error);
-                } finally {
-                  setIsLoadingConfigs(false);
-                }
+                // ProjectConfigProvider will automatically load configs
               } else {
                 previousProjectCodeRef.current = undefined;
                 setIsProjectNotFound(true);
@@ -175,7 +155,6 @@ export const Entry = () => {
       } else if (isTenantNotFound) {
         // If tenant not found, don't try to load project
         setIsLoadingProject(false);
-        setIsLoadingConfigs(false);
       }
     };
 
@@ -195,6 +174,7 @@ export const Entry = () => {
           projectGpsConfig: undefined,
           projectAttendancePhotoConfig: undefined,
           projectWorkshiftConfig: undefined,
+          currentProjectId: undefined,
         });
         previousTenantCodeRef.current = undefined;
         previousProjectCodeRef.current = undefined;
@@ -227,33 +207,26 @@ export const Entry = () => {
           return;
         }
 
-        // Transform to match AuthStore user format
-        // Note: We may need to call backend API to get full profile
-        // For now, we'll use basic info from token with default values for required fields
-        const now = new Date().toISOString();
-        const userId = parseInt(userFromAccessToken.id) || 0;
-        const userInfo: IStaffProfile & { account: IUserAccount } = {
-          id: userId,
-          staffCode: userFromAccessToken.username || "",
-          fullName: userFromAccessToken.fullName || userFromAccessToken.username || "",
-          profileImage: "",
-          trainingDate: now,
-          startDate: now,
-          passProbationDate: now,
-          updatedAt: now,
-          account: {
-            id: userId,
-            username: userFromAccessToken.username || "",
-            role: (userFromAccessToken.roles?.[0] as EUserAccountRole) || EUserAccountRole.STAFF,
-            createdAt: now,
-          },
+        const userInfo: KeycloakUser = {
+          id: userFromAccessToken.id || "",
+          username: userFromAccessToken.username || "",
+          email: userFromAccessToken.email || "",
+          firstName: userFromAccessToken.firstName || "",
+          lastName: userFromAccessToken.lastName || "",
+          enabled: true,
+          emailVerified: userFromAccessToken.emailVerified || false,
+          createdTimestamp: userFromAccessToken.createdTimestamp || 0,
+          attributes: userFromAccessToken.attributes || {},
+          groups: userFromAccessToken.groups || [],
+          realmRoles: userFromAccessToken.realmRoles || [],
+          clientRoles: userFromAccessToken.clientRoles || {},
         };
 
         notification.success({
           title: "Đăng nhập thành công!",
           description: (
             <>
-              Xin chào <span className="font-medium">{userInfo.fullName}</span>
+              Xin chào <span className="font-medium">{userInfo.firstName} {userInfo.lastName}</span>
             </>
           ),
           options: {
@@ -263,7 +236,7 @@ export const Entry = () => {
 
         authStore.setState({
           authenticated: true,
-          token: data.accessToken, // Keep for backward compatibility
+          token: data.accessToken,
           accessToken: data.accessToken,
           refreshToken: data.refreshToken,
           idToken: data.idToken,
@@ -271,7 +244,6 @@ export const Entry = () => {
           user: userInfo,
         });
 
-        // Redirect will be handled by the useEffect below
       },
       onError(error, variables, context) {
         console.log(`[🔒] error: `, error);
@@ -285,7 +257,6 @@ export const Entry = () => {
           tokenExpiresAt: null,
         });
 
-        // Extract error message from Keycloak response
         let errorMessage = "Tên đăng nhập hoặc mật khẩu không chính xác!";
         if (error && typeof error === "object" && "response" in error) {
           const axiosError = error as any;
@@ -346,18 +317,19 @@ export const Entry = () => {
 
   React.useEffect(() => {
     if (user) {
-      if (user?.account?.role === EUserAccountRole.SALE) {
-        router.replace(`/${tenantCode}/${projectCode}/sale/lobby`);
-      } else if (!selectedAdminDivision || !selectedLocation) {
-        router.replace(`/${tenantCode}/${projectCode}/outlet`);
+      if (!selectedAdminDivision || !selectedLocation) {
+        router.replace(buildPath("/location"));
       } else {
-        router.replace(`/${tenantCode}/${projectCode}/lobby`);
+        router.replace(buildPath("/lobby"));
       }
     }
   }, [user, tenantCode, projectCode, router, selectedAdminDivision, selectedLocation]);
 
-  // Show loading while fetching tenant/project
-  if (isLoadingTenant || isLoadingProject || isLoadingConfigs) {
+  // Show loading while fetching tenant/project or waiting for configs to load
+  // ProjectConfigProvider will automatically load configs when project is set
+  const isWaitingForConfigs = project && !projectAuthConfig;
+  
+  if (isLoadingTenant || isLoadingProject || isWaitingForConfigs) {
     return (
       <>
         <LoadingOverlay active={true} />

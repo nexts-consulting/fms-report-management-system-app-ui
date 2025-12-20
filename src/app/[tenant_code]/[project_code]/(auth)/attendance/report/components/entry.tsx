@@ -1,19 +1,21 @@
 "use client";
 
 import { ScreenHeader } from "@/components/ScreenHeader";
+import { useTenantProjectPath } from "@/hooks/use-tenant-project-path";
 import { Icons } from "@/kits/components/Icons";
 import { StyleUtil } from "@/kits/utils";
 import { useRouter } from "next/navigation";
 
 export const Entry = () => {
   const router = useRouter();
+  const { buildPath } = useTenantProjectPath();
 
   return (
     <>
       <ScreenHeader
         title="Tạo báo cáo"
         loading={false}
-        onBack={() => router.replace("/attendance/tracking")}
+        onBack={() => router.replace(buildPath("/attendance/tracking"))}
       />
 
       <div className="px-4">

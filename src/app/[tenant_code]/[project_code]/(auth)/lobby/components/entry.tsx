@@ -6,7 +6,6 @@ import { useAuthContext } from "@/contexts/auth.context";
 import { useGlobalContext } from "@/contexts/global.context";
 import { Icons } from "@/kits/components/Icons";
 import { StyleUtil } from "@/kits/utils";
-import { EUserAccountRole } from "@/types/model";
 import { useRouter, useSearchParams } from "next/navigation";
 import React from "react";
 import { useTenantProjectPath } from "@/hooks/use-tenant-project-path";
@@ -41,16 +40,16 @@ export const Entry = () => {
 
   React.useEffect(() => {
     if (!selectedAdminDivision || !selectedLocation) {
-      router.replace(buildPath("/outlet"));
+      router.replace(buildPath("/location"));
     }
   }, [selectedAdminDivision, selectedLocation]);
 
   return (
     <>
       <UserHeader
-        name={user?.fullName ?? ""}
-        code={user?.staffCode ?? ""}
-        avatar={user?.profileImage ?? ""}
+        name={user?.firstName + " " + user?.lastName}
+        code={user?.username ?? ""}
+        avatar={""}
       />
 
       <div className="px-4">
@@ -107,7 +106,7 @@ export const Entry = () => {
               "outline outline-1 -outline-offset-1 outline-gray-30",
               "focus:bg-gray-10 focus:outline-primary-60",
             )}
-            onClick={() => router.push(buildPath("/outlet"))}
+            onClick={() => router.push(buildPath("/location"))}
           >
             <div className="mb-8">
               <p className="text-sm">Thay đổi địa điểm</p>
