@@ -49,7 +49,7 @@ export const CheckoutGpsStep: React.FC<CheckoutGpsStepProps> = ({
             lat: location?.latitude ?? 0,
             lng: location?.longitude ?? 0,
           },
-          radius: gpsConfig?.gps_radius_meters ?? 100,
+          radius: location?.checkin_radius_meters ?? gpsConfig?.gps_radius_meters ?? 100,
         }}
         shift={{
           name: attendance.workshift_name ?? "",

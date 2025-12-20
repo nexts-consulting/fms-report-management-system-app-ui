@@ -29,6 +29,7 @@ export const Entry = () => {
     projectAttendancePhotoConfig,
     isLoadingConfigs,
     selectedWorkingShift,
+    selectedLocation,
 
     // Flow
     currentStep,
@@ -74,9 +75,10 @@ export const Entry = () => {
           onBack={goToPreviousStep}
         />
 
-        {currentStep === "gps" && projectCheckinFlow?.require_gps_at_location && (
+        {currentStep === "gps" && projectCheckinFlow?.require_gps_verification && (
           <CheckinGpsStep
             user={user}
+            location={selectedLocation}
             userLocation={userGeolocation}
             workingShift={selectedWorkingShift}
             gpsConfig={projectGpsConfig}
@@ -86,7 +88,7 @@ export const Entry = () => {
         )}
 
         {currentStep === "capture" &&
-          projectCheckinFlow?.require_attendance &&
+          projectCheckinFlow?.require_photo_verification &&
           projectAttendancePhotoConfig?.mode !== "NOT_REQUIRED" && (
             <CheckinCaptureStep
               onConfirm={handleConfirmCapture}

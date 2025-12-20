@@ -29,11 +29,11 @@ export const useCheckoutState = () => {
   // Determine initial step based on config
   const initialStep = React.useMemo<CheckoutStep>(() => {
     // If GPS is required, start with GPS
-    if (projectCheckinFlow?.require_gps_at_location) {
+    if (projectCheckinFlow?.require_gps_verification) {
       return "gps";
     }
     // If attendance is required, start with capture
-    if (projectCheckinFlow?.require_attendance && projectAttendancePhotoConfig?.mode !== "NOT_REQUIRED") {
+    if (projectCheckinFlow?.require_photo_verification && projectAttendancePhotoConfig?.mode !== "NOT_REQUIRED") {
       return "capture";
     }
     // Otherwise, go directly to submit
@@ -133,7 +133,7 @@ export const useCheckoutState = () => {
   const handleConfirmLocalize = React.useCallback(() => {
     confirmLocation();
     // Move to capture if attendance is required, otherwise go to submit
-    if (projectCheckinFlow?.require_attendance && projectAttendancePhotoConfig?.mode !== "NOT_REQUIRED") {
+    if (projectCheckinFlow?.require_photo_verification && projectAttendancePhotoConfig?.mode !== "NOT_REQUIRED") {
       setCurrentStep("capture");
     } else {
       setCurrentStep("submit");

@@ -27,6 +27,12 @@ export const useCheckoutNotifications = ({
 }: UseCheckoutNotificationsOptions) => {
   const notification = useNotification();
 
+  // Store notification methods in refs to avoid dependency issues
+  const notificationMethodsRef = React.useRef(notification);
+  React.useEffect(() => {
+    notificationMethodsRef.current = notification;
+  }, [notification]);
+
   const checkoutStatusNotificationIdRef = React.useRef<string | null>(null);
   const rangeWarningNotificationIdRef = React.useRef<string | null>(null);
   const captureGuideNotificationIdRef = React.useRef<string | null>(null);
@@ -34,7 +40,7 @@ export const useCheckoutNotifications = ({
   // Show GPS notification
   React.useEffect(() => {
     if (currentStep === "gps" && !checkoutStatusNotificationIdRef.current && !hasLocation) {
-      checkoutStatusNotificationIdRef.current = notification.pending({
+      checkoutStatusNotificationIdRef.current = notificationMethodsRef.current.pending({
         title: "Định vị",
         description: "Đang xác định vị trí của bạn...",
         options: {
@@ -42,24 +48,24 @@ export const useCheckoutNotifications = ({
         },
       });
     }
-  }, [currentStep, notification, hasLocation]);
+  }, [currentStep, hasLocation]);
 
   // Remove GPS notification when location is available or leaving GPS step
   React.useEffect(() => {
     if (currentStep !== "gps" || (hasLocation && !isLocalizing)) {
       if (checkoutStatusNotificationIdRef.current) {
-        notification.remove(checkoutStatusNotificationIdRef.current);
+        notificationMethodsRef.current.remove(checkoutStatusNotificationIdRef.current);
         checkoutStatusNotificationIdRef.current = null;
       }
     }
-  }, [currentStep, hasLocation, isLocalizing, notification]);
+  }, [currentStep, hasLocation, isLocalizing]);
 
   // Show capture notification
   React.useEffect(() => {
     if (currentStep === "capture" && !captureGuideNotificationIdRef.current) {
       const description = getPhotoCaptureDescription(photoConfig);
 
-      captureGuideNotificationIdRef.current = notification.info({
+      captureGuideNotificationIdRef.current = notificationMethodsRef.current.info({
         title: "Chụp ảnh",
         description,
         options: {
@@ -67,23 +73,23 @@ export const useCheckoutNotifications = ({
         },
       });
     }
-  }, [currentStep, photoConfig, notification]);
+  }, [currentStep, photoConfig]);
 
   // Cleanup notifications on unmount
   React.useEffect(() => {
     return () => {
       if (checkoutStatusNotificationIdRef.current) {
-        notification.remove(checkoutStatusNotificationIdRef.current);
+        notificationMethodsRef.current.remove(checkoutStatusNotificationIdRef.current);
       }
       if (rangeWarningNotificationIdRef.current) {
-        notification.remove(rangeWarningNotificationIdRef.current);
+        notificationMethodsRef.current.remove(rangeWarningNotificationIdRef.current);
       }
       if (captureGuideNotificationIdRef.current) {
-        notification.remove(captureGuideNotificationIdRef.current);
+        notificationMethodsRef.current.remove(captureGuideNotificationIdRef.current);
       }
-      notification.clear();
+      notificationMethodsRef.current.clear();
     };
-  }, [notification]);
+  }, []); // Only run cleanup on unmount - notification methods are stable
 
   /**
    * Check if GPS config is in strict mode
@@ -97,7 +103,7 @@ export const useCheckoutNotifications = ({
     // If not strict mode, remove any existing warning
     if (!isStrictGpsMode) {
       if (rangeWarningNotificationIdRef.current) {
-        notification.remove(rangeWarningNotificationIdRef.current);
+        notificationMethodsRef.current.remove(rangeWarningNotificationIdRef.current);
         rangeWarningNotificationIdRef.current = null;
       }
       return;
@@ -105,7 +111,7 @@ export const useCheckoutNotifications = ({
 
     // Only show warning in strict mode
     if (!rangeWarningNotificationIdRef.current) {
-      rangeWarningNotificationIdRef.current = notification.warning({
+      rangeWarningNotificationIdRef.current = notificationMethodsRef.current.warning({
         title: "Định vị",
         description: "Bạn đang ở ngoài khu vực check out!",
         options: {
@@ -113,43 +119,40 @@ export const useCheckoutNotifications = ({
         },
       });
     }
-  }, [notification, isStrictGpsMode]);
+  }, [isStrictGpsMode]);
 
   const hideRangeWarning = React.useCallback(() => {
     if (rangeWarningNotificationIdRef.current) {
-      notification.remove(rangeWarningNotificationIdRef.current);
+      notificationMethodsRef.current.remove(rangeWarningNotificationIdRef.current);
       rangeWarningNotificationIdRef.current = null;
     }
-  }, [notification]);
+  }, []);
 
   // Update GPS error notification
-  const updateGpsError = React.useCallback(
-    (message: string) => {
-      if (checkoutStatusNotificationIdRef.current) {
-        notification.update(checkoutStatusNotificationIdRef.current, {
-          type: "error",
-          description: message,
-        });
-      }
-    },
-    [notification],
-  );
+  const updateGpsError = React.useCallback((message: string) => {
+    if (checkoutStatusNotificationIdRef.current) {
+      notificationMethodsRef.current.update(checkoutStatusNotificationIdRef.current, {
+        type: "error",
+        description: message,
+      });
+    }
+  }, []);
 
   // Remove capture notification
   const removeCaptureNotification = React.useCallback(() => {
     if (captureGuideNotificationIdRef.current) {
-      notification.remove(captureGuideNotificationIdRef.current);
+      notificationMethodsRef.current.remove(captureGuideNotificationIdRef.current);
       captureGuideNotificationIdRef.current = null;
     }
-  }, [notification]);
+  }, []);
 
   // Auto-remove range warning when GPS config changes to non-strict mode
   React.useEffect(() => {
     if (!isStrictGpsMode && rangeWarningNotificationIdRef.current) {
-      notification.remove(rangeWarningNotificationIdRef.current);
+      notificationMethodsRef.current.remove(rangeWarningNotificationIdRef.current);
       rangeWarningNotificationIdRef.current = null;
     }
-  }, [isStrictGpsMode, notification]);
+  }, [isStrictGpsMode]);
 
   return {
     showRangeWarning,

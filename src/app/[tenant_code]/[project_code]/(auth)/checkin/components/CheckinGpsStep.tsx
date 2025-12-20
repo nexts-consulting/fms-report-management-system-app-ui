@@ -3,14 +3,9 @@ import { Localize } from "@/kits/widgets/Localize";
 import type { IWorkingShiftLocation, IProjectGpsConfig, KeycloakUser, ILocation } from "@/types/model";
 import { UserGeolocation } from "../common/types";
 
-interface Location {
-  latitude: number;
-  longitude: number;
-  accuracy: number;
-}
-
 interface CheckinGpsStepProps {
   user: KeycloakUser;
+  location: ILocation | null;
   userLocation: UserGeolocation | null;
   workingShift: IWorkingShiftLocation;
   gpsConfig: IProjectGpsConfig | null | undefined;
@@ -23,6 +18,7 @@ interface CheckinGpsStepProps {
  */
 export const CheckinGpsStep: React.FC<CheckinGpsStepProps> = ({
   user,
+  location,
   userLocation,
   workingShift,
   gpsConfig,
@@ -45,14 +41,14 @@ export const CheckinGpsStep: React.FC<CheckinGpsStepProps> = ({
             : null
         }
         location={{
-          name: workingShift.location.name,
-          address: workingShift.location.address ?? "",
-          adminDivision: workingShift.location.admin_division_id?.toString() ?? "",
+          name: location?.name ?? "",
+          address: location?.address ?? "",
+          adminDivision: "",
           gps: {
-            lat: workingShift.location.latitude ?? 0,
-            lng: workingShift.location.longitude ?? 0,
+            lat: location?.latitude ?? 0,
+            lng: location?.longitude ?? 0,
           },
-          radius: gpsConfig?.gps_radius_meters ?? workingShift.location.checkin_radius_meters ?? 100,
+          radius: location?.checkin_radius_meters ?? gpsConfig?.gps_radius_meters ?? 100,
         }}
         shift={{
           name: workingShift.name,

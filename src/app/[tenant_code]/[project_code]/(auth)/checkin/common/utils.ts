@@ -16,8 +16,8 @@ export const calculateAvailableSteps = (
 
   if (checkinFlow.require_survey) steps.push("survey");
   if (checkinFlow.require_pre_shift_task) steps.push("pre_shift_task");
-  if (checkinFlow.require_gps_at_location) steps.push("gps");
-  if (checkinFlow.require_attendance) {
+  if (checkinFlow.require_gps_verification) steps.push("gps");
+  if (checkinFlow.require_photo_verification) {
     steps.push("capture");
     steps.push("submit");
   }
@@ -51,7 +51,7 @@ const isGpsRequired = (
   }
 
   if (checkinFlow) {
-    return checkinFlow.require_gps_at_location ?? false;
+    return checkinFlow.require_gps_verification ?? false;
   }
 
   return false;

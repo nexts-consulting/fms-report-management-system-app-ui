@@ -74,7 +74,6 @@ export const httpRequestAttendanceCheckin = async (
 
     // Get current timestamp
     const checkinTime = dayjs().toISOString();
-
     // Calculate timing status
     const timingStatus = calculateTimingStatus(checkinTime, workshiftStartTime);
 

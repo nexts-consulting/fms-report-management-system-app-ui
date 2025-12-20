@@ -61,7 +61,7 @@ export const UserMarker = React.memo((props: UserMarkerProps) => {
             <img
               src={user.avatar || "/images/user-avatar.webp"}
               alt="avatar"
-              className="z-[2] !h-12 !w-12 flex-1 rounded-full bg-gray-20 object-cover"
+              className="z-[2] !h-12 !w-12 flex-1 rounded-full bg-gray-10 object-cover"
             />
             <span className="absolute bottom-0 left-[50%] z-[1] h-[14px] w-[14px] translate-x-[-50%] translate-y-[30%] rotate-45 bg-white" />
           </div>

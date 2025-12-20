@@ -48,7 +48,7 @@ export const CheckInConfirm = React.memo((props: CheckInConfirmProps) => {
               <div>
                 <p className="line-clamp-1 text-sm font-medium text-gray-100">Bắt đầu ca</p>
                 <p className="line-clamp-1 text-xs text-gray-50">
-                  {moment(workingShiftLocation.start_time).format("HH:mm A")}
+                  {moment().format("HH:mm A")}
                 </p>
               </div>
             </div>

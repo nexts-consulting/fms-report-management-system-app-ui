@@ -306,8 +306,8 @@ export interface IProjectCheckinFlow {
   project_id: string;
   require_survey: boolean;
   require_pre_shift_task: boolean;
-  require_gps_at_location: boolean;
-  require_attendance: boolean;
+  require_gps_verification: boolean;
+  require_photo_verification: boolean;
   require_post_shift_task: boolean;
   created_at: string;
   updated_at: string;

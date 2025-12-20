@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { useRouter } from "next/navigation";
 import { useAuthContext } from "@/contexts/auth.context";
 import { LoadingOverlay } from "@/kits/components/LoadingOverlay";

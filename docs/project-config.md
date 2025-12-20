@@ -95,8 +95,8 @@ interface IProjectCheckinFlow {
   project_id: string;                      // Unique per project
   require_survey: boolean;                 // Bắt buộc khảo sát trước khi check-in
   require_pre_shift_task: boolean;         // Bắt buộc task trước ca
-  require_gps_at_location: boolean;        // Bắt buộc GPS tại địa điểm
-  require_attendance: boolean;              // Bắt buộc điểm danh
+  require_gps_verification: boolean;        // Bắt buộc GPS tại địa điểm
+  require_photo_verification: boolean;              // Bắt buộc điểm danh
   require_post_shift_task: boolean;         // Bắt buộc task sau ca
   created_at: string;
   updated_at: string;
@@ -110,8 +110,8 @@ interface IProjectCheckinFlow {
 - Flow thực thi theo thứ tự:
   1. Survey (nếu `require_survey = true`)
   2. Pre-shift Task (nếu `require_pre_shift_task = true`)
-  3. GPS Verification (nếu `require_gps_at_location = true`)
-  4. Attendance (nếu `require_attendance = true`)
+  3. GPS Verification (nếu `require_gps_verification = true`)
+  4. Attendance (nếu `require_photo_verification = true`)
   5. Post-shift Task (nếu `require_post_shift_task = true`)
 
 ### API Functions
@@ -400,7 +400,7 @@ const checkinFlow = useGlobalContext().use.projectCheckinFlow();
 if (checkinFlow?.require_survey) {
   // Hiển thị survey trước khi check-in
 }
-if (checkinFlow?.require_gps_at_location) {
+if (checkinFlow?.require_gps_verification) {
   // Yêu cầu GPS verification
 }
 ```
