@@ -1,5 +1,5 @@
-import { useEffect } from "react";
 import { useSurveyProgressContext } from "@/contexts/survey-progress.context";
+import { useEffect } from "react";
 
 export const useGiftSessionReset = () => {
   const surveyProgress = useSurveyProgressContext();

@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useAuthContext } from "@/contexts/auth.context";
-import { LoadingOverlay } from "@/kits/components/LoadingOverlay";
+import { LoadingOverlay } from "@/kits/components/loading-overlay";
 import { useCheckoutState } from "../hooks/use-checkout-state";
 import { CheckoutHeader } from "./CheckoutHeader";
 import { CheckoutGpsStep } from "./CheckoutGpsStep";
@@ -90,7 +90,7 @@ export const Entry = () => {
 
         {currentStep === "submit" && (
           <CheckoutSubmitStep
-            attendance={currentAttendance}
+            location={selectedLocation}
             currentTipIndex={currentTipIndex}
             isSubmitting={isSubmitting}
             isUploadingPhoto={isUploadingPhoto}

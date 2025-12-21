@@ -2,9 +2,9 @@ import { useControllableState } from "@/kits/hooks";
 import { CommonUtil, StringUtil, StyleUtil } from "@/kits/utils";
 import { CameraCapture } from "@/kits/widgets/CameraCapture";
 import React from "react";
-import { IconButton } from "../IconButton";
-import { Icons } from "../Icons";
-import { Modal } from "../Modal";
+import { IconButton } from "../icon-button";
+import { Icons } from "../icons";
+import { Modal } from "../modal";
 
 const constants = {
   INSTANCE_NAME: "ImageCaptureInput",

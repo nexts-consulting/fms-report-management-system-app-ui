@@ -14,9 +14,6 @@ export interface CheckoutLocation {
   acc: number;
 }
 
-// Export for use in service
-export type { CheckoutLocation };
-
 export interface CheckoutFlowContext {
   checkinFlow: IProjectCheckinFlow | null | undefined;
   userGeolocation: UserGeolocation | null;

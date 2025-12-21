@@ -1,11 +1,11 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Modal } from '@/kits/components/Modal';
+import { Modal } from '@/kits/components/modal';
 import { Button } from '@/kits/components/button';
 import { questionBank } from '@/mock/mockQuestion';
 import { IQuestion } from '@/types/model';
-import { useNotification } from '@/kits/components/Notification';
+import { useNotification } from '@/kits/components/notification';
 import Image from 'next/image';
 interface QuestionFormProps {
   onComplete: () => void;

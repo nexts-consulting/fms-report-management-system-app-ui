@@ -1,7 +1,7 @@
 import { CommonUtil, StringUtil, StyleUtil } from "@/kits/utils";
 import { cva, VariantProps } from "class-variance-authority";
 import React from "react";
-import { Tooltip } from "@/kits/components/Tooltip";
+import { Tooltip } from "@/kits/components/tooltip";
 import { Placement } from "@floating-ui/react";
 
 const constants = {

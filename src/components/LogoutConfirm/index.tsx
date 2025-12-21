@@ -5,8 +5,8 @@ import { useAuthContext } from "@/contexts/auth.context";
 import { Dialog } from "@/kits/components/dialog";
 import { Button } from "@/kits/components/button";
 import React from "react";
-import { LoadingOverlay } from "@/kits/components/LoadingOverlay";
-import { useNotification } from "@/kits/components/Notification";
+import { LoadingOverlay } from "@/kits/components/loading-overlay";
+import { useNotification } from "@/kits/components/notification";
 import { useRouter } from "next/navigation";
 import { useTenantProjectPath } from "@/hooks/use-tenant-project-path";
 

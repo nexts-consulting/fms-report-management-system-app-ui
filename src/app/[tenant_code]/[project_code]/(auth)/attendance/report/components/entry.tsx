@@ -2,7 +2,7 @@
 
 import { ScreenHeader } from "@/components/ScreenHeader";
 import { useTenantProjectPath } from "@/hooks/use-tenant-project-path";
-import { Icons } from "@/kits/components/Icons";
+import { Icons } from "@/kits/components/icons";
 import { StyleUtil } from "@/kits/utils";
 import { useRouter } from "next/navigation";
 

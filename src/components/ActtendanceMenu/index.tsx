@@ -1,5 +1,5 @@
-import { IconButton } from "@/kits/components/IconButton";
-import { Icons } from "@/kits/components/Icons";
+import { IconButton } from "@/kits/components/icon-button";
+import { Icons } from "@/kits/components/icons";
 import React from "react";
 import { motion } from "framer-motion";
 

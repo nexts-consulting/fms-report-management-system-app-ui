@@ -1,9 +1,9 @@
 import { CommonUtil, StringUtil, StyleUtil } from "@/kits/utils";
 import { cva, VariantProps } from "class-variance-authority";
 import React from "react";
-import { Spinner } from "@/kits/components/Spinner";
-import { Icons } from "@/kits/components/Icons";
-import { IconButton } from "../IconButton";
+import { Spinner } from "@/kits/components/spinner";
+import { Icons } from "@/kits/components/icons";
+import { IconButton } from "../icon-button";
 
 const constants = {
   INSTANCE_NAME: "NotificationBanner",

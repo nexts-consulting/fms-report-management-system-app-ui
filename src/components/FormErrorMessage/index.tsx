@@ -1,4 +1,4 @@
-import { Icons } from "@/kits/components/Icons";
+import { Icons } from "@/kits/components/icons";
 import { ErrorMessage } from "@hookform/error-message";
 import { FieldErrors } from "react-hook-form";
 

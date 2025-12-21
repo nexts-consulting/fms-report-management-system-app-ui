@@ -5,9 +5,9 @@ import { PointExpression, LatLngTuple } from "leaflet";
 import { useMapResize } from "@/kits/hooks/leaflet/use-map-resize";
 import L from "leaflet";
 import { JSXMarker } from "@/kits/components/leaflet/JSXMarker";
-import { Icons } from "@/kits/components/Icons";
-import { IconButton } from "@/kits/components/IconButton";
-import { RippleDotB } from "@/kits/components/RippleDotB";
+import { Icons } from "@/kits/components/icons";
+import { IconButton } from "@/kits/components/icon-button";
+import { RippleDotB } from "@/kits/components/ripple-dot-b";
 import { StringUtil } from "@/kits/utils";
 
 const constants = {

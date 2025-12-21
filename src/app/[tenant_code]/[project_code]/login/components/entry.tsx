@@ -1,16 +1,16 @@
 "use client";
 
 import { Button } from "@/kits/components/button";
-import { Heading } from "@/kits/components/Heading";
-import { LoadingOverlay } from "@/kits/components/LoadingOverlay";
-import { PasswordInput } from "@/kits/components/PasswordInput";
-import { TextInput } from "@/kits/components/TextInput";
+import { Heading } from "@/kits/components/heading";
+import { LoadingOverlay } from "@/kits/components/loading-overlay";
+import { PasswordInput } from "@/kits/components/password-input";
+import { TextInput } from "@/kits/components/text-input";
 import Image from "next/image";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema, LoginSchema } from "../schemas/login.schema";
 import { Controller, SubmitErrorHandler, SubmitHandler, useForm } from "react-hook-form";
 import { FormErrorMessage } from "@/components/FormErrorMessage";
-import { useNotification } from "@/kits/components/Notification";
+import { useNotification } from "@/kits/components/notification";
 import { useMutationAuthLogin } from "@/services/api/application/auth/login";
 import { CommonUtil } from "@/kits/utils";
 import { useAuthContext } from "@/contexts/auth.context";

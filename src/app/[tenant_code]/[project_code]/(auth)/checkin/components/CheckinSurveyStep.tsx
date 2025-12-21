@@ -1,5 +1,4 @@
 import React from "react";
-import { Survey } from "@/components/Survey";
 
 interface CheckinSurveyStepProps {
   onComplete: () => void;
@@ -13,5 +12,7 @@ export const CheckinSurveyStep: React.FC<CheckinSurveyStepProps> = ({
   onComplete,
   onBack,
 }) => {
-  return <Survey onComplete={onComplete} onBack={onBack} />;
+  return (
+    <></>
+  );
 };

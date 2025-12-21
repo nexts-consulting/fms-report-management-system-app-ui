@@ -11,7 +11,7 @@ export default function AttendanceLayout(props: AttendanceLayoutProps) {
   return (
     <>
       <AttendanceGuardWrapper>{children}</AttendanceGuardWrapper>
-      <LeaveEndConfirm />
+      {/* <LeaveEndConfirm /> */}
     </>
   );
 }

@@ -2,19 +2,19 @@
 
 import { Button } from "@/kits/components/button";
 import { ScreenHeader } from "@/components/ScreenHeader";
-import { IconButton } from "@/kits/components/IconButton";
-import { Icons } from "@/kits/components/Icons";
-import { Modal } from "@/kits/components/Modal";
-import { useNotification } from "@/kits/components/Notification";
-import { SelectModal } from "@/kits/components/SelectModal";
+import { IconButton } from "@/kits/components/icon-button";
+import { Icons } from "@/kits/components/icons";
+import { Modal } from "@/kits/components/modal";
+import { useNotification } from "@/kits/components/notification";
+import { SelectModal } from "@/kits/components/select-modal";
 import { StyleUtil } from "@/kits/utils";
 import { OutletMap } from "@/kits/widgets/OutletMap";
 import { IAdminDivision, IAdminDivisionWithChildren } from "@/types/model";
 import { useRouter, useParams } from "next/navigation";
 import React from "react";
 import { useGlobalContext } from "@/contexts/global.context";
-import { LoadingOverlay } from "@/kits/components/LoadingOverlay";
-import { NotificationBanner } from "@/kits/components/NotificationBanner";
+import { LoadingOverlay } from "@/kits/components/loading-overlay";
+import { NotificationBanner } from "@/kits/components/notification-banner";
 import { ScreenFooter } from "@/components/ScreenFooter";
 import { useAuthContext } from "@/contexts/auth.context";
 import { useTenantProjectPath } from "@/hooks/use-tenant-project-path";

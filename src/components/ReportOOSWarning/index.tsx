@@ -1,5 +1,5 @@
 import { useGlobalContext } from "@/contexts/global.context";
-import { NotificationBanner } from "@/kits/components/NotificationBanner";
+import { NotificationBanner } from "@/kits/components/notification-banner";
 import { useLockTimer } from "@/kits/hooks/use-lock-timer";
 import React from "react";
 import { AppConfig } from "@/config";
@@ -9,7 +9,7 @@ export const ReportOOSWarning = () => {
   const currentAttendance = globalStore.use.currentAttendance();
 
   const timer = useLockTimer({
-    startTime: new Date(currentAttendance?.shift.startTime ?? ""),
+    startTime: new Date(currentAttendance?.shift_end_time ?? ""),
     lockAfterHours: AppConfig.oosReportCloseAfterHours,
   });
 

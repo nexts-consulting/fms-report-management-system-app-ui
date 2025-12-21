@@ -1,6 +1,5 @@
 import { useEffect } from "react";
 import { useSurveyProgressContext } from "@/contexts/survey-progress.context";
-
 export const useResetOnRefresh = () => {
   const surveyProgress = useSurveyProgressContext();
   const resetProgress = surveyProgress.use.resetProgress();

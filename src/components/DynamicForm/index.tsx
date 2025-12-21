@@ -10,7 +10,7 @@ import { FormConfig, FieldConfig, FormSection, FormValidationResult, FormSubmitH
 import { FieldRenderer } from "./FieldRenderer";
 import { validateForm, shouldDisplayField } from "./utils";
 import { StyleUtil } from "@/kits/utils";
-import { Button } from "../button";
+import { Button } from "@/kits/components/button";
 
 const constants = {
   INSTANCE_NAME: "DynamicForm",

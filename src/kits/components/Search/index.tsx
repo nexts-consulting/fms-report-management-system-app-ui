@@ -1,9 +1,9 @@
 import React from "react";
 import { CommonUtil, StringUtil, StyleUtil } from "@/kits/utils";
-import { Icons } from "@/kits/components/Icons";
+import { Icons } from "@/kits/components/icons";
 import { useMergeRefs } from "@/kits/hooks/use-merge-refs";
 import { useControllableState } from "@/kits/hooks";
-import { IconButton } from "@/kits/components/IconButton";
+import { IconButton } from "@/kits/components/icon-button";
 
 const constants = {
   INSTANCE_NAME: "Search",

@@ -17,15 +17,6 @@ export const getCheckoutLocation = (
     };
   }
 
-  // Fallback to attendance location
-  if (attendance?.shift?.outlet) {
-    return {
-      lat: attendance.shift.outlet.latitude ?? 0,
-      lng: attendance.shift.outlet.longitude ?? 0,
-      acc: 0,
-    };
-  }
-
   return {
     lat: 0,
     lng: 0,

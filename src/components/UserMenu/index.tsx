@@ -3,10 +3,10 @@
 import { CommonUtil, StringUtil, StyleUtil } from "@/kits/utils";
 import React from "react";
 import { createPortal } from "react-dom";
-import { Icons } from "@/kits/components/Icons";
+import { Icons } from "@/kits/components/icons";
 import { useGlobalContext } from "@/contexts/global.context";
 import { useRouter } from "next/navigation";
-import { useNotification } from "@/kits/components/Notification";
+import { useNotification } from "@/kits/components/notification";
 import { useAuthContext } from "@/contexts/auth.context";
 import { useTenantProjectPath } from "@/hooks/use-tenant-project-path";
 import { User, Exit, Logout, Settings } from "@carbon/icons-react";

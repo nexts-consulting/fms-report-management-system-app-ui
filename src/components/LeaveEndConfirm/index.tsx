@@ -1,16 +1,16 @@
 "use client";
 
 import { useGlobalContext } from "@/contexts/global.context";
-import { Modal } from "@/kits/components/Modal";
+import { Modal } from "@/kits/components/modal";
 import React from "react";
 import { Button } from "@/kits/components/button";
 import moment from "moment";
-import { useNotification } from "@/kits/components/Notification";
-import { LoadingOverlay } from "@/kits/components/LoadingOverlay";
+import { useNotification } from "@/kits/components/notification";
+import { LoadingOverlay } from "@/kits/components/loading-overlay";
 import { useTick } from "@/kits/hooks/use-tick";
-import { NotificationBanner } from "@/kits/components/NotificationBanner";
+import { NotificationBanner } from "@/kits/components/notification-banner";
 import { useQueryClient } from "react-query";
-import { Spinner } from "@/kits/components/Spinner";
+import { Spinner } from "@/kits/components/spinner";
 import { useMutationEndStaffLeave } from "@/services/api/application/staff-leaves/end";
 
 const leaveTypes = [
@@ -34,10 +34,18 @@ export const LeaveEndConfirm = React.memo(() => {
   const queryClient = useQueryClient();
 
   // Find last incomplete leave
-  const lastIncompleteLeave = React.useMemo(() => {
-    if (!currentAttendance?.staffLeaves?.length) return null;
-    return currentAttendance.staffLeaves.find((leave) => !leave.endTime);
-  }, [currentAttendance?.staffLeaves]);
+  // const lastIncompleteLeave = React.useMemo(() => {
+  //   if (!currentAttendance?.staffLeaves?.length) return null;
+  //   return currentAttendance.staffLeaves.find((leave) => !leave.endTime);
+  // }, [currentAttendance?.staffLeaves]);
+
+  const lastIncompleteLeave = {
+    id: 1,
+    leaveType: "LUNCH_BREAK",
+    startTime: "2025-01-01 10:00:00",
+    endTime: "2025-01-01 12:00:00",
+    note: "Đi ăn trưa",
+  };
 
   // Calculate elapsed time
   const elapsedTime = React.useMemo(() => {

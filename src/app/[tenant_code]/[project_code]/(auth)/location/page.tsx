@@ -1,6 +1,6 @@
 import { Entry } from "./components/entry";
 
-export default function OutletPage() {
+export default function LocationPage() {
   return (
     <>
       <Entry />

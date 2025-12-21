@@ -1,7 +1,7 @@
 import { CommonUtil, StringUtil } from "@/kits/utils";
 import React from "react";
-import { SelectModal } from "../../SelectModal";
 import { SelectOption } from "../types";
+import { SelectModal } from "@/kits/components/select-modal";
 
 const constants = {
   INSTANCE_NAME: "SelectInput",

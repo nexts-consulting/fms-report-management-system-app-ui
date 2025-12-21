@@ -1,7 +1,7 @@
 import { useGlobalContext } from "@/contexts/global.context";
 import { useNavigatorStatus } from "./use-navigator-status";
 import React from "react";
-import { useNotification } from "@/kits/components/Notification";
+import { useNotification } from "@/kits/components/notification";
 
 export const useCheckConnection = () => {
   const globalStore = useGlobalContext();

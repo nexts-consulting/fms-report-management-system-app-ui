@@ -1,5 +1,5 @@
 import { CommonUtil, StringUtil, StyleUtil } from "@/kits/utils";
-import { Spinner } from "@/kits/components/Spinner";
+import { Spinner } from "@/kits/components/spinner";
 import React from "react";
 
 const constants = {

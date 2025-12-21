@@ -1,8 +1,8 @@
 import { Button } from "@/kits/components/button";
-import { Heading } from "@/kits/components/Heading";
-import { IconButton } from "@/kits/components/IconButton";
-import { Icons } from "@/kits/components/Icons";
-import { LoadingBar } from "@/kits/components/LoadingBar";
+import { Heading } from "@/kits/components/heading";
+import { IconButton } from "@/kits/components/icon-button";
+import { Icons } from "@/kits/components/icons";
+import { LoadingBar } from "@/kits/components/loading-bar";
 import { StringUtil, StyleUtil } from "@/kits/utils";
 import React, { useEffect, useState } from "react";
 

@@ -3,7 +3,7 @@ import { useGlobalContext } from "@/contexts/global.context";
 import { useQueryCurrentShift } from "@/services/api/application/attendance/current-shift";
 import { useQueryWorkshiftById } from "@/services/api/application/working-shift/get-by-id";
 import { useQueryLocationById } from "@/services/api/application/location/get-by-id";
-import { ILocation, IWorkingShiftLocation } from "@/types/model";
+import { ILocation } from "@/types/model";
 import React, { useEffect } from "react";
 import { useParams } from "next/navigation";
 

@@ -1,7 +1,7 @@
-import { Heading } from "@/kits/components/Heading";
-import { Icons } from "@/kits/components/Icons";
-import { IconButton } from "@/kits/components/IconButton";
-import { LoadingBar } from "@/kits/components/LoadingBar";
+import { Heading } from "@/kits/components/heading";
+import { Icons } from "@/kits/components/icons";
+import { IconButton } from "@/kits/components/icon-button";
+import { LoadingBar } from "@/kits/components/loading-bar";
 import { StyleUtil } from "@/kits/utils";
 
 export interface ScreenHeaderProps {

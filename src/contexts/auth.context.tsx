@@ -5,7 +5,7 @@ import React, { createContext } from "react";
 import { StoreApi } from "zustand";
 import { decodeJwtPayload } from "@/utils/auth";
 import moment from "moment";
-import { useNotification } from "@/kits/components/Notification";
+import { useNotification } from "@/kits/components/notification";
 import { httpRequestAuthRefresh } from "@/services/api/application/auth/refresh";
 import { useGlobalContext } from "./global.context";
 

@@ -6,8 +6,6 @@
 
 import React from "react";
 import { FieldConfig } from "./types";
-import { TextInput } from "../TextInput";
-import { TextArea } from "../TextArea";
 import { NumberInput } from "./fields/NumberInput";
 import { CurrencyInput } from "./fields/CurrencyInput";
 import { PercentageInput } from "./fields/PercentageInput";
@@ -20,9 +18,12 @@ import { DatePickerInput } from "./fields/DatePickerInput";
 import { TimePickerInput } from "./fields/TimePickerInput";
 import { DateTimePickerInput } from "./fields/DateTimePickerInput";
 import { DateRangePickerInput } from "./fields/DateRangePickerInput";
-import { ImageCaptureInputWithUpload } from "../ImageCaptureInputWithUpload";
 import { InputGroup, InputGroupItem } from "./fields/InputGroup";
 import { GroupedInputGroup } from "./fields/GroupedInputGroup";
+
+import { TextInput } from "@/kits/components/text-input";
+import { TextArea } from "@/kits/components/text-area";
+import { ImageCaptureInputWithUpload } from "@/kits/components/image-capture-input-upload";
 
 export interface FieldRendererProps {
   field: FieldConfig;

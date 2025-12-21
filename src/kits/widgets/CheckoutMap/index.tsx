@@ -6,8 +6,8 @@ import { useMapResize } from "@/kits/hooks/leaflet/use-map-resize";
 import L from "leaflet";
 import { JSXMarker } from "@/kits/components/leaflet/JSXMarker";
 import { StringUtil } from "@/kits/utils";
-import { Icons } from "@/kits/components/Icons";
-import { RippleDotA } from "@/kits/components/RippleDotA";
+import { Icons } from "@/kits/components/icons";
+import { RippleDotA } from "@/kits/components/ripple-dot-a";
 
 const constants = {
   INSTANCE_NAME: "CheckoutMap",

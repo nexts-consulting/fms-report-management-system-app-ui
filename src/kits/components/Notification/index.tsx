@@ -4,9 +4,9 @@ import { StoreApi, createStore } from "zustand";
 import React from "react";
 import { LibraryUtil } from "@/kits/utils/lib.util";
 import { createPortal } from "react-dom";
-import { Icons } from "@/kits/components/Icons";
-import { Spinner } from "@/kits/components/Spinner";
-import { IconButton } from "@/kits/components/IconButton";
+import { Icons } from "@/kits/components/icons";
+import { Spinner } from "@/kits/components/spinner";
+import { IconButton } from "@/kits/components/icon-button";
 
 const constants = {
   INSTANCE_NAME: "Notification",

@@ -1,10 +1,10 @@
 import { useControllableState, useDebounce } from "@/kits/hooks";
 import { CommonUtil, StringUtil, StyleUtil, DomUtil } from "@/kits/utils";
-import { Modal } from "@/kits/components/Modal";
+import { Modal } from "@/kits/components/modal";
 import React from "react";
-import { LoadingBar } from "@/kits/components/LoadingBar";
-import { Search } from "@/kits/components/Search";
-import { HighlightText } from "@/kits/components/HighlightText";
+import { LoadingBar } from "@/kits/components/loading-bar";
+import { Search } from "@/kits/components/search";
+import { HighlightText } from "@/kits/components/highlight-text";
 
 const constants = {
   INSTANCE_NAME: "SelectModal",

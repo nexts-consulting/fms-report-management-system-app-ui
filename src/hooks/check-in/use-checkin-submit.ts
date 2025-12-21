@@ -1,7 +1,7 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import { useGlobalContext } from "@/contexts/global.context";
-import { useNotification } from "@/kits/components/Notification";
+import { useNotification } from "@/kits/components/notification";
 import { useTenantProjectPath } from "@/hooks/use-tenant-project-path";
 import type { CheckinStep, CheckinLocation } from "../../app/[tenant_code]/[project_code]/(auth)/checkin/common/types";
 import type { IProjectCheckinFlow } from "@/types/model";

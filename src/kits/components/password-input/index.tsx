@@ -1,7 +1,7 @@
 import { CommonUtil, StringUtil, StyleUtil } from "@/kits/utils";
 import React from "react";
-import { Icons } from "@/kits/components/Icons";
-import { IconButton } from "@/kits/components/IconButton";
+import { Icons } from "@/kits/components/icons";
+import { IconButton } from "@/kits/components/icon-button";
 
 const constants = {
   INSTANCE_NAME: "PasswordInput",

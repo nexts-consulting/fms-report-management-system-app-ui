@@ -1,12 +1,12 @@
 import React from "react";
 import { CheckoutMap } from "@/kits/widgets/CheckoutMap";
-import { LoadingBar } from "@/kits/components/LoadingBar";
+import { LoadingBar } from "@/kits/components/loading-bar";
 import { AnimatedEllipsis } from "@/kits/components/animated-ellipsis";
-import type { IAttendance } from "@/types/model";
+import type { ILocation } from "@/types/model";
 import { CHECKOUT_TIPS } from "../common/config";
 
 interface CheckoutSubmitStepProps {
-  attendance: IAttendance;
+  location: ILocation | null;
   currentTipIndex: number;
   isSubmitting: boolean;
   isUploadingPhoto: boolean;
@@ -16,21 +16,19 @@ interface CheckoutSubmitStepProps {
  * Submit step component for check-out process
  */
 export const CheckoutSubmitStep: React.FC<CheckoutSubmitStepProps> = ({
-  attendance,
+  location,
   currentTipIndex,
   isSubmitting,
   isUploadingPhoto,
 }) => {
-  const outlet = attendance.shift?.outlet;
-
   return (
     <div className="fixed left-0 right-0 top-1/2 -translate-y-2/3 p-4">
       <div className="bg-white p-4">
         <div className="aspect-[3/2] w-full flex-1">
           <CheckoutMap
             gps={{
-              lat: outlet?.latitude ?? 0,
-              lng: outlet?.longitude ?? 0,
+              lat: location?.latitude ?? 0,
+              lng: location?.longitude ?? 0,
             }}
           />
         </div>

@@ -2,7 +2,7 @@
 import React, { Suspense } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { ErrorBoundary } from "react-error-boundary";
-import { NotificationProvider } from "@/kits/components/Notification";
+import { NotificationProvider } from "@/kits/components/notification";
 import { AuthContextProvider } from "@/contexts/auth.context";
 import { GlobalContextProvider } from "@/contexts/global.context";
 import { ProjectConfigProvider } from "@/contexts/project-config.context";

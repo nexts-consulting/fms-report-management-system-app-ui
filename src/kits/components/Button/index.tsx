@@ -1,7 +1,7 @@
 import React from "react";
 import { cva, VariantProps } from "class-variance-authority";
 import { StyleUtil, CommonUtil, StringUtil } from "@/kits/utils";
-import { Spinner } from "../Spinner";
+import { Spinner } from "../spinner";
 
 const constants = {
   INSTANCE_NAME: "Button",

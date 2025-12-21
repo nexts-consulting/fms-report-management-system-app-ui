@@ -1,7 +1,7 @@
 import { CommonUtil, StringUtil, StyleUtil } from "@/kits/utils";
 import React from "react";
 import { IconButton } from "@/kits/components/icon-button";
-import { Icons } from "@/kits/components/Icons";
+import { Icons } from "@/kits/components/icons";
 
 const constants = {
   INSTANCE_NAME: "InputGroup",

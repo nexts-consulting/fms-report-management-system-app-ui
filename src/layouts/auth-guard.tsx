@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import React from "react";
 import { useAuthContext } from "@/contexts/auth.context";
-import { LoadingOverlay } from "@/kits/components/LoadingOverlay";
+import { LoadingOverlay } from "@/kits/components/loading-overlay";
 import { useTenantProjectPath } from "@/hooks/use-tenant-project-path";
 
 interface AuthGuardProps {

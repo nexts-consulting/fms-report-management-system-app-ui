@@ -1,9 +1,9 @@
 import { CommonUtil, StringUtil, StyleUtil } from "@/kits/utils";
 import React from "react";
 import { createPortal } from "react-dom";
-import { IconButton } from "@/kits/components/IconButton";
-import { Icons } from "@/kits/components/Icons";
-import { Tooltip } from "@/kits/components/Tooltip";
+import { IconButton } from "@/kits/components/icon-button";
+import { Icons } from "@/kits/components/icons";
+import { Tooltip } from "@/kits/components/tooltip";
 
 const constants = {
   INSTANCE_NAME: "Modal",
