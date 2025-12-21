@@ -3,7 +3,7 @@
 import { useGlobalContext } from "@/contexts/global.context";
 import { Modal } from "@/kits/components/Modal";
 import React from "react";
-import { Button } from "@/kits/components/Button";
+import { Button } from "@/kits/components/button";
 import moment from "moment";
 import { useNotification } from "@/kits/components/Notification";
 import { LoadingOverlay } from "@/kits/components/LoadingOverlay";

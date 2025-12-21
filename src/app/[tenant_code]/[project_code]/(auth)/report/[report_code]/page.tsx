@@ -1,0 +1,459 @@
+"use client";
+
+import React from "react";
+import { DynamicForm, FormConfig } from "@/kits/components/dynamic-form";
+import { ScreenHeader } from "@/components/ScreenHeader";
+import { LoadingOverlay } from "@/kits/components/LoadingOverlay";
+import { useRouter } from "next/navigation";
+import { useTenantProjectPath } from "@/hooks/use-tenant-project-path";
+
+export default function ReportPage() {
+  const [formData, setFormData] = React.useState<Record<string, any>>({});
+  const [submittedData, setSubmittedData] = React.useState<Record<string, any> | null>(null);
+  const router = useRouter();
+  const formConfig: FormConfig = {
+    title: "Dynamic Form Demo",
+    description: "This form is generated from JSON configuration. All field types are demonstrated below.",
+    gridColumns: 12,
+    submitLabel: "Submit Form",
+    cancelLabel: "Reset",
+    showSubmit: true,
+    showCancel: true,
+    sections: [
+      {
+        title: "Text & Number Inputs",
+        description: "Basic text and number input fields",
+        fields: [
+          {
+            name: "fullName",
+            type: "text",
+            label: "Full Name",
+            placeholder: "Enter your full name",
+            required: true,
+            span: 12,
+            validation: [
+              { type: "required", message: "Full name is required" },
+              { type: "minLength", value: 2, message: "Name must be at least 2 characters" },
+            ],
+          },
+          {
+            name: "email",
+            type: "text",
+            label: "Email Address",
+            placeholder: "example@email.com",
+            inputType: "email",
+            required: true,
+            span: 12,
+            validation: [
+              { type: "required", message: "Email is required" },
+              { type: "email", message: "Please enter a valid email address" },
+            ],
+          },
+          {
+            name: "description",
+            type: "textarea",
+            label: "Description",
+            placeholder: "Enter a description",
+            rows: 4,
+            span: 122,
+            validation: [
+              { type: "maxLength", value: 500, message: "Description must be less than 500 characters" },
+            ],
+          },
+          {
+            name: "age",
+            type: "number",
+            label: "Age",
+            placeholder: "Enter your age",
+            min: 0,
+            max: 120,
+            span: 12,
+            validation: [
+              { type: "min", value: 0, message: "Age must be at least 0" },
+              { type: "max", value: 120, message: "Age must be at most 120" },
+            ],
+          },
+          {
+            name: "salary",
+            type: "currency",
+            label: "Salary",
+            placeholder: "0",
+            currency: "VND",
+            decimals: 0,
+            min: 0,
+            span: 12,
+          },
+          {
+            name: "discount",
+            type: "percentage",
+            label: "Discount",
+            placeholder: "0",
+            min: 0,
+            max: 100,
+            decimals: 2,
+            span: 12,
+          },
+          {
+            name: "phone",
+            type: "masked",
+            label: "Phone Number",
+            placeholder: "(123) 456-7890",
+            mask: "phone",
+            span: 12,
+          },
+          {
+            name: "code",
+            type: "masked",
+            label: "Product Code",
+            placeholder: "ABC-123",
+            mask: "code",
+            span: 12,
+          },
+        ],
+      },
+      {
+        title: "Selection Fields",
+        description: "Select, multi-select, checkbox, radio, and switch fields",
+        fields: [
+          {
+            name: "country",
+            type: "select",
+            label: "Country",
+            placeholder: "Select a country",
+            required: true,
+            span: 12,
+            options: [
+              { label: "Vietnam", value: "vn" },
+              { label: "United States", value: "us" },
+              { label: "United Kingdom", value: "uk" },
+              { label: "Japan", value: "jp" },
+              { label: "South Korea", value: "kr" },
+            ],
+            validation: [{ type: "required", message: "Please select a country" }],
+          },
+          {
+            name: "languages",
+            type: "multiselect",
+            label: "Languages",
+            placeholder: "Select languages",
+            span: 12,
+            maxSelections: 5,
+            options: [
+              { label: "Vietnamese", value: "vi" },
+              { label: "English", value: "en" },
+              { label: "Japanese", value: "ja" },
+              { label: "Korean", value: "ko" },
+              { label: "Chinese", value: "zh" },
+              { label: "French", value: "fr" },
+            ],
+          },
+          {
+            name: "termsAccepted",
+            type: "checkbox",
+            label: "Terms and Conditions",
+            checkboxLabel: "I accept the terms and conditions",
+            required: true,
+            span: 122,
+            validation: [
+              {
+                type: "custom",
+                validator: (value) => value === true,
+                message: "You must accept the terms and conditions",
+              },
+            ],
+          },
+          {
+            name: "interests",
+            type: "checkboxGroup",
+            label: "Interests",
+            span: 122,
+            grid: 3,
+            options: [
+              { label: "Technology", value: "tech" },
+              { label: "Sports", value: "sports" },
+              { label: "Music", value: "music" },
+              { label: "Travel", value: "travel" },
+              { label: "Reading", value: "reading" },
+              { label: "Cooking", value: "cooking" },
+            ],
+          },
+          {
+            name: "gender",
+            type: "radioGroup",
+            label: "Gender",
+            span: 122,
+            direction: "horizontal",
+            options: [
+              { label: "Male", value: "male" },
+              { label: "Female", value: "female" },
+              { label: "Other", value: "other" },
+            ],
+          },
+          {
+            name: "notifications",
+            type: "switch",
+            label: "Notifications",
+            switchLabel: "Enable email notifications",
+            span: 122,
+          },
+        ],
+      },
+      {
+        title: "Date & Time Fields",
+        description: "Date, time, datetime, and date range pickers",
+        fields: [
+          {
+            name: "birthDate",
+            type: "date",
+            label: "Birth Date",
+            format: "YYYY-MM-DD",
+            maxDate: new Date(),
+            span: 12,
+          },
+          {
+            name: "appointmentTime",
+            type: "time",
+            label: "Appointment Time",
+            format: "24h",
+            span: 12,
+          },
+          {
+            name: "eventDateTime",
+            type: "datetime",
+            label: "Event Date & Time",
+            format: "YYYY-MM-DD HH:mm",
+            span: 12,
+          },
+          {
+            name: "vacationRange",
+            type: "dateRange",
+            label: "Vacation Period",
+            format: "YYYY-MM-DD",
+            span: 122,
+          },
+        ],
+      },
+      {
+        title: "Image Upload",
+        description: "Image capture and upload field",
+        fields: [
+          {
+            name: "profileImage",
+            type: "imageCapture",
+            label: "Profile Image",
+            helperText: "Take a photo or upload an image",
+            span: 122,
+            cloudConfig: {
+              provider: "custom",
+              uploadFunction: async (file: File) => {
+                // Simulate upload delay
+                await new Promise((resolve) => setTimeout(resolve, 1000));
+                // In a real app, this would upload to your server
+                return URL.createObjectURL(file);
+              },
+            },
+          },
+        ],
+      },
+      {
+        title: "Conditional Fields",
+        description: "Fields that appear based on other field values",
+        fields: [
+          {
+            name: "hasVehicle",
+            type: "switch",
+            label: "Do you have a vehicle?",
+            span: 122,
+          },
+          {
+            name: "vehicleType",
+            type: "select",
+            label: "Vehicle Type",
+            placeholder: "Select vehicle type",
+            span: 12,
+            options: [
+              { label: "Car", value: "car" },
+              { label: "Motorcycle", value: "motorcycle" },
+              { label: "Bicycle", value: "bicycle" },
+            ],
+            conditional: [
+              {
+                field: "hasVehicle",
+                operator: "equals",
+                value: true,
+              },
+            ],
+          },
+          {
+            name: "vehicleModel",
+            type: "text",
+            label: "Vehicle Model",
+            placeholder: "Enter vehicle model",
+            span: 12,
+            conditional: [
+              {
+                field: "hasVehicle",
+                operator: "equals",
+                value: true,
+              },
+            ],
+          },
+        ],
+      },
+      {
+        title: "Input Group",
+        description: "List of items with number inputs (like product quantity input)",
+        fields: [
+          {
+            name: "products",
+            type: "inputGroup",
+            label: "Sản phẩm",
+            helperText: "Nhập số lượng cho từng sản phẩm",
+            span: 12,
+            items: [
+              {
+                code: "SKU001",
+                name: "Sản phẩm A",
+                description: "Quà tặng: Túi xách cao cấp",
+                unit: "pcs",
+              },
+              {
+                code: "SKU002",
+                name: "Sản phẩm B",
+                description: "Quà tặng: Áo thun",
+                unit: "pcs",
+              },
+              {
+                code: "SKU003",
+                name: "Sản phẩm C",
+                description: "Quà tặng: Mũ bảo hiểm",
+                unit: "pcs",
+              },
+              {
+                code: "SKU004",
+                name: "Sản phẩm D",
+                description: "Quà tặng: Bình nước",
+                unit: "pcs",
+              },
+            ],
+            fieldNamePrefix: "items",
+            fieldNameSuffix: "pcs",
+            min: 0,
+            layout: "grid",
+            showButtons: true,
+          },
+        ],
+      },
+      {
+        title: "Grouped Input Group",
+        description: "Items grouped by category (like products grouped by brand)",
+        fields: [
+          {
+            name: "productsByBrand",
+            type: "groupedInputGroup",
+            label: "Sản phẩm theo thương hiệu",
+            helperText: "Nhập số lượng cho từng sản phẩm, được nhóm theo thương hiệu",
+            span: 12,
+            items: [
+              {
+                code: "SKU001",
+                name: "Sản phẩm A1",
+                description: "SKU: SKU001",
+                unit: "pcs",
+                groupKey: "Brand A",
+                data: { brand: "Brand A", category: "Electronics" },
+              },
+              {
+                code: "SKU002",
+                name: "Sản phẩm A2",
+                description: "SKU: SKU002",
+                unit: "pcs",
+                groupKey: "Brand A",
+                data: { brand: "Brand A", category: "Electronics" },
+              },
+              {
+                code: "SKU003",
+                name: "Sản phẩm B1",
+                description: "SKU: SKU003",
+                unit: "pcs",
+                groupKey: "Brand B",
+                data: { brand: "Brand B", category: "Fashion" },
+              },
+              {
+                code: "SKU004",
+                name: "Sản phẩm B2",
+                description: "SKU: SKU004",
+                unit: "pcs",
+                groupKey: "Brand B",
+                data: { brand: "Brand B", category: "Fashion" },
+              },
+              {
+                code: "SKU005",
+                name: "Sản phẩm C1",
+                description: "SKU: SKU005",
+                unit: "pcs",
+                groupKey: "Brand C",
+                data: { brand: "Brand C", category: "Home" },
+              },
+            ],
+            groupBy: "brand",
+            formatGroupTitle: (groupKey, items) => `${groupKey} (${items.length} sản phẩm)`,
+            fieldNamePrefix: "items",
+            fieldNameSuffix: "pcs",
+            min: 0,
+            layout: "flex",
+            showButtons: false,
+          },
+        ],
+      },
+    ],
+  };
+
+  const handleSubmit = (data: Record<string, any>) => {
+    console.log("Form submitted with data:", data);
+    setSubmittedData(data);
+    alert("Form submitted! Check console for data.");
+  };
+
+  const handleChange = (data: Record<string, any>, fieldName: string, value: any) => {
+    setFormData(data);
+    console.log(`Field ${fieldName} changed:`, value);
+  };
+
+  const handleCancel = () => {
+    setFormData({});
+    setSubmittedData(null);
+  };
+
+  return (
+    <>
+    <LoadingOverlay active={false} />
+
+     <ScreenHeader
+        title="Báo cáo"
+        onBack={() => router.back()}
+      />
+    <div className="flex flex-col gap-4 p-4 pt-0">
+      <div className="flex items-center justify-between">
+          <DynamicForm
+            config={formConfig}
+            initialValues={formData}
+            onChange={handleChange}
+            onSubmit={handleSubmit}
+            onCancel={handleCancel}
+          />
+
+          {submittedData && (
+            <div className="mt-8 p-4 bg-gray-10 ">
+              <h3 className="text-lg font-semibold mb-4">Submitted Data:</h3>
+              <pre className="text-sm overflow-auto">
+                {JSON.stringify(submittedData, null, 2)}
+              </pre>
+            </div>
+          )}
+        </div>
+      </div>
+    </>
+  );
+}
+

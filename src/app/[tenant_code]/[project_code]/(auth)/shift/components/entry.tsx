@@ -11,7 +11,7 @@ import { useShiftStatus } from "@/hooks/shift/use-shift-status";
 import { useShiftTime } from "@/hooks/shift/use-shift-time";
 import { useShiftUpcoming } from "@/hooks/shift/use-shift-upcoming";
 import { useCheckinTimeAllowed } from "@/hooks/check-in/use-checkin-time-allowed";
-import { Button } from "@/kits/components/Button";
+import { Button } from "@/kits/components/button";
 import { Icons } from "@/kits/components/Icons";
 import { LoadingOverlay } from "@/kits/components/LoadingOverlay";
 import { Modal } from "@/kits/components/Modal";

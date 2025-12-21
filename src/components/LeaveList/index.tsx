@@ -16,13 +16,16 @@ const leaveTypes = [
 
 export const LeaveList = React.memo(() => {
   const globalStore = useGlobalContext();
-  const currentAttendance = globalStore.use.currentAttendance();
   const [now, controls] = useTick({ unit: "minute" });
 
   const leaves = React.useMemo(() => {
-    if (!currentAttendance?.staffLeaves?.length) return [];
-    return [...currentAttendance.staffLeaves].reverse();
-  }, [currentAttendance?.staffLeaves]);
+    return [{
+      id: "1",
+      leaveType: "LUNCH_BREAK",
+      startTime: "2025-01-01 10:00:00",
+      endTime: "2025-01-01 12:00:00",
+    }];
+  }, []);
 
   const calculateDuration = (startTime: string, endTime?: string) => {
     const start = moment(startTime);

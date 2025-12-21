@@ -20,7 +20,9 @@ export const Entry = () => {
 
   const {
     // Config
+    projectCheckinFlow,
     projectGpsConfig,
+    projectAttendancePhotoConfig,
     isLoadingConfigs,
     currentAttendance,
     selectedLocation,
@@ -64,7 +66,7 @@ export const Entry = () => {
           onBack={() => router.back()}
         />
 
-        {currentStep === "gps" && (
+        {currentStep === "gps" && projectCheckinFlow?.require_gps_verification && (
           <CheckoutGpsStep
             user={user}
             location={selectedLocation}
@@ -76,13 +78,15 @@ export const Entry = () => {
           />
         )}
 
-        {currentStep === "capture" && (
-          <CheckoutCaptureStep
-            onConfirm={handleConfirmCapture}
-            onCapture={handleOnCapture}
-            onError={handleOnCameraError}
-          />
-        )}
+        {currentStep === "capture" &&
+          projectCheckinFlow?.require_photo_verification &&
+          projectAttendancePhotoConfig?.mode !== "NOT_REQUIRED" && (
+            <CheckoutCaptureStep
+              onConfirm={handleConfirmCapture}
+              onCapture={handleOnCapture}
+              onError={handleOnCameraError}
+            />
+          )}
 
         {currentStep === "submit" && (
           <CheckoutSubmitStep

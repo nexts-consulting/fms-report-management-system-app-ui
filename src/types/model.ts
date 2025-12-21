@@ -17,6 +17,9 @@ export type LocationCategoryType = "GROUP" | "CATEGORY" | "TYPE";
 // App Menu Type
 export type AppMenuType = "APP" | "ADMIN";
 
+// App Menu Action Type
+export type AppMenuActionType = "route" | "api" | "popup";
+
 // Filter Logic Operator
 export type FilterLogicOperator =
   | "AND"
@@ -109,12 +112,15 @@ export interface GetLocationsParams {
 // APP MENU MODELS
 // ==============================
 
+
 export interface IAppMenu {
   id: number;
   project_code: string;
   code: string;
   name: string;
   menu_type: AppMenuType;
+  action_type: AppMenuActionType;
+  action_value: string | null;
   icon: string | null;
   path: string | null;
   parent_id: number | null;
@@ -455,4 +461,16 @@ export interface GetKeycloakGroupsParams {
   search?: string;
   first?: number;
   max?: number;
+}
+
+
+// ==============================
+// QUESTION MODELS
+// ==============================
+
+export interface IQuestion {
+  id: string;
+  question: string;
+  options: string[];
+  correctIndex: number;
 }

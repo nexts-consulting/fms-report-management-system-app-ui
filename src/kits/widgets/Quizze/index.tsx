@@ -1,4 +1,4 @@
-import { Button } from "@/kits/components/Button";
+import { Button } from "@/kits/components/button";
 import { Heading } from "@/kits/components/Heading";
 import { IconButton } from "@/kits/components/IconButton";
 import { Icons } from "@/kits/components/Icons";

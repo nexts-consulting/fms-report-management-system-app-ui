@@ -1,4 +1,4 @@
-import { Button } from "@/kits/components/Button";
+import { Button } from "@/kits/components/button";
 import { Icons } from "@/kits/components/Icons";
 import { NotificationBanner } from "@/kits/components/NotificationBanner";
 import { CommonUtil, StringUtil, StyleUtil } from "@/kits/utils";

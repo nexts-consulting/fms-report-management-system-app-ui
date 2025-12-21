@@ -2,7 +2,7 @@
 
 import React from "react";
 import { ScreenHeader } from "@/components/ScreenHeader";
-import { Button } from "@/kits/components/Button";
+import { Button } from "@/kits/components/button";
 import { TextInput } from "@/kits/components/TextInput";
 import { CheckboxGroupInput } from "@/kits/components/CheckboxGroupInput";
 

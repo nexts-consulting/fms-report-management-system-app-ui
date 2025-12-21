@@ -9,7 +9,6 @@ import { useCheckinGeolocation } from "./use-checkin-geolocation";
 import { useCheckinPhotoUpload } from "./use-checkin-photo-upload";
 import { useCheckinStepHandlers } from "./use-checkin-step-handlers";
 import { getCheckinLocation } from "../common/utils";
-import type { UserGeolocation } from "../common/types";
 
 /**
  * Main hook to manage all check-in state and logic
@@ -42,6 +41,7 @@ export const useCheckinState = () => {
   // State for tips and completion
   const [currentTipIndex, setCurrentTipIndex] = React.useState(0);
   const [allbeDone, setAllbeDone] = React.useState(false);
+  const hasAutoSubmittedRef = React.useRef(false);
 
   // Geolocation hook
   const {
@@ -164,18 +164,42 @@ export const useCheckinState = () => {
     removeCaptureNotification();
   }, [removeCaptureNotification]);
 
-  // Auto-submit when reaching submit step if photo is not required and no file captured
+  // Reset auto-submit flag when leaving submit step
+  React.useEffect(() => {
+    if (currentStep !== "submit") {
+      hasAutoSubmittedRef.current = false;
+    }
+  }, [currentStep]);
+
+  // Auto-submit when reaching submit step if photo is not required or not in flow
   React.useEffect(() => {
     if (
       currentStep === "submit" &&
-      projectAttendancePhotoConfig?.mode === "NOT_REQUIRED" &&
-      !photoUrl &&
-      !isUploadingPhoto
+      !isUploadingPhoto &&
+      !hasAutoSubmittedRef.current &&
+      !isSubmitting
     ) {
-      // Submit without photo
-      submitCheckin();
+      // Check if photo is required
+      const isPhotoRequired =
+        projectCheckinFlow?.require_photo_verification &&
+        projectAttendancePhotoConfig?.mode !== "NOT_REQUIRED";
+
+      // If photo is not required or not in flow, and no photo was captured, auto-submit
+      if (!isPhotoRequired && !photoUrl) {
+        hasAutoSubmittedRef.current = true;
+        // Submit without photo
+        submitCheckin();
+      }
     }
-  }, [currentStep, projectAttendancePhotoConfig, photoUrl, isUploadingPhoto, submitCheckin]);
+  }, [
+    currentStep,
+    projectCheckinFlow?.require_photo_verification,
+    projectAttendancePhotoConfig?.mode,
+    photoUrl,
+    isUploadingPhoto,
+    isSubmitting,
+    submitCheckin,
+  ]);
 
   return {
     // Config

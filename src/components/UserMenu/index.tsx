@@ -8,6 +8,8 @@ import { useGlobalContext } from "@/contexts/global.context";
 import { useRouter } from "next/navigation";
 import { useNotification } from "@/kits/components/Notification";
 import { useAuthContext } from "@/contexts/auth.context";
+import { useTenantProjectPath } from "@/hooks/use-tenant-project-path";
+import { User, Exit, Logout, Settings } from "@carbon/icons-react";
 
 const constants = {
   INSTANCE_NAME: "UserMenu",
@@ -33,7 +35,7 @@ export const UserMenu = React.memo((props: UserMenuProps) => {
 
   const authStore = useAuthContext();
   const user = authStore.use.user();
-
+  const { buildPath } = useTenantProjectPath();
   const { isOpen, onClose } = props;
 
   const globalStore = useGlobalContext();
@@ -56,31 +58,25 @@ export const UserMenu = React.memo((props: UserMenuProps) => {
 
   const items = [
     {
-      icon: Icons.Report,
-      label: "Tạo báo cáo",
+      label: "Profile",
       className: "",
-      active: !!currentAttendance,
+      active: true,
+      icon: User,
       action: () => {
-        setTimeout(() => {
-          router.push("/attendance/report");
-          onClose();
-        }, 100);
+        router.push(buildPath("/profile"));
       },
     },
     {
-      icon: Icons.Pedestrian,
-      label: "Rời vị trí",
+      label: "Hệ thống",
       className: "",
-      active: !!currentAttendance,
+      active: true,
+      icon: Settings,
       action: () => {
-        setTimeout(() => {
-          globalStore.setState({ showLeaveConfirmation: true });
-          onClose();
-        }, 100);
+        router.push(buildPath("/configuration"));
       },
     },
     {
-      icon: Icons.Logout,
+      icon: Exit,
       label: "Check out",
       className: "",
       active: !!currentAttendance,
@@ -101,7 +97,7 @@ export const UserMenu = React.memo((props: UserMenuProps) => {
       },
     },
     {
-      icon: Icons.PortOutput,
+      icon: Logout,
       label: "Đăng xuất",
       className: StyleUtil.cn("text-red-50"),
       active: true,

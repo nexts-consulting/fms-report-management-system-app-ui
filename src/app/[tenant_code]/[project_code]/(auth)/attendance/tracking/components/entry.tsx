@@ -1,7 +1,6 @@
 "use client";
 
 import { CheckoutConfirm } from "@/components/CheckoutConfirm";
-import { LeaveList } from "@/components/LeaveList";
 import { LeaveStartConfirm } from "@/components/LeaveStartConfirm";
 import { UserHeader } from "@/components/UserHeader";
 import { useAuthContext } from "@/contexts/auth.context";
@@ -17,6 +16,29 @@ import { useRouter } from "next/navigation";
 import React from "react";
 import { reportMenuItems } from "./menuItems";
 import { useTenantProjectPath } from "@/hooks/use-tenant-project-path";
+
+import {
+  Box,
+  StoragePool,
+  ReportData,
+  Gift,
+  Image,
+  RecentlyViewed,
+  ShoppingCart,
+  Customer,
+} from "@carbon/icons-react";
+
+
+const iconMap: Record<string, any> = {
+  Box,
+  StoragePool,
+  ReportData,
+  Gift,
+  Image,
+  RecentlyViewed,
+  ShoppingCart,
+  Customer,
+};
 
 export const Entry = () => {
   const authStore = useAuthContext();
@@ -42,10 +64,10 @@ export const Entry = () => {
   };
 
   const handleAction = (item: any) => {
-    if (item.actionType === "route") {
-      router.push(item.actionValue ?? "");
-    } else if (item.actionType === "modal") {
-      globalStore.setState({ [item.actionValue ?? ""]: true });
+    if (item.action_type === "route") {
+      router.push( buildPath(item.path ?? ""));
+    } else if (item.action_type === "modal") {
+      globalStore.setState({ [item.action_value ?? ""]: true });
     }
   };
 
@@ -153,9 +175,10 @@ export const Entry = () => {
       <div className="my-8 px-4">
         <div className="grid grid-cols-3">
           {reportMenuItems.map((item, idx) => {
-            const done = reportStatus[item.key as keyof typeof reportStatus] ?? false;
-
-            const notchColor = item.required
+            const done = false; // TODO: Implement report status
+            // TODO: Implement report status
+            const icon = iconMap[item.icon as string] || Box;
+            const notchColor = false
               ? done
                 ? "bg-green-500"
                 : "bg-red-500"
@@ -169,17 +192,14 @@ export const Entry = () => {
                 {/* Notch trạng thái */}
                 <div className={`absolute right-2 top-2 h-2 w-2 ${notchColor}`} />
 
-                <item.icon className="mb-2 h-6 w-6 text-gray-700" />
+                {React.createElement(icon, { className: "mb-2 h-6 w-6 text-gray-700" })}
                 <p className="text-center text-sm font-medium leading-tight text-gray-700">
-                  {item.label}
+                  {item.name ?? ""}
                 </p>
               </div>
             );
           })}
         </div>
-      </div>
-      <div className="px-4">
-        <LeaveList />
       </div>
 
       <div className="mb-20 pb-8" />

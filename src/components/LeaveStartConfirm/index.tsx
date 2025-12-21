@@ -1,4 +1,4 @@
-import { Button } from "@/kits/components/Button";
+import { Button } from "@/kits/components/button";
 import { Icons } from "@/kits/components/Icons";
 import { SelectModal } from "@/kits/components/SelectModal";
 import { TextArea } from "@/kits/components/TextArea";

@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/kits/components/Button";
+import { Button } from "@/kits/components/button";
 import { ScreenHeader } from "@/components/ScreenHeader";
 import { IconButton } from "@/kits/components/IconButton";
 import { Icons } from "@/kits/components/Icons";

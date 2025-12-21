@@ -2,8 +2,8 @@
 
 import { useGlobalContext } from "@/contexts/global.context";
 import { useAuthContext } from "@/contexts/auth.context";
-import { Dialog } from "@/kits/components/Dialog";
-import { Button } from "@/kits/components/Button";
+import { Dialog } from "@/kits/components/dialog";
+import { Button } from "@/kits/components/button";
 import React from "react";
 import { LoadingOverlay } from "@/kits/components/LoadingOverlay";
 import { useNotification } from "@/kits/components/Notification";

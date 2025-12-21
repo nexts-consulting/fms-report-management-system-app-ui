@@ -2,9 +2,9 @@
 
 import React, { useEffect, useState } from 'react';
 import { Modal } from '@/kits/components/Modal';
-import { Button } from '@/kits/components/Button';
+import { Button } from '@/kits/components/button';
 import { questionBank } from '@/mock/mockQuestion';
-import { Question } from '@/types/model';
+import { IQuestion } from '@/types/model';
 import { useNotification } from '@/kits/components/Notification';
 import Image from 'next/image';
 interface QuestionFormProps {
@@ -12,7 +12,7 @@ interface QuestionFormProps {
 }
 
 export const QuestionForm: React.FC<QuestionFormProps> = ({ onComplete }) => {
-  const [questions, setQuestions] = useState<Question[]>([]);
+  const [questions, setQuestions] = useState<IQuestion[]>([]);
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [submitted, setSubmitted] = useState(false);
   const [passed, setPassed] = useState<boolean | null>(null);

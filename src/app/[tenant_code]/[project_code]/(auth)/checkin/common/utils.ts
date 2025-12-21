@@ -19,8 +19,9 @@ export const calculateAvailableSteps = (
   if (checkinFlow.require_gps_verification) steps.push("gps");
   if (checkinFlow.require_photo_verification) {
     steps.push("capture");
-    steps.push("submit");
   }
+  // Always add submit step at the end (before post_shift_task)
+  steps.push("submit");
   if (checkinFlow.require_post_shift_task) steps.push("post_shift_task");
 
   return steps.length > 0 ? steps : DEFAULT_STEPS;
@@ -77,10 +78,10 @@ export const getCheckinLocation = (
     };
   }
 
-  // Fallback to working shift location
+  // Fallback
   return {
-    lat: workingShift?.location?.latitude || 0,
-    lng: workingShift?.location?.longitude || 0,
+    lat: 0,
+    lng: 0,
     acc: 0,
   };
 };

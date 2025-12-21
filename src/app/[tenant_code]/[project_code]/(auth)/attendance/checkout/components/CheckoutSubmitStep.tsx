@@ -1,7 +1,7 @@
 import React from "react";
 import { CheckoutMap } from "@/kits/widgets/CheckoutMap";
 import { LoadingBar } from "@/kits/components/LoadingBar";
-import { AnimatedEllipsis } from "@/kits/components/AnimatedEllipsis";
+import { AnimatedEllipsis } from "@/kits/components/animated-ellipsis";
 import type { IAttendance } from "@/types/model";
 import { CHECKOUT_TIPS } from "../common/config";
 

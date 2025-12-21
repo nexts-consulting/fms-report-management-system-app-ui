@@ -1,7 +1,7 @@
 import { constants } from "../../constants";
 import React from "react";
 import { useLocalContext } from "../../contexts/local.context";
-import { Button } from "@/kits/components/Button";
+import { Button } from "@/kits/components/button";
 import { Icons } from "@/kits/components/Icons";
 
 export interface ContinueButtonProps {}

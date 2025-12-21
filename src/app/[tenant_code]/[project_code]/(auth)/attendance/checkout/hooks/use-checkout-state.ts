@@ -44,6 +44,7 @@ export const useCheckoutState = () => {
   const [currentStep, setCurrentStep] = React.useState<CheckoutStep>(initialStep);
   const [currentTipIndex, setCurrentTipIndex] = React.useState(0);
   const [allbeDone, setAllbeDone] = React.useState(false);
+  const hasAutoSubmittedRef = React.useRef(false);
 
   // Update step when config changes
   React.useEffect(() => {
@@ -156,18 +157,42 @@ export const useCheckoutState = () => {
     removeCaptureNotification();
   }, [removeCaptureNotification]);
 
-  // Auto-submit when reaching submit step if photo is not required and no file captured
+  // Reset auto-submit flag when leaving submit step
+  React.useEffect(() => {
+    if (currentStep !== "submit") {
+      hasAutoSubmittedRef.current = false;
+    }
+  }, [currentStep]);
+
+  // Auto-submit when reaching submit step if photo is not required or not in flow
   React.useEffect(() => {
     if (
       currentStep === "submit" &&
-      projectAttendancePhotoConfig?.mode === "NOT_REQUIRED" &&
-      !photoUrl &&
-      !isUploadingPhoto
+      !isUploadingPhoto &&
+      !hasAutoSubmittedRef.current &&
+      !isSubmitting
     ) {
-      // Submit without photo
-      submitCheckout();
+      // Check if photo is required
+      const isPhotoRequired =
+        projectCheckinFlow?.require_photo_verification &&
+        projectAttendancePhotoConfig?.mode !== "NOT_REQUIRED";
+
+      // If photo is not required or not in flow, and no photo was captured, auto-submit
+      if (!isPhotoRequired && !photoUrl) {
+        hasAutoSubmittedRef.current = true;
+        // Submit without photo
+        submitCheckout();
+      }
     }
-  }, [currentStep, projectAttendancePhotoConfig, photoUrl, isUploadingPhoto, submitCheckout]);
+  }, [
+    currentStep,
+    projectCheckinFlow?.require_photo_verification,
+    projectAttendancePhotoConfig?.mode,
+    photoUrl,
+    isUploadingPhoto,
+    isSubmitting,
+    submitCheckout,
+  ]);
 
   return {
     // Config

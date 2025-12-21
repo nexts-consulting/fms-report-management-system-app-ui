@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/kits/components/Button";
+import { Button } from "@/kits/components/button";
 import { Heading } from "@/kits/components/Heading";
 import { LoadingOverlay } from "@/kits/components/LoadingOverlay";
 import { PasswordInput } from "@/kits/components/PasswordInput";

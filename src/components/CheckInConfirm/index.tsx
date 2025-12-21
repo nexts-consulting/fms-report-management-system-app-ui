@@ -1,5 +1,5 @@
 import { useShiftDurationFormated } from "@/hooks/shift/use-shift-duration-formated";
-import { Button } from "@/kits/components/Button";
+import { Button } from "@/kits/components/button";
 import { Icons } from "@/kits/components/Icons";
 import { StringUtil } from "@/kits/utils";
 import { OutletMap } from "@/kits/widgets/OutletMap";
