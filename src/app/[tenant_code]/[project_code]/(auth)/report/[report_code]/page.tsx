@@ -1,11 +1,11 @@
 "use client";
 
 import React from "react";
-import { DynamicForm, FormConfig } from "@/kits/components/dynamic-form";
+import { DynamicForm } from "@/components/DynamicForm";
+import { FormConfig } from "@/components/DynamicForm/types";
 import { ScreenHeader } from "@/components/ScreenHeader";
-import { LoadingOverlay } from "@/kits/components/LoadingOverlay";
+import { LoadingOverlay } from "@/kits/components/loading-overlay";
 import { useRouter } from "next/navigation";
-import { useTenantProjectPath } from "@/hooks/use-tenant-project-path";
 
 export default function ReportPage() {
   const [formData, setFormData] = React.useState<Record<string, any>>({});
