@@ -76,7 +76,7 @@ export const CheckboxInput = React.memo(
             disabled={disabled}
             className={ StyleUtil.cn(styles.checkbox, {
               "border-red-60": error,
-            }, "mt-1 h-5 w-5 border-gray-300 accent-primary-60 text-primary-60 cursor-pointer")}
+            }, "h-5 w-5 border-gray-300 accent-primary-60 text-primary-60 cursor-pointer")}
             {...rest}
           />
           {(checkboxLabel || label) && (

@@ -1,6 +1,6 @@
 import React from "react";
 import { CheckinMap } from "@/kits/widgets/CheckinMap";
-import { LoadingBar } from "@/kits/components/LoadingBar";
+import { LoadingBar } from "@/kits/components/loading-bar";
 import { AnimatedEllipsis } from "@/kits/components/animated-ellipsis";
 import type { IWorkingShiftLocation } from "@/types/model";
 import { CHECKIN_TIPS } from "../common/config";

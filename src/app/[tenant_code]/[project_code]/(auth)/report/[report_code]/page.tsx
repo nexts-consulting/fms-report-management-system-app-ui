@@ -12,14 +12,13 @@ import exampleJsonConfig from "@/components/DynamicForm/exampleJsonConfig.json";
 export default function ReportPage() {
   const [formData, setFormData] = React.useState<Record<string, any>>({});
   const [submittedData, setSubmittedData] = React.useState<Record<string, any> | null>(null);
-  const [useJsonConfig, setUseJsonConfig] = React.useState(true);
+  const [useJsonConfig, setUseJsonConfig] = React.useState(true); // Toggle between JSON-based and code-based config
   const router = useRouter();
 
   // Hydrate JSON config to runtime config (simulates loading from database)
   const hydratedJsonConfig = React.useMemo(() => {
     return hydrateFormConfig(exampleJsonConfig);
   }, []);
-
   // CODE-BASED CONFIG (with functions and Date objects - NOT suitable for database storage)
   const codeBasedFormConfig: FormConfig = {
     title: "Dynamic Form Demo (Code-Based)",
@@ -173,33 +172,6 @@ export default function ReportPage() {
             ],
           },
           {
-            name: "interests",
-            type: "checkboxGroup",
-            label: "Interests",
-            span: 122,
-            grid: 3,
-            options: [
-              { label: "Technology", value: "tech" },
-              { label: "Sports", value: "sports" },
-              { label: "Music", value: "music" },
-              { label: "Travel", value: "travel" },
-              { label: "Reading", value: "reading" },
-              { label: "Cooking", value: "cooking" },
-            ],
-          },
-          {
-            name: "gender",
-            type: "radioGroup",
-            label: "Gender",
-            span: 122,
-            direction: "horizontal",
-            options: [
-              { label: "Male", value: "male" },
-              { label: "Female", value: "female" },
-              { label: "Other", value: "other" },
-            ],
-          },
-          {
             name: "notifications",
             type: "switch",
             label: "Notifications",
@@ -254,13 +226,8 @@ export default function ReportPage() {
             helperText: "Take a photo or upload an image",
             span: 122,
             cloudConfig: {
-              provider: "custom",
-              uploadFunction: async (file: File) => {
-                // Simulate upload delay
-                await new Promise((resolve) => setTimeout(resolve, 1000));
-                // In a real app, this would upload to your server
-                return URL.createObjectURL(file);
-              },
+              provider: "firebase",
+              path: "images/uploads/fms-report-management-system-app-ui-test",
             },
           },
         ],
@@ -449,8 +416,8 @@ export default function ReportPage() {
       
       <div className="flex flex-col gap-4 p-4 pt-0">
         {/* Config Type Toggle */}
-        <div className="bg-white border  p-4">
-          <div className="flex items-center justify-between">
+        <div className="bg-white border p-4">
+          <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-semibold">Configuration Type</h3>
             <button
               onClick={() => {
@@ -464,6 +431,26 @@ export default function ReportPage() {
             </button>
           </div>
           
+          <div className="text-sm text-gray-70">
+            {useJsonConfig ? (
+              <div>
+                <p className="font-semibold text-green-600 mb-1">JSON-Based Config (Database Safe)</p>
+                <p>This config can be stored in database. Functions and dates are converted to special string references:</p>
+                <ul className="list-disc list-inside mt-1 text-xs space-y-1">
+                  <li><code className="bg-gray-10 px-1 py-0.5 rounded">@@DATE_NOW</code> - Current date/time</li>
+                  <li><code className="bg-gray-10 px-1 py-0.5 rounded">@@DATE_TODAY</code> - Today at midnight</li>
+                  <li><code className="bg-gray-10 px-1 py-0.5 rounded">@@VALIDATOR:validatorName</code> - Predefined validator</li>
+                  <li><code className="bg-gray-10 px-1 py-0.5 rounded">@@FORMATTER:formatterName</code> - Predefined formatter</li>
+                  <li><code className="bg-gray-10 px-1 py-0.5 rounded">@@UPLOAD_PROVIDER:providerName</code> - Upload provider</li>
+                </ul>
+              </div>
+            ) : (
+              <div>
+                <p className="font-semibold text-red-600 mb-1">Code-Based Config (NOT Database Safe)</p>
+                <p>This config contains functions and Date objects that cannot be serialized to JSON for database storage.</p>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Dynamic Form */}

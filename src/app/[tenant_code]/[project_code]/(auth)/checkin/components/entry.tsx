@@ -3,7 +3,7 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import { useAuthContext } from "@/contexts/auth.context";
-import { LoadingOverlay } from "@/kits/components/LoadingOverlay";
+import { LoadingOverlay } from "@/kits/components/loading-overlay";
 import { useTenantProjectPath } from "@/hooks/use-tenant-project-path";
 import { useCheckinState } from "../hooks/use-checkin-state";
 import { CheckinHeader } from "./CheckinHeader";

@@ -11,6 +11,17 @@ A powerful, flexible form system that renders forms dynamically from JSON config
 - 🔄 **Conditional Fields** - Show/hide fields based on other field values
 - 📱 **Responsive** - Grid-based layout with customizable column spans
 - 🎯 **Accessible** - ARIA labels and keyboard navigation support
+- 🗄️ **Database-Safe** - JSON configs can be stored in database (see [Database Config Guide](./FIREBASE_INTEGRATION.md))
+- ☁️ **Firebase Integration** - Built-in Firebase Storage support for image uploads
+
+## Quick Links
+
+- [Basic Usage](#basic-usage) - Get started quickly
+- [Firebase Integration Guide](./FIREBASE_INTEGRATION.md) - **NEW!** Use Firebase Storage for uploads
+- [Database Config Guide](./FIREBASE_INTEGRATION.md) - Store form configs in database
+- [Field Types](#supported-field-types) - All available field types
+- [Validation](#validation) - Form validation rules
+- [Examples](./exampleJsonConfig.json) - Complete JSON config example
 
 ## Supported Field Types
 
@@ -342,31 +353,55 @@ interface BaseFieldConfig {
 
 ### Image Capture
 
+#### Using Firebase Storage (Recommended)
+
+```typescript
+{
+  name: "profileImage",
+  type: "imageCapture",
+  label: "Profile Image",
+  helperText: "Upload to Firebase Storage",
+  cloudConfig: {
+    provider: "firebase",
+    path: "images/profiles",
+  },
+}
+```
+
+For JSON config (database-safe):
+```json
+{
+  "name": "profileImage",
+  "type": "imageCapture",
+  "label": "Profile Image",
+  "cloudConfig": "@@UPLOAD_PROVIDER:firebase"
+}
+```
+
+#### Using Custom Upload Function
+
 ```typescript
 {
   name: "profileImage",
   type: "imageCapture",
   label: "Profile Image",
   cloudConfig: {
-    provider: "firebase",
-    path: "images/profiles",
+    provider: "custom",
+    uploadFunction: async (file) => {
+      const formData = new FormData();
+      formData.append("image", file);
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await response.json();
+      return data.url;
+    },
   },
-  // Or custom upload:
-  // cloudConfig: {
-  //   provider: "custom",
-  //   uploadFunction: async (file) => {
-  //     const formData = new FormData();
-  //     formData.append("image", file);
-  //     const response = await fetch("/api/upload", {
-  //       method: "POST",
-  //       body: formData,
-  //     });
-  //     const data = await response.json();
-  //     return data.url;
-  //   },
-  // },
 }
 ```
+
+**See [Firebase Integration Guide](./FIREBASE_INTEGRATION.md) for more details.**
 
 ## Validation
 

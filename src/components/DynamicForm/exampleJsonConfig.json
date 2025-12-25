@@ -151,33 +151,6 @@
           ]
         },
         {
-          "name": "interests",
-          "type": "checkboxGroup",
-          "label": "Interests",
-          "span": 12,
-          "grid": 3,
-          "options": [
-            { "label": "Technology", "value": "tech" },
-            { "label": "Sports", "value": "sports" },
-            { "label": "Music", "value": "music" },
-            { "label": "Travel", "value": "travel" },
-            { "label": "Reading", "value": "reading" },
-            { "label": "Cooking", "value": "cooking" }
-          ]
-        },
-        {
-          "name": "gender",
-          "type": "radioGroup",
-          "label": "Gender",
-          "span": 12,
-          "direction": "horizontal",
-          "options": [
-            { "label": "Male", "value": "male" },
-            { "label": "Female", "value": "female" },
-            { "label": "Other", "value": "other" }
-          ]
-        },
-        {
           "name": "notifications",
           "type": "switch",
           "label": "Notifications",
@@ -223,15 +196,26 @@
     },
     {
       "title": "Image Upload",
-      "description": "Image capture and upload field",
+      "description": "Image capture and upload field with Firebase Storage",
       "fields": [
         {
           "name": "profileImage",
           "type": "imageCapture",
-          "label": "Profile Image",
-          "helperText": "Take a photo or upload an image",
-          "span": 12,
-          "cloudConfig": "@@UPLOAD_PROVIDER:mock"
+          "label": "Profile Image (Default Path)",
+          "helperText": "Upload to Firebase: images/uploads (using predefined provider)",
+          "span": 6,
+          "cloudConfig": "@@UPLOAD_PROVIDER:firebase"
+        },
+        {
+          "name": "reportImage",
+          "type": "imageCapture",
+          "label": "Report Image (Custom Path)",
+          "helperText": "Upload to Firebase: reports/custom-folder (using custom path)",
+          "span": 6,
+          "cloudConfig": {
+            "provider": "firebase",
+            "path": "reports/custom-folder"
+          }
         }
       ]
     },

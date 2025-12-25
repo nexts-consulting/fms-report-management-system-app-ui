@@ -103,10 +103,7 @@ export const PREDEFINED_FORMATTERS: Record<string, (groupKey: string, items: Inp
  * Predefined upload providers for image capture
  */
 export const PREDEFINED_UPLOAD_PROVIDERS: Record<string, any> = {
-  /**
-   * Mock upload provider (creates object URL)
-   */
-  mock: {
+  api: {
     provider: "custom",
     uploadFunction: async (file: File) => {
       // Simulate upload delay
@@ -116,7 +113,8 @@ export const PREDEFINED_UPLOAD_PROVIDERS: Record<string, any> = {
   },
 
   /**
-   * Firebase upload provider (requires firebase config)
+   * Firebase upload provider (uses Firebase Storage service)
+   * Uploads to "images/uploads" folder by default
    */
   firebase: {
     provider: "firebase",
@@ -124,12 +122,19 @@ export const PREDEFINED_UPLOAD_PROVIDERS: Record<string, any> = {
   },
 
   /**
-   * Supabase upload provider (requires supabase config)
+   * Firebase with custom path for reports
    */
-  supabase: {
-    provider: "supabase",
-    bucket: "uploads",
-    path: "images",
+  firebaseReports: {
+    provider: "firebase",
+    path: "reports/attachments",
+  },
+
+  /**
+   * Firebase with custom path for profiles
+   */
+  firebaseProfiles: {
+    provider: "firebase",
+    path: "users/profiles",
   },
 };
 
@@ -329,6 +334,7 @@ function hydrateValidationRule(rule: any): ValidationRule {
  * Hydrate cloud config for image capture
  */
 function hydrateCloudConfig(config: any): any {
+  // Handle string reference: "@@UPLOAD_PROVIDER:providerName"
   if (typeof config === "string" && config.startsWith(SPECIAL_VALUES.UPLOAD_PROVIDER_PREFIX)) {
     const providerName = config.substring(SPECIAL_VALUES.UPLOAD_PROVIDER_PREFIX.length);
     const provider = PREDEFINED_UPLOAD_PROVIDERS[providerName];
@@ -339,6 +345,12 @@ function hydrateCloudConfig(config: any): any {
       console.warn(`Upload provider "${providerName}" not found in PREDEFINED_UPLOAD_PROVIDERS`);
       return config;
     }
+  }
+  
+  // Handle object config: { provider: "firebase", path: "custom/path" }
+  // This is already JSON-safe, just return as-is
+  if (typeof config === "object" && config !== null) {
+    return config;
   }
   
   return config;
