@@ -57,13 +57,13 @@ import { useControllableState } from "@/kits/hooks";
 import { CommonUtil, StringUtil, StyleUtil } from "@/kits/utils";
 import { CameraCapture } from "@/kits/widgets/CameraCapture";
 import React from "react";
-import { IconButton } from "../IconButton";
-import { Icons } from "../Icons";
-import { Modal } from "../Modal";
-import { LoadingOverlay } from "../LoadingOverlay";
-import { NotificationBanner } from "../NotificationBanner";
-import { CloudConfig, UploadProgressCallback } from "@/kits/components/ImageCaptureInputWithUpload/types";
-import { uploadFileToCloud } from "@/kits/components/ImageCaptureInputWithUpload/upload.service";
+import { IconButton } from "../icon-button";
+import { Icons } from "../icons";
+import { Modal } from "../modal";
+import { LoadingOverlay } from "../loading-overlay";
+import { NotificationBanner } from "../notification-banner";
+import { CloudConfig, UploadProgressCallback } from "@/kits/components/image-capture-input-upload/types";
+import { uploadFileToCloud } from "@/kits/components/image-capture-input-upload/upload.service";
 
 const constants = {
   INSTANCE_NAME: "ImageCaptureInputWithUpload",
@@ -358,11 +358,11 @@ export const ImageCaptureInputWithUpload = React.memo(
 ImageCaptureInputWithUpload.displayName = constants.INSTANCE_NAME;
 
 // Export types and utilities
-export type { CloudConfig, CloudProvider, UploadResult, UploadProgressCallback } from "@/kits/components/ImageCaptureInputWithUpload/types";
+export type { CloudConfig, CloudProvider, UploadResult, UploadProgressCallback } from "@/kits/components/image-capture-input-upload/types";
 export type {
   FirebaseConfig,
   GCPConfig,
   S3Config,
   CustomConfig,
-} from "@/kits/components/ImageCaptureInputWithUpload/types";
-export { uploadFileToCloud } from "@/kits/components/ImageCaptureInputWithUpload/upload.service";
+} from "@/kits/components/image-capture-input-upload/types";
+export { uploadFileToCloud } from "@/kits/components/image-capture-input-upload/upload.service";

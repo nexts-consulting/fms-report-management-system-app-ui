@@ -6,14 +6,24 @@ import { FormConfig } from "@/components/DynamicForm/types";
 import { ScreenHeader } from "@/components/ScreenHeader";
 import { LoadingOverlay } from "@/kits/components/loading-overlay";
 import { useRouter } from "next/navigation";
+import { hydrateFormConfig } from "@/components/DynamicForm/formConfigSerializer";
+import exampleJsonConfig from "@/components/DynamicForm/exampleJsonConfig.json";
 
 export default function ReportPage() {
   const [formData, setFormData] = React.useState<Record<string, any>>({});
   const [submittedData, setSubmittedData] = React.useState<Record<string, any> | null>(null);
+  const [useJsonConfig, setUseJsonConfig] = React.useState(true);
   const router = useRouter();
-  const formConfig: FormConfig = {
-    title: "Dynamic Form Demo",
-    description: "This form is generated from JSON configuration. All field types are demonstrated below.",
+
+  // Hydrate JSON config to runtime config (simulates loading from database)
+  const hydratedJsonConfig = React.useMemo(() => {
+    return hydrateFormConfig(exampleJsonConfig);
+  }, []);
+
+  // CODE-BASED CONFIG (with functions and Date objects - NOT suitable for database storage)
+  const codeBasedFormConfig: FormConfig = {
+    title: "Dynamic Form Demo (Code-Based)",
+    description: "This form uses code-based config with functions and Date objects (NOT suitable for database storage).",
     gridColumns: 12,
     submitLabel: "Submit Form",
     cancelLabel: "Reset",
@@ -89,7 +99,7 @@ export default function ReportPage() {
             label: "Discount",
             placeholder: "0",
             min: 0,
-            max: 100,
+            max: 200,
             decimals: 2,
             span: 12,
           },
@@ -314,7 +324,7 @@ export default function ReportPage() {
               {
                 code: "SKU001",
                 name: "Sản phẩm A",
-                description: "Quà tặng: Túi xách cao cấp",
+                description: "Quà tặng: Túi xách",
                 unit: "pcs",
               },
               {
@@ -339,7 +349,7 @@ export default function ReportPage() {
             fieldNamePrefix: "items",
             fieldNameSuffix: "pcs",
             min: 0,
-            layout: "grid",
+            layout: "flex",
             showButtons: true,
           },
         ],
@@ -409,6 +419,9 @@ export default function ReportPage() {
     ],
   };
 
+  // Select config based on toggle
+  const formConfig = useJsonConfig ? hydratedJsonConfig : codeBasedFormConfig;
+
   const handleSubmit = (data: Record<string, any>) => {
     console.log("Form submitted with data:", data);
     setSubmittedData(data);
@@ -427,31 +440,50 @@ export default function ReportPage() {
 
   return (
     <>
-    <LoadingOverlay active={false} />
+      <LoadingOverlay active={false} />
 
-     <ScreenHeader
+      <ScreenHeader
         title="Báo cáo"
         onBack={() => router.back()}
       />
-    <div className="flex flex-col gap-4 p-4 pt-0">
-      <div className="flex items-center justify-between">
-          <DynamicForm
-            config={formConfig}
-            initialValues={formData}
-            onChange={handleChange}
-            onSubmit={handleSubmit}
-            onCancel={handleCancel}
-          />
-
-          {submittedData && (
-            <div className="mt-8 p-4 bg-gray-10 ">
-              <h3 className="text-lg font-semibold mb-4">Submitted Data:</h3>
-              <pre className="text-sm overflow-auto">
-                {JSON.stringify(submittedData, null, 2)}
-              </pre>
-            </div>
-          )}
+      
+      <div className="flex flex-col gap-4 p-4 pt-0">
+        {/* Config Type Toggle */}
+        <div className="bg-white border  p-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-semibold">Configuration Type</h3>
+            <button
+              onClick={() => {
+                setUseJsonConfig(!useJsonConfig);
+                setFormData({});
+                setSubmittedData(null);
+              }}
+              className="px-4 py-2 bg-primary-50 text-white hover:bg-primary-60 transition-colors text-sm"
+            >
+              Switch to {useJsonConfig ? "Code-Based" : "JSON-Based"}
+            </button>
+          </div>
+          
         </div>
+
+        {/* Dynamic Form */}
+        <DynamicForm
+          config={formConfig}
+          initialValues={formData}
+          onChange={handleChange}
+          onSubmit={handleSubmit}
+          onCancel={handleCancel}
+        />
+
+        {/* Submitted Data Display */}
+        {submittedData && (
+          <div className="mt-4 p-4 bg-gray-10 border border-gray-30 rounded-lg">
+            <h3 className="text-lg font-semibold mb-4">Submitted Data:</h3>
+            <pre className="text-sm overflow-auto">
+              {JSON.stringify(submittedData, null, 2)}
+            </pre>
+          </div>
+        )}
       </div>
     </>
   );

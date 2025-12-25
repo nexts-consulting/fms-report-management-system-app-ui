@@ -1,6 +1,6 @@
 import { Button } from "@/kits/components/button";
-import { Icons } from "@/kits/components/Icons";
-import { NotificationBanner } from "@/kits/components/NotificationBanner";
+import { Icons } from "@/kits/components/icons";
+import { NotificationBanner } from "@/kits/components/notification-banner";
 import { CommonUtil, StringUtil, StyleUtil } from "@/kits/utils";
 import { ImageUtil } from "@/kits/utils/image.util";
 import React, { useRef, useState, useCallback } from "react";

@@ -32,6 +32,8 @@ export const PercentageInput = React.memo(
     } = props;
 
     const instanceId = React.useRef(CommonUtil.nanoid("alphaLower"));
+    const [isFocused, setIsFocused] = React.useState(false);
+    const [inputValue, setInputValue] = React.useState("");
 
     const ids = React.useRef({
       container: StringUtil.createElementId(constants.INSTANCE_NAME, instanceId.current),
@@ -48,14 +50,26 @@ export const PercentageInput = React.memo(
       return value.toFixed(decimals);
     };
 
+    // Sync inputValue with valueProp when not focused
+    React.useEffect(() => {
+      if (!isFocused) {
+        const formatted = valueProp === null || valueProp === undefined 
+          ? "" 
+          : formatPercentage(typeof valueProp === "string" ? parseFloat(valueProp) : valueProp);
+        setInputValue(formatted);
+      }
+    }, [valueProp, isFocused, decimals]);
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const inputValue = e.target.value;
-      if (inputValue === "" || inputValue === null || inputValue === undefined) {
+      const newInputValue = e.target.value;
+      setInputValue(newInputValue);
+
+      if (newInputValue === "" || newInputValue === null || newInputValue === undefined) {
         onChangeProp?.(null);
         return;
       }
 
-      const numValue = parseFloat(inputValue);
+      const numValue = parseFloat(newInputValue);
       if (!isNaN(numValue)) {
         // Clamp value between min and max
         const clampedValue = Math.max(min, Math.min(max, numValue));
@@ -65,9 +79,29 @@ export const PercentageInput = React.memo(
       }
     };
 
-    const displayValue = valueProp === null || valueProp === undefined 
-      ? "" 
-      : formatPercentage(typeof valueProp === "string" ? parseFloat(valueProp) : valueProp);
+    const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+      setIsFocused(true);
+      rest.onFocus?.(e);
+    };
+
+    const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+      setIsFocused(false);
+      
+      // Format the value on blur
+      if (inputValue !== "" && inputValue !== null && inputValue !== undefined) {
+        const numValue = parseFloat(inputValue);
+        if (!isNaN(numValue)) {
+          const clampedValue = Math.max(min, Math.min(max, numValue));
+          const formatted = formatPercentage(clampedValue);
+          setInputValue(formatted);
+          onChangeProp?.(clampedValue);
+        }
+      }
+      
+      rest.onBlur?.(e);
+    };
+
+    const displayValue = inputValue;
 
     return (
       <div id={ids.current.container}>
@@ -81,6 +115,8 @@ export const PercentageInput = React.memo(
             error={error}
             value={displayValue}
             onChange={handleChange}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
             min={min}
             max={max}
             step={decimals > 0 ? 1 / Math.pow(10, decimals) : 1}

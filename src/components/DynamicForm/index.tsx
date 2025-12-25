@@ -12,6 +12,26 @@ import { validateForm, shouldDisplayField } from "./utils";
 import { StyleUtil } from "@/kits/utils";
 import { Button } from "@/kits/components/button";
 
+// Export form config serializer utilities
+export {
+  hydrateFormConfig,
+  serializeFormConfig,
+  deserializeFormConfig,
+  registerValidator,
+  registerFormatter,
+  registerUploadProvider,
+  createValidatorReference,
+  createFormatterReference,
+  createUploadProviderReference,
+  convertToJsonSafe,
+  PREDEFINED_VALIDATORS,
+  PREDEFINED_FORMATTERS,
+  PREDEFINED_UPLOAD_PROVIDERS,
+} from "./formConfigSerializer";
+
+// Export types
+export type { FormConfig, FieldConfig, FormSection, FormValidationResult, FormSubmitHandler, FormChangeHandler } from "./types";
+
 const constants = {
   INSTANCE_NAME: "DynamicForm",
 };
