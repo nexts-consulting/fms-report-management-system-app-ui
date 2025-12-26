@@ -10,9 +10,9 @@ const constants = {
 const styles = {
   selectedTags: StyleUtil.cn("flex flex-wrap gap-2 mt-2"),
   tag: StyleUtil.cn(
-    "inline-flex items-center gap-1 px-2 py-1 bg-primary-50 text-white text-xs rounded",
+    "inline-flex items-center gap-1 px-2 py-1 bg-primary-50 text-white text-xs",
   ),
-  removeButton: StyleUtil.cn("hover:bg-primary-60 rounded cursor-pointer"),
+  removeButton: StyleUtil.cn("hover:bg-primary-60 cursor-pointer"),
 };
 
 export interface MultiSelectInputProps {

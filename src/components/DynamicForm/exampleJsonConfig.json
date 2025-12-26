@@ -146,7 +146,7 @@
           "type": "select",
           "label": "Province (Parent)",
           "placeholder": "Select province",
-          "span": 6,
+          "span": 12,
           "options": {
             "groupCode": "province"
           }
@@ -156,7 +156,7 @@
           "type": "select",
           "label": "District (Child of Province)",
           "placeholder": "Select district",
-          "span": 6,
+          "span": 12,
           "options": {
             "groupCode": "district",
             "parentField": "province"
