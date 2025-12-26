@@ -47,30 +47,44 @@ export const TimePickerInput = React.memo(
       ),
     });
 
-    const formatTime = (time: string | Dayjs | null | undefined): string => {
+    const formatTime = React.useCallback((time: string | Dayjs | null | undefined): string => {
       if (!time) return "";
-      const t = typeof time === "string" ? dayjs(time, "HH:mm") : dayjs(time);
+      const t = typeof time === "string" ? dayjs(time, "HH:mm", true) : dayjs(time);
       if (!t.isValid()) return "";
-      return format === "24h" ? t.format("HH:mm") : t.format("hh:mm A");
-    };
+      // Always use 24h format for HTML input type="time"
+      return t.format("HH:mm");
+    }, []);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Local state to hold the current input value to prevent reset during state updates
+    const [localValue, setLocalValue] = React.useState<string>(() => formatTime(valueProp));
+
+    // Update local value when valueProp changes from external source
+    React.useEffect(() => {
+      const formatted = formatTime(valueProp);
+      // Only update if valueProp actually has a value (not null/undefined)
+      // This prevents resetting when parent hasn't updated yet
+      if (formatted) {
+        setLocalValue(formatted);
+      } else if (valueProp === null) {
+        // Explicitly clear if valueProp is explicitly null
+        setLocalValue("");
+      }
+    }, [valueProp, formatTime]);
+
+    const handleChange = React.useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
       const inputValue = e.target.value;
+      // Update local state immediately to prevent input reset
+      setLocalValue(inputValue);
+      
       if (!inputValue) {
         onChangeProp?.(null);
         return;
       }
+      onChangeProp?.(inputValue);
+    }, [onChangeProp]);
 
-      const time = dayjs(inputValue, "HH:mm");
-      if (time.isValid()) {
-        onChangeProp?.(time.format("HH:mm"));
-      } else {
-        onChangeProp?.(null);
-      }
-    };
-
-    const displayValue = formatTime(valueProp);
-
+    // Use localValue to ensure input doesn't reset during state updates
+    const displayValue = localValue;
     return (
       <div id={ids.current.container}>
         <TextInput
@@ -85,7 +99,7 @@ export const TimePickerInput = React.memo(
           min={minTime}
           max={maxTime}
           disabled={disabled}
-          placeholder={placeholder || (format === "24h" ? "HH:mm" : "hh:mm AM/PM")}
+          placeholder={placeholder || "HH:mm"}
         />
       </div>
     );
