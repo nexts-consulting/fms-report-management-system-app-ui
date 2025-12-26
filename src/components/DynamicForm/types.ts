@@ -26,6 +26,7 @@ export type FieldType =
   | "datetime"
   | "dateRange"
   | "imageCapture"
+  | "multipleImagesCapture"
   | "inputGroup"
   | "groupedInputGroup";
 
@@ -235,14 +236,47 @@ export interface SelectOption {
 }
 
 /**
+ * Dynamic dropdown configuration
+ */
+export interface DynamicDropdownConfig {
+  /**
+   * Group code to identify dropdown group in database
+   * Example: "LOCATION", "EQUIPMENT_TYPE", "STATUS"
+   */
+  groupCode: string;
+
+  /**
+   * Use condition_1 filter (location filter from localStorage)
+   * @default false
+   */
+  useCondition1?: boolean;
+
+  /**
+   * Use condition_2 filter
+   * @default false
+   */
+  useCondition2?: boolean;
+
+  /**
+   * Parent field name for hierarchical dropdown
+   * When parent value changes, child options will reload
+   * Example: "province" -> when province changes, load districts
+   */
+  parentField?: string;
+}
+
+/**
  * Select input field configuration
  */
 export interface SelectFieldConfig extends BaseFieldConfig {
   type: "select";
   /**
-   * Options for the select
+   * Static options OR dynamic dropdown config
+   * - Static: Array of SelectOption
+   * - Dynamic: DynamicDropdownConfig object to load from database
+   * - Async: Function that returns Promise<SelectOption[]>
    */
-  options: SelectOption[] | (() => Promise<SelectOption[]>);
+  options?: SelectOption[] | DynamicDropdownConfig | (() => Promise<SelectOption[]>);
   /**
    * Whether to allow clearing the selection
    */
@@ -259,9 +293,12 @@ export interface SelectFieldConfig extends BaseFieldConfig {
 export interface MultiSelectFieldConfig extends BaseFieldConfig {
   type: "multiselect";
   /**
-   * Options for the multi-select
+   * Static options OR dynamic dropdown config
+   * - Static: Array of SelectOption
+   * - Dynamic: DynamicDropdownConfig object to load from database
+   * - Async: Function that returns Promise<SelectOption[]>
    */
-  options: SelectOption[] | (() => Promise<SelectOption[]>);
+  options?: SelectOption[] | DynamicDropdownConfig | (() => Promise<SelectOption[]>);
   /**
    * Maximum number of selections
    */
@@ -416,6 +453,37 @@ export interface ImageCaptureFieldConfig extends BaseFieldConfig {
 }
 
 /**
+ * Multiple images capture field configuration
+ */
+export interface MultipleImagesCaptureFieldConfig extends BaseFieldConfig {
+  type: "multipleImagesCapture";
+  /**
+   * Cloud storage configuration (required for MultipleImagesCaptureInputUpload)
+   */
+  cloudConfig: any; // CloudConfig from ImageCaptureInputWithUpload
+  /**
+   * Default camera facing mode
+   */
+  defaultFacingMode?: "user" | "environment";
+  /**
+   * Maximum number of images allowed
+   */
+  maxImages?: number;
+  /**
+   * Minimum number of images required
+   */
+  minImages?: number;
+  /**
+   * Number of columns in grid
+   */
+  gridColumns?: 1 | 2 | 3 | 4;
+  /**
+   * Show image index badge
+   */
+  showImageIndex?: boolean;
+}
+
+/**
  * Input group item
  */
 export interface InputGroupItem {
@@ -560,6 +628,7 @@ export type FieldConfig =
   | DateTimeFieldConfig
   | DateRangeFieldConfig
   | ImageCaptureFieldConfig
+  | MultipleImagesCaptureFieldConfig
   | InputGroupFieldConfig
   | GroupedInputGroupFieldConfig;
 

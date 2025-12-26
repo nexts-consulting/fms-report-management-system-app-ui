@@ -171,25 +171,69 @@ export const DynamicForm = React.memo<DynamicFormProps>((props) => {
   // Handle field value change
   const handleFieldChange = React.useCallback(
     (fieldName: string, value: any) => {
-      const newValues = { ...values, [fieldName]: value };
+      // Find child fields that depend on this field (for dynamic dropdowns with parentField)
+      const childFieldsToReset: string[] = [];
+      allFields.forEach((field) => {
+        if (
+          (field.type === "select" || field.type === "multiselect") &&
+          field.options &&
+          typeof field.options === "object" &&
+          "parentField" in field.options &&
+          (field.options as any).parentField === fieldName
+        ) {
+          childFieldsToReset.push(field.name);
+        }
+      });
 
       if (isControlled) {
+        // For controlled components, use latest valuesProp from props
+        const newValues = { ...valuesProp, [fieldName]: value };
+        // Reset child fields that depend on this parent field
+        childFieldsToReset.forEach((childFieldName) => {
+          delete newValues[childFieldName];
+        });
         onChangeProp?.(newValues, fieldName, value);
       } else {
-        setInternalValues(newValues);
-        onChangeProp?.(newValues, fieldName, value);
+        // For uncontrolled components, calculate newValues from current state first
+        // Note: This may be stale if multiple rapid updates occur, but functional update
+        // in setState ensures the actual state is always correct
+        const newValues = { ...internalValues, [fieldName]: value };
+        // Reset child fields that depend on this parent field
+        childFieldsToReset.forEach((childFieldName) => {
+          delete newValues[childFieldName];
+        });
+        
+        // Use functional update to ensure we always work with latest state
+        setInternalValues((prev) => {
+          const updatedValues = { ...prev, [fieldName]: value };
+          childFieldsToReset.forEach((childFieldName) => {
+            delete updatedValues[childFieldName];
+          });
+          return updatedValues;
+        });
+        
+        // Call onChangeProp AFTER setState to avoid "Cannot update component while rendering" error
+        // Use setTimeout to defer until after the current render cycle
+        if (onChangeProp) {
+          setTimeout(() => {
+            onChangeProp(newValues, fieldName, value);
+          }, 0);
+        }
       }
 
-      // Clear validation error for this field
-      if (validationErrors[fieldName]) {
+      // Clear validation error for this field and child fields
+      if (validationErrors[fieldName] || childFieldsToReset.some((name) => validationErrors[name])) {
         setValidationErrors((prev) => {
           const next = { ...prev };
           delete next[fieldName];
+          childFieldsToReset.forEach((childFieldName) => {
+            delete next[childFieldName];
+          });
           return next;
         });
       }
     },
-    [values, isControlled, onChangeProp, validationErrors],
+    [valuesProp, isControlled, onChangeProp, validationErrors, allFields],
   );
 
   // Validate form
@@ -242,6 +286,7 @@ export const DynamicForm = React.memo<DynamicFormProps>((props) => {
             onChange={(value) => handleFieldChange(field.name, value)}
             error={fieldError}
             disabled={disabled}
+            formData={values}
           />
         </div>
       );
@@ -285,6 +330,7 @@ export const DynamicForm = React.memo<DynamicFormProps>((props) => {
                       onChange={(value) => handleFieldChange(field.name, value)}
                       error={fieldError}
                       disabled={disabled}
+                      formData={values}
                     />
                   </div>
                 );

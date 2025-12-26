@@ -63,7 +63,7 @@ import { Modal } from "../modal";
 import { LoadingOverlay } from "../loading-overlay";
 import { NotificationBanner } from "../notification-banner";
 import { CloudConfig, UploadProgressCallback } from "@/kits/components/image-capture-input-upload/types";
-import { uploadFileToCloud } from "@/kits/components/image-capture-input-upload/upload.service";
+import { uploadFileToCloud } from "@/components/DynamicForm/services/upload.service";
 
 const constants = {
   INSTANCE_NAME: "ImageCaptureInputWithUpload",
@@ -356,13 +356,3 @@ export const ImageCaptureInputWithUpload = React.memo(
 );
 
 ImageCaptureInputWithUpload.displayName = constants.INSTANCE_NAME;
-
-// Export types and utilities
-export type { CloudConfig, CloudProvider, UploadResult, UploadProgressCallback } from "@/kits/components/image-capture-input-upload/types";
-export type {
-  FirebaseConfig,
-  GCPConfig,
-  S3Config,
-  CustomConfig,
-} from "@/kits/components/image-capture-input-upload/types";
-export { uploadFileToCloud } from "@/kits/components/image-capture-input-upload/upload.service";

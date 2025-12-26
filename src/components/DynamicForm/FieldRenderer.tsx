@@ -10,8 +10,8 @@ import { NumberInput } from "./fields/NumberInput";
 import { CurrencyInput } from "./fields/CurrencyInput";
 import { PercentageInput } from "./fields/PercentageInput";
 import { MaskedInput } from "./fields/MaskedInput";
-import { SelectInput } from "./fields/SelectInput";
-import { MultiSelectInput } from "./fields/MultiSelectInput";
+import { SelectWithDynamic } from "./fields/SelectWithDynamic";
+import { MultiSelectWithDynamic } from "./fields/MultiSelectWithDynamic";
 import { CheckboxInput } from "./fields/CheckboxInput";
 import { SwitchInput } from "./fields/SwitchInput";
 import { DatePickerInput } from "./fields/DatePickerInput";
@@ -24,6 +24,8 @@ import { GroupedInputGroup } from "./fields/GroupedInputGroup";
 import { TextInput } from "@/kits/components/text-input";
 import { TextArea } from "@/kits/components/text-area";
 import { ImageCaptureInputWithUpload } from "@/kits/components/image-capture-input-upload";
+import { MultipleImagesCaptureInputUpload } from "@/kits/components/multiple-images-capture-input-upload";
+
 
 export interface FieldRendererProps {
   field: FieldConfig;
@@ -31,6 +33,7 @@ export interface FieldRendererProps {
   onChange: (value: any) => void;
   error?: string;
   disabled?: boolean;
+  formData?: Record<string, any>; // Add formData to access other field values
 }
 
 export const FieldRenderer: React.FC<FieldRendererProps> = ({
@@ -39,6 +42,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
   onChange,
   error,
   disabled,
+  formData = {},
 }) => {
   const commonProps = {
     label: field.label,
@@ -129,24 +133,25 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
 
     case "select":
       return (
-        <SelectInput
-          {...commonProps}
+        <SelectWithDynamic
+          field={field}
           value={value}
           onChange={onChange}
-          options={field.options}
-          placeholder={field.placeholder}
+          commonProps={commonProps}
+          disabled={disabled}
+          formData={formData}
         />
       );
 
     case "multiselect":
       return (
-        <MultiSelectInput
-          {...commonProps}
+        <MultiSelectWithDynamic
+          field={field}
           value={value}
           onChange={onChange}
-          options={field.options}
-          placeholder={field.placeholder}
-          maxSelections={field.maxSelections}
+          commonProps={commonProps}
+          disabled={disabled}
+          formData={formData}
         />
       );
 
@@ -229,6 +234,24 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
           defaultFacingMode={field.defaultFacingMode}
           error={!!error}
           disabled={disabled || field.disabled}
+        />
+      );
+
+    case "multipleImagesCapture":
+      return (
+        <MultipleImagesCaptureInputUpload
+          label={field.label}
+          helperText={field.helperText}
+          value={value || []}
+          onChange={onChange}
+          cloudConfig={field.cloudConfig}
+          defaultFacingMode={field.defaultFacingMode}
+          error={!!error}
+          disabled={disabled || field.disabled}
+          maxImages={field.maxImages}
+          minImages={field.minImages}
+          gridColumns={field.gridColumns}
+          showImageIndex={field.showImageIndex}
         />
       );
 

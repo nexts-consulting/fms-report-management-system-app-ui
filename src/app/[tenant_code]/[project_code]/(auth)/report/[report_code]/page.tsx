@@ -397,7 +397,6 @@ export default function ReportPage() {
 
   const handleChange = (data: Record<string, any>, fieldName: string, value: any) => {
     setFormData(data);
-    console.log(`Field ${fieldName} changed:`, value);
   };
 
   const handleCancel = () => {

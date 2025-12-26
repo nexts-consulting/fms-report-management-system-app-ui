@@ -17,7 +17,7 @@ import {
   CustomConfig,
   UploadResult,
   UploadProgressCallback,
-} from "./types";
+} from "../../../kits/components/image-capture-input-upload/types";
 
 /**
  * Default configuration values
