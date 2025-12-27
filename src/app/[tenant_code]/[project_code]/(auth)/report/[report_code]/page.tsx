@@ -7,7 +7,6 @@ import { ScreenHeader } from "@/components/ScreenHeader";
 import { LoadingOverlay } from "@/kits/components/loading-overlay";
 import { useRouter } from "next/navigation";
 import { hydrateFormConfig } from "@/components/DynamicForm/formConfigSerializer";
-import exampleJsonConfig from "@/components/DynamicForm/exampleJsonConfig.json";
 
 export default function ReportPage() {
   const [formData, setFormData] = React.useState<Record<string, any>>({});
@@ -16,9 +15,9 @@ export default function ReportPage() {
   const router = useRouter();
 
   // Hydrate JSON config to runtime config (simulates loading from database)
-  const hydratedJsonConfig = React.useMemo(() => {
-    return hydrateFormConfig(exampleJsonConfig);
-  }, []);
+  // const hydratedJsonConfig = React.useMemo(() => {
+  //   return hydrateFormConfig(exampleJsonConfig);
+  // }, []);
   // CODE-BASED CONFIG (with functions and Date objects - NOT suitable for database storage)
   const codeBasedFormConfig: FormConfig = {
     title: "Dynamic Form Demo (Code-Based)",
@@ -387,7 +386,7 @@ export default function ReportPage() {
   };
 
   // Select config based on toggle
-  const formConfig = useJsonConfig ? hydratedJsonConfig : codeBasedFormConfig;
+  const formConfig = codeBasedFormConfig;
 
   const handleSubmit = (data: Record<string, any>) => {
     console.log("Form submitted with data:", data);

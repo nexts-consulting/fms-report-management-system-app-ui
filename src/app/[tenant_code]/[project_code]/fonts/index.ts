@@ -17,12 +17,6 @@ export const inter = Inter({
   display: "swap",
 });
 
-export const vnmSansDisplay = localFont({
-  src: "../../../../../public/fonts/VNM Sans Display Regular.otf",
-  variable: "--font-vnm-sans-display",
-  display: "swap",
-});
-
-const fonts: NextFontWithVariable[] = [chakraPetch, inter, vnmSansDisplay];
+const fonts: NextFontWithVariable[] = [chakraPetch, inter];
 
 export const fontVariables: string[] = fonts.map((font) => font.variable);

@@ -58,10 +58,7 @@ export type ProjectWorkshiftMode = "FIXED_TIME_WITHIN_WORKSHIFT" | "FIXED_TIME_W
 // Tenant Project Status
 export type TenantProjectStatus = "ACTIVE" | "INACTIVE" | "ENDED";
 
-// ==============================
 // ADMIN DIVISION MODELS
-// ==============================
-
 export interface IAdminDivision {
   id: number;
   project_code: string;
@@ -79,10 +76,7 @@ export interface IAdminDivisionWithChildren extends IAdminDivision {
   children?: IAdminDivisionWithChildren[];
 }
 
-// ==============================
 // LOCATION MODELS
-// ==============================
-
 export interface ILocation {
   id: number;
   project_code: string;
@@ -108,11 +102,7 @@ export interface GetLocationsParams {
   offset?: number;
 }
 
-// ==============================
 // APP MENU MODELS
-// ==============================
-
-
 export interface IAppMenu {
   id: number;
   project_code: string;
@@ -134,7 +124,7 @@ export interface IAppMenuWithChildren extends IAppMenu {
   children?: IAppMenuWithChildren[];
 }
 
-// App Menu Permissions
+// APP MENU ROLE PERMISSION MODELS
 export interface IAppMenuRolePermission {
   id: number;
   menu_id: number;
@@ -149,10 +139,7 @@ export interface IAppMenuUserPermission {
   permission: string;
 }
 
-// ==============================
 // WORKSHIFT MODELS
-// ==============================
-
 export interface IWorkshift {
   id: number;
   project_code: string;
@@ -175,7 +162,7 @@ export interface GetWorkshiftsParams {
   offset?: number;
 }
 
-// Location Workshift Assignment
+// LOCATION WORKSHIFT ASSIGNMENT MODELS
 export interface ILocationWorkshift {
   id: number;
   project_code: string;
@@ -208,7 +195,7 @@ export interface GetLocationWorkshiftsParams {
   offset?: number;
 }
 
-// User Workshift Assignment
+// USER WORKSHIFT ASSIGNMENT MODELS
 export interface IUserWorkshift {
   id: number;
   project_code: string;
@@ -239,7 +226,7 @@ export interface GetUserWorkshiftsParams {
   offset?: number;
 }
 
-// Working Shift (UI Model - includes location info)
+// WORKING SHIFT (UI MODEL - INCLUDES LOCATION INFO)
 export interface IWorkingShiftLocation {
   id: number;
   name: string;
@@ -248,10 +235,7 @@ export interface IWorkingShiftLocation {
   location: ILocation;
 }
 
-// ==============================
 // ATTENDANCE MODELS
-// ==============================
-
 export interface IAttendance {
   id: number;
   project_code: string;
@@ -278,11 +262,7 @@ export interface IAttendance {
   updated_at: string;
 }
 
-// ==============================
 // PROJECT CONFIG MODELS
-// ==============================
-
-// Project Metadata
 export interface IProjectMetadata {
   id: string;
   project_id: string;
@@ -294,7 +274,6 @@ export interface IProjectMetadata {
   version: number;
 }
 
-// Project Auth Config
 export interface IProjectAuthConfig {
   id: string;
   project_id: string;
@@ -306,7 +285,6 @@ export interface IProjectAuthConfig {
   version: number;
 }
 
-// Project Checkin Flow
 export interface IProjectCheckinFlow {
   id: string;
   project_id: string;
@@ -320,7 +298,6 @@ export interface IProjectCheckinFlow {
   version: number;
 }
 
-// Project GPS Config
 export interface IProjectGpsConfig {
   id: string;
   project_id: string;
@@ -331,7 +308,6 @@ export interface IProjectGpsConfig {
   version: number;
 }
 
-// Project Attendance Photo Config
 export interface IProjectAttendancePhotoConfig {
   id: string;
   project_id: string;
@@ -343,7 +319,6 @@ export interface IProjectAttendancePhotoConfig {
   version: number;
 }
 
-// Project Workshift Config
 export interface IProjectWorkshiftConfig {
   id: string;
   project_id: string;
@@ -365,7 +340,6 @@ export interface IProjectWorkshiftConfig {
   version: number;
 }
 
-// Project All Configs
 export interface IProjectAllConfigs {
   metadata: IProjectMetadata[];
   authConfig: IProjectAuthConfig | null;
@@ -375,10 +349,7 @@ export interface IProjectAllConfigs {
   workshiftConfig: IProjectWorkshiftConfig | null;
 }
 
-// ==============================
 // TENANT MODELS
-// ==============================
-
 export interface ITenant {
   id: string;
   code: string;
@@ -419,10 +390,7 @@ export interface ITenantProject {
   version: number;
 }
 
-// ==============================
 // KEYCLOAK MODELS
-// ==============================
-
 export interface KeycloakUser {
   id: string;
   username: string;
@@ -463,14 +431,36 @@ export interface GetKeycloakGroupsParams {
   max?: number;
 }
 
-
-// ==============================
 // QUESTION MODELS
-// ==============================
-
 export interface IQuestion {
   id: string;
   question: string;
   options: string[];
   correctIndex: number;
+}
+
+// REPORT DEFINITION MODELS
+export interface IReportDefinition {
+  id: string;
+  tenant_id: string;
+  project_code: string;
+  code: string;
+  name: string;
+  description?: string;
+  status?: "draft" | "published" | "archived" | null;
+  data_source_type?: "table" | "view" | "rpc" | "external_api" | null;
+  data_source_config?: Record<string, any> | null;
+  form_definition?: Record<string, any> | null;
+  table_definition?: Record<string, any> | null;
+  form_preview_definition?: Record<string, any> | null;
+  table_preview_definition?: Record<string, any> | null;
+  filter_definition?: Record<string, any> | null;
+  permissions?: Record<string, any> | null;
+  version?: number | null;
+  is_active?: boolean | null;
+  is_required?: boolean | null;
+  required_after_checkin_minutes?: number | null;
+  created_by?: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
 }

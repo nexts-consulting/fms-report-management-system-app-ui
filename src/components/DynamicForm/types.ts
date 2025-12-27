@@ -241,7 +241,6 @@ export interface SelectOption {
 export interface DynamicDropdownConfig {
   /**
    * Group code to identify dropdown group in database
-   * Example: "LOCATION", "EQUIPMENT_TYPE", "STATUS"
    */
   groupCode: string;
 

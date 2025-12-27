@@ -12,11 +12,11 @@ import { useShiftTime } from "@/hooks/shift/use-shift-time";
 import { useShiftUpcoming } from "@/hooks/shift/use-shift-upcoming";
 import { useCheckinTimeAllowed } from "@/hooks/check-in/use-checkin-time-allowed";
 import { Button } from "@/kits/components/button";
-import { Icons } from "@/kits/components/Icons";
-import { LoadingOverlay } from "@/kits/components/LoadingOverlay";
-import { Modal } from "@/kits/components/Modal";
-import { useNotification } from "@/kits/components/Notification";
-import { NotificationBanner } from "@/kits/components/NotificationBanner";
+import { Icons } from "@/kits/components/icons";
+import { LoadingOverlay } from "@/kits/components/loading-overlay";
+import { Modal } from "@/kits/components/modal";
+import { useNotification } from "@/kits/components/notification";
+import { NotificationBanner } from "@/kits/components/notification-banner";
 import { StringUtil, StyleUtil } from "@/kits/utils";
 import { useQueryWorkingShiftListByLocationToday } from "@/services/api/application/working-shift/list-by-location-today";
 import { useQueryWorkingShiftListByUserToday } from "@/services/api/application/working-shift/list-by-user-today";
@@ -52,7 +52,6 @@ export const Entry = () => {
 
   const notification = useNotification();
 
-  
   
   const [selectedWorkingShift, setSelectedWorkingShift] = React.useState<IWorkingShiftLocation | null>(
     null,

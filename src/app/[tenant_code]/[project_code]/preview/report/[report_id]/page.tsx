@@ -1,0 +1,96 @@
+"use client";
+
+import React, { useEffect } from "react";
+import { DynamicForm } from "@/components/DynamicForm";
+import { ScreenHeader } from "@/components/ScreenHeader";
+import { LoadingOverlay } from "@/kits/components/loading-overlay";
+import { hydrateFormConfig } from "@/components/DynamicForm/formConfigSerializer";
+import { useParams } from "next/navigation";
+import { useQueryReportDefinitionPreviewById } from "@/services/api/application/report-definition/get-preview-by-id";
+
+export default function ReportPage() {
+  const [formData, setFormData] = React.useState<Record<string, any>>({});
+  const [submittedData, setSubmittedData] = React.useState<Record<string, any> | null>(null);
+
+  const params = useParams();
+  const reportId = params?.report_id as string;
+
+  useEffect(() => {
+    const handler = (e: MessageEvent) => {
+      if (e.data?.type === "FORM_UPDATED") {
+        refetchForm();
+      }
+    };
+    window.addEventListener("message", handler);
+    return () => window.removeEventListener("message", handler);
+  }, []);
+  
+  const reportDefinitionPreviewQuery = useQueryReportDefinitionPreviewById({
+    params: {
+      id: reportId || "",
+    },
+    config: {
+      enabled: !!reportId,
+    },
+  });
+
+  const hydratedJsonConfig = React.useMemo(() => {
+    if (!reportDefinitionPreviewQuery.data?.data) {
+      return null;
+    }
+    return hydrateFormConfig(reportDefinitionPreviewQuery.data.data.form_preview_definition);
+  }, [reportDefinitionPreviewQuery.data?.data?.form_preview_definition]);
+  const formConfig = hydratedJsonConfig;
+
+  const handleSubmit = (data: Record<string, any>) => {
+    console.log("Form submitted with data:", data);
+    setSubmittedData(data);
+    alert("Form submitted! Check console for data.");
+  };
+
+  const handleChange = (data: Record<string, any>, fieldName: string, value: any) => {
+    setFormData(data);
+  };
+
+  const handleCancel = () => {
+    setFormData({});
+    setSubmittedData(null);
+  };
+  
+  const refetchForm = () => {
+    reportDefinitionPreviewQuery.refetch();
+  };
+
+  const isLoading = reportDefinitionPreviewQuery.isLoading || reportDefinitionPreviewQuery.isFetching;
+  const hasError = reportDefinitionPreviewQuery.isError;
+  const hasData = !!formConfig;
+
+  return (
+    <>
+      <LoadingOverlay active={isLoading} />
+
+      <ScreenHeader
+        title="Preview Mode"
+      />
+      <div className="flex flex-col gap-4 p-4 pt-0">
+        {hasData && !hasError && (
+          <DynamicForm
+            config={formConfig}
+            initialValues={formData}
+            onChange={handleChange}
+            onSubmit={handleSubmit}
+            onCancel={handleCancel}
+          />
+        )}
+        {submittedData && (
+          <div className="mt-4 p-4 bg-gray-10 border border-gray-30 rounded-lg">
+            <h3 className="text-lg font-semibold mb-4">Submitted Data:</h3>
+            <pre className="text-sm overflow-auto">
+              {JSON.stringify(submittedData, null, 2)}
+            </pre>
+          </div>
+        )}
+      </div>
+    </>
+  );
+}
