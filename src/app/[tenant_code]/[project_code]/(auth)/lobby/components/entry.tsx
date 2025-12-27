@@ -4,7 +4,7 @@ import { ScreenFooter } from "@/components/ScreenFooter";
 import { UserHeader } from "@/components/UserHeader";
 import { useAuthContext } from "@/contexts/auth.context";
 import { useGlobalContext } from "@/contexts/global.context";
-import { Icons } from "@/kits/components/Icons";
+import { Icons } from "@/kits/components/icons";
 import { StyleUtil } from "@/kits/utils";
 import { useRouter, useSearchParams } from "next/navigation";
 import React from "react";
