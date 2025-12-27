@@ -30,7 +30,7 @@ export const httpRequestReportDefinitionPreviewByCode = async (
 
     return { data: data as IReportDefinition };
   } catch (error) {
-    console.error("Error fetching report definition preview by code:", error);
+    console.error("Error fetching report definition preview by id:", error);
     throw error;
   }
 }

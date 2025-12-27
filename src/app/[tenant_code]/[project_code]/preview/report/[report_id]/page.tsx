@@ -15,6 +15,16 @@ export default function ReportPage() {
   const params = useParams();
   const reportId = params?.report_id as string;
 
+  const reportDefinitionPreviewQuery = useQueryReportDefinitionPreviewById({
+    params: {
+      id: reportId || "",
+    },
+    config: {
+      enabled: !!reportId,
+    },
+  });
+
+  // Listen for messages from parent (admin UI)
   useEffect(() => {
     const handler = (e: MessageEvent) => {
       if (e.data?.type === "FORM_UPDATED") {
@@ -25,14 +35,9 @@ export default function ReportPage() {
     return () => window.removeEventListener("message", handler);
   }, []);
   
-  const reportDefinitionPreviewQuery = useQueryReportDefinitionPreviewById({
-    params: {
-      id: reportId || "",
-    },
-    config: {
-      enabled: !!reportId,
-    },
-  });
+  const refetchForm = () => {
+    reportDefinitionPreviewQuery.refetch();
+  };
 
   const hydratedJsonConfig = React.useMemo(() => {
     if (!reportDefinitionPreviewQuery.data?.data) {
@@ -40,6 +45,7 @@ export default function ReportPage() {
     }
     return hydrateFormConfig(reportDefinitionPreviewQuery.data.data.form_preview_definition);
   }, [reportDefinitionPreviewQuery.data?.data?.form_preview_definition]);
+  
   const formConfig = hydratedJsonConfig;
 
   const handleSubmit = (data: Record<string, any>) => {
@@ -55,10 +61,6 @@ export default function ReportPage() {
   const handleCancel = () => {
     setFormData({});
     setSubmittedData(null);
-  };
-  
-  const refetchForm = () => {
-    reportDefinitionPreviewQuery.refetch();
   };
 
   const isLoading = reportDefinitionPreviewQuery.isLoading || reportDefinitionPreviewQuery.isFetching;
