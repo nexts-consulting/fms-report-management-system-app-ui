@@ -11,6 +11,7 @@ import { FieldRenderer } from "./FieldRenderer";
 import { validateForm, shouldDisplayField } from "./utils";
 import { StyleUtil } from "@/kits/utils";
 import { Button } from "@/kits/components/button";
+import { NotificationBanner } from "@/kits/components/notification-banner";
 
 // Export form config serializer utilities
 export {
@@ -82,6 +83,8 @@ const styles = {
     });
   },
   actions: StyleUtil.cn("flex gap-4 justify-end mt-8"),
+  errorList: StyleUtil.cn("mb-6 space-y-2"),
+  errorListItem: StyleUtil.cn("text-sm"),
 };
 
 export interface DynamicFormProps {
@@ -249,10 +252,12 @@ export const DynamicForm = React.memo<DynamicFormProps>((props) => {
   const handleSubmit = React.useCallback(
     (e: React.FormEvent) => {
       e.preventDefault();
-
+      console.log("values", values);
       const validation = validate();
+      console.log("validation", validation);
       if (validation.isValid) {
         onSubmitProp?.(values);
+        console.log("values after submit", values);
       }
     },
     [validate, onSubmitProp, values],
@@ -265,6 +270,23 @@ export const DynamicForm = React.memo<DynamicFormProps>((props) => {
     },
     [externalErrors, validationErrors],
   );
+
+  // Get all errors as an array
+  const allErrors = React.useMemo(() => {
+    const errors: Array<{ fieldName: string; message: string; label?: string }> = [];
+    const combinedErrors = { ...externalErrors, ...validationErrors };
+    
+    Object.keys(combinedErrors).forEach((fieldName) => {
+      const field = allFields.find((f) => f.name === fieldName);
+      errors.push({
+        fieldName,
+        message: combinedErrors[fieldName],
+        label: field?.label || fieldName,
+      });
+    });
+    
+    return errors;
+  }, [externalErrors, validationErrors, allFields]);
 
   // Render a single field
   const renderField = React.useCallback(
@@ -352,12 +374,30 @@ export const DynamicForm = React.memo<DynamicFormProps>((props) => {
     <form className={StyleUtil.cn(styles.form, config.className)} onSubmit={handleSubmit}>
       {config.title && <h2 className={styles.title}>{config.title}</h2>}
       {config.description && <p className={styles.description}>{config.description}</p>}
-
       {config.sections ? (
         config.sections.map(renderSection)
       ) : (
         <div className={styles.fieldsGrid(config.gridColumns || 12)}>
           {allFields.map(renderField)}
+        </div>
+      )}
+
+      {showErrors && allErrors.length > 0 && (
+        <div className={styles.errorList}>
+          <NotificationBanner
+            type="error"
+            title={`Vui lòng kiểm tra lại các trường`}
+            description={
+              <ul className={StyleUtil.cn("list-disc list-inside space-y-1 mt-2")}>
+                {allErrors.map((error, index) => (
+                  <li key={index} className={styles.errorListItem}>
+                    <strong>{error.label}:</strong> {error.message}
+                  </li>
+                ))}
+              </ul>
+            }
+            closeable={false}
+          />
         </div>
       )}
 
@@ -369,7 +409,7 @@ export const DynamicForm = React.memo<DynamicFormProps>((props) => {
             </Button>
           )}
           {config.showSubmit !== false && (
-            <Button type="submit" variant="primary" disabled={disabled}>
+            <Button type="submit" variant="primary" disabled={disabled} onClick={handleSubmit}>
               {config.submitLabel || "Submit"}
             </Button>
           )}

@@ -51,7 +51,6 @@ export default function ReportPage() {
   const handleSubmit = (data: Record<string, any>) => {
     console.log("Form submitted with data:", data);
     setSubmittedData(data);
-    alert("Form submitted! Check console for data.");
   };
 
   const handleChange = (data: Record<string, any>, fieldName: string, value: any) => {

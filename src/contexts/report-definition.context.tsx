@@ -9,7 +9,6 @@ import React from "react";
 import { StoreApi } from "zustand";
 import { LibraryUtil } from "../kits/utils/lib.util";
 import { httpRequestReportDefinitionPreviewByCode } from "@/services/api/application/report-definition/get-preview-by-id";
-import { IReportDefinition } from "@/types/model";
 
 export interface IReportDefinitionContext extends StoreApi<ReportDefinitionStore> {}
 const ReportDefinitionContext = React.createContext<IReportDefinitionContext | undefined>(

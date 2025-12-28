@@ -442,7 +442,7 @@ export interface IQuestion {
 // REPORT DEFINITION MODELS
 export interface IReportDefinition {
   id: string;
-  tenant_id: string;
+  tenant_code: string;
   project_code: string;
   code: string;
   name: string;

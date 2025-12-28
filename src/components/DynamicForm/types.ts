@@ -719,6 +719,11 @@ export interface FormConfig {
    * Whether to show cancel button
    */
   showCancel?: boolean;
+
+  /**
+   * Entry label columns
+   */
+  entryLabelColumn?: string[];
 }
 
 /**

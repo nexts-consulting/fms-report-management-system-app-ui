@@ -8,398 +8,102 @@ import { LoadingOverlay } from "@/kits/components/loading-overlay";
 import { useRouter, useParams } from "next/navigation";
 import { hydrateFormConfig } from "@/components/DynamicForm/formConfigSerializer";
 import { useReportDefinition } from "@/contexts/report-definition.context";
+import { useTenantProjectPath } from "@/hooks/use-tenant-project-path";
+import { useAuthContext } from "@/contexts/auth.context";
+import { useNotification } from "@/kits/components/notification";
+import { httpRequestCreateReportEntry } from "@/services/api/application/report-entry/create";
 
 export default function ReportPage() {
   const [formData, setFormData] = React.useState<Record<string, any>>({});
   const [submittedData, setSubmittedData] = React.useState<Record<string, any> | null>(null);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
   const router = useRouter();
   const params = useParams();
   const reportId = params?.report_id as string;
+  const authStore = useAuthContext();
+  const user = authStore.use.user();
+  const notification = useNotification();
   
   const { data: reportDefinition, isLoading, error } = useReportDefinition(reportId);
 
   // Hydrate form config from report definition
   const hydratedFormConfig = React.useMemo(() => {
-    if (!reportDefinition?.form_preview_definition) {
+    if (!reportDefinition?.form_definition) {
       return null;
     }
-    return hydrateFormConfig(reportDefinition.form_preview_definition);
-  }, [reportDefinition?.form_preview_definition]);
+    return hydrateFormConfig(reportDefinition.form_definition);
+  }, [reportDefinition?.form_definition]);
 
-  // Fallback demo config (for testing when no report definition is available)
-  const codeBasedFormConfig: FormConfig = {
-    title: "Dynamic Form Demo (Code-Based)",
-    description: "This form uses code-based config with functions and Date objects (NOT suitable for database storage).",
-    gridColumns: 12,
-    submitLabel: "Submit Form",
-    cancelLabel: "Reset",
-    showSubmit: true,
-    showCancel: true,
-    sections: [
-      {
-        title: "Text & Number Inputs",
-        description: "Basic text and number input fields",
-        fields: [
-          {
-            name: "fullName",
-            type: "text",
-            label: "Full Name",
-            placeholder: "Enter your full name",
-            required: true,
-            span: 12,
-            validation: [
-              { type: "required", message: "Full name is required" },
-              { type: "minLength", value: 2, message: "Name must be at least 2 characters" },
-            ],
-          },
-          {
-            name: "email",
-            type: "text",
-            label: "Email Address",
-            placeholder: "example@email.com",
-            inputType: "email",
-            required: true,
-            span: 12,
-            validation: [
-              { type: "required", message: "Email is required" },
-              { type: "email", message: "Please enter a valid email address" },
-            ],
-          },
-          {
-            name: "description",
-            type: "textarea",
-            label: "Description",
-            placeholder: "Enter a description",
-            rows: 4,
-            span: 122,
-            validation: [
-              { type: "maxLength", value: 500, message: "Description must be less than 500 characters" },
-            ],
-          },
-          {
-            name: "age",
-            type: "number",
-            label: "Age",
-            placeholder: "Enter your age",
-            min: 0,
-            max: 120,
-            span: 12,
-            validation: [
-              { type: "min", value: 0, message: "Age must be at least 0" },
-              { type: "max", value: 120, message: "Age must be at most 120" },
-            ],
-          },
-          {
-            name: "salary",
-            type: "currency",
-            label: "Salary",
-            placeholder: "0",
-            currency: "VND",
-            decimals: 0,
-            min: 0,
-            span: 12,
-          },
-          {
-            name: "discount",
-            type: "percentage",
-            label: "Discount",
-            placeholder: "0",
-            min: 0,
-            max: 200,
-            decimals: 2,
-            span: 12,
-          },
-          {
-            name: "phone",
-            type: "masked",
-            label: "Phone Number",
-            placeholder: "(123) 456-7890",
-            mask: "phone",
-            span: 12,
-          },
-          {
-            name: "code",
-            type: "masked",
-            label: "Product Code",
-            placeholder: "ABC-123",
-            mask: "code",
-            span: 12,
-          },
-        ],
-      },
-      {
-        title: "Selection Fields",
-        description: "Select, multi-select, checkbox, radio, and switch fields",
-        fields: [
-          {
-            name: "country",
-            type: "select",
-            label: "Country",
-            placeholder: "Select a country",
-            required: true,
-            span: 12,
-            options: [
-              { label: "Vietnam", value: "vn" },
-              { label: "United States", value: "us" },
-              { label: "United Kingdom", value: "uk" },
-              { label: "Japan", value: "jp" },
-              { label: "South Korea", value: "kr" },
-            ],
-            validation: [{ type: "required", message: "Please select a country" }],
-          },
-          {
-            name: "languages",
-            type: "multiselect",
-            label: "Languages",
-            placeholder: "Select languages",
-            span: 12,
-            maxSelections: 5,
-            options: [
-              { label: "Vietnamese", value: "vi" },
-              { label: "English", value: "en" },
-              { label: "Japanese", value: "ja" },
-              { label: "Korean", value: "ko" },
-              { label: "Chinese", value: "zh" },
-              { label: "French", value: "fr" },
-            ],
-          },
-          {
-            name: "termsAccepted",
-            type: "checkbox",
-            label: "Terms and Conditions",
-            checkboxLabel: "I accept the terms and conditions",
-            required: true,
-            span: 122,
-            validation: [
-              {
-                type: "custom",
-                validator: (value) => value === true,
-                message: "You must accept the terms and conditions",
-              },
-            ],
-          },
-          {
-            name: "notifications",
-            type: "switch",
-            label: "Notifications",
-            switchLabel: "Enable email notifications",
-            span: 122,
-          },
-        ],
-      },
-      {
-        title: "Date & Time Fields",
-        description: "Date, time, datetime, and date range pickers",
-        fields: [
-          {
-            name: "birthDate",
-            type: "date",
-            label: "Birth Date",
-            format: "YYYY-MM-DD",
-            maxDate: new Date(),
-            span: 12,
-          },
-          {
-            name: "appointmentTime",
-            type: "time",
-            label: "Appointment Time",
-            format: "24h",
-            span: 12,
-          },
-          {
-            name: "eventDateTime",
-            type: "datetime",
-            label: "Event Date & Time",
-            format: "YYYY-MM-DD HH:mm",
-            span: 12,
-          },
-          {
-            name: "vacationRange",
-            type: "dateRange",
-            label: "Vacation Period",
-            format: "YYYY-MM-DD",
-            span: 122,
-          },
-        ],
-      },
-      {
-        title: "Image Upload",
-        description: "Image capture and upload field",
-        fields: [
-          {
-            name: "profileImage",
-            type: "imageCapture",
-            label: "Profile Image",
-            helperText: "Take a photo or upload an image",
-            span: 122,
-            cloudConfig: {
-              provider: "firebase",
-              path: "images/uploads/fms-report-management-system-app-ui-test",
-            },
-          },
-        ],
-      },
-      {
-        title: "Conditional Fields",
-        description: "Fields that appear based on other field values",
-        fields: [
-          {
-            name: "hasVehicle",
-            type: "switch",
-            label: "Do you have a vehicle?",
-            span: 122,
-          },
-          {
-            name: "vehicleType",
-            type: "select",
-            label: "Vehicle Type",
-            placeholder: "Select vehicle type",
-            span: 12,
-            options: [
-              { label: "Car", value: "car" },
-              { label: "Motorcycle", value: "motorcycle" },
-              { label: "Bicycle", value: "bicycle" },
-            ],
-            conditional: [
-              {
-                field: "hasVehicle",
-                operator: "equals",
-                value: true,
-              },
-            ],
-          },
-          {
-            name: "vehicleModel",
-            type: "text",
-            label: "Vehicle Model",
-            placeholder: "Enter vehicle model",
-            span: 12,
-            conditional: [
-              {
-                field: "hasVehicle",
-                operator: "equals",
-                value: true,
-              },
-            ],
-          },
-        ],
-      },
-      {
-        title: "Input Group",
-        description: "List of items with number inputs (like product quantity input)",
-        fields: [
-          {
-            name: "products",
-            type: "inputGroup",
-            label: "Sản phẩm",
-            helperText: "Nhập số lượng cho từng sản phẩm",
-            span: 12,
-            items: [
-              {
-                code: "SKU001",
-                name: "Sản phẩm A",
-                description: "Quà tặng: Túi xách",
-                unit: "pcs",
-              },
-              {
-                code: "SKU002",
-                name: "Sản phẩm B",
-                description: "Quà tặng: Áo thun",
-                unit: "pcs",
-              },
-              {
-                code: "SKU003",
-                name: "Sản phẩm C",
-                description: "Quà tặng: Mũ bảo hiểm",
-                unit: "pcs",
-              },
-              {
-                code: "SKU004",
-                name: "Sản phẩm D",
-                description: "Quà tặng: Bình nước",
-                unit: "pcs",
-              },
-            ],
-            fieldNamePrefix: "items",
-            fieldNameSuffix: "pcs",
-            min: 0,
-            layout: "flex",
-            showButtons: true,
-          },
-        ],
-      },
-      {
-        title: "Grouped Input Group",
-        description: "Items grouped by category (like products grouped by brand)",
-        fields: [
-          {
-            name: "productsByBrand",
-            type: "groupedInputGroup",
-            label: "Sản phẩm theo thương hiệu",
-            helperText: "Nhập số lượng cho từng sản phẩm, được nhóm theo thương hiệu",
-            span: 12,
-            items: [
-              {
-                code: "SKU001",
-                name: "Sản phẩm A1",
-                description: "SKU: SKU001",
-                unit: "pcs",
-                groupKey: "Brand A",
-                data: { brand: "Brand A", category: "Electronics" },
-              },
-              {
-                code: "SKU002",
-                name: "Sản phẩm A2",
-                description: "SKU: SKU002",
-                unit: "pcs",
-                groupKey: "Brand A",
-                data: { brand: "Brand A", category: "Electronics" },
-              },
-              {
-                code: "SKU003",
-                name: "Sản phẩm B1",
-                description: "SKU: SKU003",
-                unit: "pcs",
-                groupKey: "Brand B",
-                data: { brand: "Brand B", category: "Fashion" },
-              },
-              {
-                code: "SKU004",
-                name: "Sản phẩm B2",
-                description: "SKU: SKU004",
-                unit: "pcs",
-                groupKey: "Brand B",
-                data: { brand: "Brand B", category: "Fashion" },
-              },
-              {
-                code: "SKU005",
-                name: "Sản phẩm C1",
-                description: "SKU: SKU005",
-                unit: "pcs",
-                groupKey: "Brand C",
-                data: { brand: "Brand C", category: "Home" },
-              },
-            ],
-            groupBy: "brand",
-            formatGroupTitle: (groupKey, items) => `${groupKey} (${items.length} sản phẩm)`,
-            fieldNamePrefix: "items",
-            fieldNameSuffix: "pcs",
-            min: 0,
-            layout: "flex",
-            showButtons: false,
-          },
-        ],
-      },
-    ],
-  };
+ 
+  const formConfig = hydratedFormConfig || null;
 
-  // Use report definition form config if available, otherwise use demo config
-  const formConfig = hydratedFormConfig || codeBasedFormConfig;
+  const handleSubmit = async (data: Record<string, any>) => {
+    if (!reportDefinition || !user?.username) {
+      notification.error({
+        title: "Lỗi",
+        description: "Kiểm tra lại các lỗi",
+      });
+      return;
+    }
 
-  const handleSubmit = (data: Record<string, any>) => {
-    console.log("Form submitted with data:", data);
-    setSubmittedData(data);
-    alert("Form submitted! Check console for data.");
+    // Check if data_source_type is 'table'
+    if (reportDefinition.data_source_type !== "table") {
+      notification.error({
+        title: "Lỗi",
+        description: "Báo cáo này không hỗ trợ lưu dữ liệu. Kiểm tra lại data_source_type",
+      });
+      return;
+    }
+
+    // Get table name from data_source_config
+    const dataSourceConfig = reportDefinition.data_source_config as {
+      schema?: string;
+      table_name: string;
+      primary_key?: string;
+    } | null;
+
+    if (!dataSourceConfig?.table_name) {
+      notification.error({
+        title: "Lỗi",
+        description: "Không tìm thấy cấu hình bảng dữ liệu. Vui lòng kiểm tra lại cấu hình báo cáo.",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const result = await httpRequestCreateReportEntry({
+        tableName: dataSourceConfig.table_name,
+        schema: dataSourceConfig.schema || "public",
+        data,
+        createdBy: user.username,
+      });
+
+      setSubmittedData(data);
+      
+      notification.success({
+        title: "Thành công",
+        description: "Báo cáo đã được lưu thành công",
+      });
+
+      // Navigate back after a short delay
+      setTimeout(() => {
+        router.back();
+      }, 1500);
+    } catch (err: any) {
+      console.error("Error saving report entry:", err);
+      
+      const errorMessage =
+        err?.message || "Có lỗi xảy ra khi lưu báo cáo. Vui lòng thử lại.";
+      
+      notification.error({
+        title: "Lỗi",
+        description: errorMessage,
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (data: Record<string, any>, fieldName: string, value: any) => {
@@ -416,7 +120,7 @@ export default function ReportPage() {
 
   return (
     <>
-      <LoadingOverlay active={isLoading} />
+      <LoadingOverlay active={isLoading || isSubmitting} />
 
       <ScreenHeader
         title={`Báo cáo ${reportDefinition?.name || ''}`}
@@ -428,15 +132,17 @@ export default function ReportPage() {
           <DynamicForm
             config={formConfig}
             initialValues={formData}
+            showErrors={true}
             onChange={handleChange}
             onSubmit={handleSubmit}
             onCancel={handleCancel}
+            disabled={isSubmitting}
           />
         )}
 
         {/* Submitted Data Display */}
         {submittedData && (
-          <div className="mt-4 p-4 bg-gray-10 border border-gray-30 rounded-lg">
+          <div className="mt-4 p-4 bg-gray-10 border border-gray-30">
             <h3 className="text-lg font-semibold mb-4">Submitted Data:</h3>
             <pre className="text-sm overflow-auto">
               {JSON.stringify(submittedData, null, 2)}
