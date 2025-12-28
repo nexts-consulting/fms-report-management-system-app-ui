@@ -6,6 +6,7 @@ import { NotificationProvider } from "@/kits/components/notification";
 import { AuthContextProvider } from "@/contexts/auth.context";
 import { GlobalContextProvider } from "@/contexts/global.context";
 import { ProjectConfigProvider } from "@/contexts/project-config.context";
+import { ReportDefinitionContextProvider } from "@/contexts/report-definition.context";
 import { Content } from "./content";
 import { ProjectThemeProvider } from "@/components/shared/project-theme-provider";
 import moment from "moment";
@@ -30,9 +31,11 @@ const Providers = (props: ProvidersProps) => {
             <GlobalContextProvider>
               <AuthContextProvider>
                 <ProjectConfigProvider>
-                  <ProjectThemeProvider>
-                    <Content>{children}</Content>
-                  </ProjectThemeProvider>
+                  <ReportDefinitionContextProvider>
+                    <ProjectThemeProvider>
+                      <Content>{children}</Content>
+                    </ProjectThemeProvider>
+                  </ReportDefinitionContextProvider>
                 </ProjectConfigProvider>
               </AuthContextProvider>
             </GlobalContextProvider>

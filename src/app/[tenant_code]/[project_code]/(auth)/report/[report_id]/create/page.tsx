@@ -5,20 +5,28 @@ import { DynamicForm } from "@/components/DynamicForm";
 import { FormConfig } from "@/components/DynamicForm/types";
 import { ScreenHeader } from "@/components/ScreenHeader";
 import { LoadingOverlay } from "@/kits/components/loading-overlay";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { hydrateFormConfig } from "@/components/DynamicForm/formConfigSerializer";
+import { useReportDefinition } from "@/contexts/report-definition.context";
 
 export default function ReportPage() {
   const [formData, setFormData] = React.useState<Record<string, any>>({});
   const [submittedData, setSubmittedData] = React.useState<Record<string, any> | null>(null);
-  const [useJsonConfig, setUseJsonConfig] = React.useState(true); // Toggle between JSON-based and code-based config
   const router = useRouter();
+  const params = useParams();
+  const reportId = params?.report_id as string;
+  
+  const { data: reportDefinition, isLoading, error } = useReportDefinition(reportId);
 
-  // Hydrate JSON config to runtime config (simulates loading from database)
-  // const hydratedJsonConfig = React.useMemo(() => {
-  //   return hydrateFormConfig(exampleJsonConfig);
-  // }, []);
-  // CODE-BASED CONFIG (with functions and Date objects - NOT suitable for database storage)
+  // Hydrate form config from report definition
+  const hydratedFormConfig = React.useMemo(() => {
+    if (!reportDefinition?.form_preview_definition) {
+      return null;
+    }
+    return hydrateFormConfig(reportDefinition.form_preview_definition);
+  }, [reportDefinition?.form_preview_definition]);
+
+  // Fallback demo config (for testing when no report definition is available)
   const codeBasedFormConfig: FormConfig = {
     title: "Dynamic Form Demo (Code-Based)",
     description: "This form uses code-based config with functions and Date objects (NOT suitable for database storage).",
@@ -385,8 +393,8 @@ export default function ReportPage() {
     ],
   };
 
-  // Select config based on toggle
-  const formConfig = codeBasedFormConfig;
+  // Use report definition form config if available, otherwise use demo config
+  const formConfig = hydratedFormConfig || codeBasedFormConfig;
 
   const handleSubmit = (data: Record<string, any>) => {
     console.log("Form submitted with data:", data);
@@ -403,62 +411,28 @@ export default function ReportPage() {
     setSubmittedData(null);
   };
 
+  const hasError = !!error;
+  const hasData = !!formConfig;
+
   return (
     <>
-      <LoadingOverlay active={false} />
+      <LoadingOverlay active={isLoading} />
 
       <ScreenHeader
-        title="Báo cáo"
+        title={`Báo cáo ${reportDefinition?.name || ''}`}
         onBack={() => router.back()}
       />
       
       <div className="flex flex-col gap-4 p-4 pt-0">
-        {/* Config Type Toggle */}
-        <div className="bg-white border p-4">
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-semibold">Configuration Type</h3>
-            <button
-              onClick={() => {
-                setUseJsonConfig(!useJsonConfig);
-                setFormData({});
-                setSubmittedData(null);
-              }}
-              className="px-4 py-2 bg-primary-50 text-white hover:bg-primary-60 transition-colors text-sm"
-            >
-              Switch to {useJsonConfig ? "Code-Based" : "JSON-Based"}
-            </button>
-          </div>
-          
-          <div className="text-sm text-gray-70">
-            {useJsonConfig ? (
-              <div>
-                <p className="font-semibold text-green-600 mb-1">JSON-Based Config (Database Safe)</p>
-                <p>This config can be stored in database. Functions and dates are converted to special string references:</p>
-                <ul className="list-disc list-inside mt-1 text-xs space-y-1">
-                  <li><code className="bg-gray-10 px-1 py-0.5 rounded">@@DATE_NOW</code> - Current date/time</li>
-                  <li><code className="bg-gray-10 px-1 py-0.5 rounded">@@DATE_TODAY</code> - Today at midnight</li>
-                  <li><code className="bg-gray-10 px-1 py-0.5 rounded">@@VALIDATOR:validatorName</code> - Predefined validator</li>
-                  <li><code className="bg-gray-10 px-1 py-0.5 rounded">@@FORMATTER:formatterName</code> - Predefined formatter</li>
-                  <li><code className="bg-gray-10 px-1 py-0.5 rounded">@@UPLOAD_PROVIDER:providerName</code> - Upload provider</li>
-                </ul>
-              </div>
-            ) : (
-              <div>
-                <p className="font-semibold text-red-600 mb-1">Code-Based Config (NOT Database Safe)</p>
-                <p>This config contains functions and Date objects that cannot be serialized to JSON for database storage.</p>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Dynamic Form */}
-        <DynamicForm
-          config={formConfig}
-          initialValues={formData}
-          onChange={handleChange}
-          onSubmit={handleSubmit}
-          onCancel={handleCancel}
-        />
+        {hasData && !hasError && (
+          <DynamicForm
+            config={formConfig}
+            initialValues={formData}
+            onChange={handleChange}
+            onSubmit={handleSubmit}
+            onCancel={handleCancel}
+          />
+        )}
 
         {/* Submitted Data Display */}
         {submittedData && (
