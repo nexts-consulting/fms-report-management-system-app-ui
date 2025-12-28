@@ -14,7 +14,7 @@ import { TrackingProgress } from "@/kits/widgets/TrackingProgress";
 import moment from "moment";
 import { useRouter } from "next/navigation";
 import React from "react";
-import { reportMenuItems } from "./menuItems";
+import { useAppMenuItems } from "./menuItems";
 import { useTenantProjectPath } from "@/hooks/use-tenant-project-path";
 
 import {
@@ -53,6 +53,7 @@ export const Entry = () => {
   
   const { buildPath } = useTenantProjectPath();
   const [confirmCheckoutLoading, setConfirmCheckoutLoading] = React.useState(false);
+  const { menuItems: reportMenuItems, isLoading: isLoadingMenus } = useAppMenuItems();
 
   const shiftDurationFormated = useShiftDurationFormated({
     startTime: new Date(currentAttendance?.shift_start_time ?? ""),
@@ -174,7 +175,12 @@ export const Entry = () => {
 
       <div className="my-8 px-4">
         <div className="grid grid-cols-3">
-          {reportMenuItems.map((item, idx) => {
+          {isLoadingMenus ? (
+            <div className="col-span-3 flex items-center justify-center py-8">
+              <p className="text-gray-500">Đang tải menu...</p>
+            </div>
+          ) : (
+            reportMenuItems.map((item, idx) => {
             const done = false; // TODO: Implement report status
             // TODO: Implement report status
             const icon = iconMap[item.icon as string] || Box;
@@ -198,7 +204,8 @@ export const Entry = () => {
                 </p>
               </div>
             );
-          })}
+          })
+        )}
         </div>
       </div>
 

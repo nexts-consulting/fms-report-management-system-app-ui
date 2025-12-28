@@ -7,6 +7,7 @@ import { AuthContextProvider } from "@/contexts/auth.context";
 import { GlobalContextProvider } from "@/contexts/global.context";
 import { ProjectConfigProvider } from "@/contexts/project-config.context";
 import { ReportDefinitionContextProvider } from "@/contexts/report-definition.context";
+import { AppMenuProvider } from "@/contexts/app-menu.context";
 import { Content } from "./content";
 import { ProjectThemeProvider } from "@/components/shared/project-theme-provider";
 import moment from "moment";
@@ -31,11 +32,13 @@ const Providers = (props: ProvidersProps) => {
             <GlobalContextProvider>
               <AuthContextProvider>
                 <ProjectConfigProvider>
-                  <ReportDefinitionContextProvider>
-                    <ProjectThemeProvider>
-                      <Content>{children}</Content>
-                    </ProjectThemeProvider>
-                  </ReportDefinitionContextProvider>
+                  <AppMenuProvider>
+                    <ReportDefinitionContextProvider>
+                      <ProjectThemeProvider>
+                        <Content>{children}</Content>
+                      </ProjectThemeProvider>
+                    </ReportDefinitionContextProvider>
+                  </AppMenuProvider>
                 </ProjectConfigProvider>
               </AuthContextProvider>
             </GlobalContextProvider>
