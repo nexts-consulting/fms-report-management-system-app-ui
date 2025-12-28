@@ -11,6 +11,8 @@ import { TextInput } from "@/kits/components/text-input";
 import { format } from "date-fns";
 import { useQueryReportEntries, ReportEntry } from "@/services/api/application/report-entry/list";
 import { FormConfig } from "@/components/DynamicForm/types";
+import { ReportEntryDetailView } from "@/components/ReportEntryDetailView";
+import { Icons } from "@/kits/components/icons";
 
 export default function ReportPage() {
   const router = useRouter();
@@ -20,6 +22,7 @@ export default function ReportPage() {
   const INITIAL_PAGE_SIZE = 50;
   const [pageSize, setPageSize] = useState(INITIAL_PAGE_SIZE);
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedEntry, setSelectedEntry] = useState<ReportEntry | null>(null);
 
   const reportId = params?.report_id as string;
   const { buildPath } = useTenantProjectPath();
@@ -156,7 +159,8 @@ export default function ReportPage() {
                 {entries.map((entry) => (
                   <div
                     key={entry.id}
-                    className="border border-gray-200 p-4 shadow-sm bg-white"
+                    className="border border-gray-200 p-4 shadow-sm bg-white cursor-pointer hover:shadow-md transition-shadow"
+                    onClick={() => setSelectedEntry(entry)}
                   >
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
@@ -167,10 +171,11 @@ export default function ReportPage() {
                           Người tạo: {entry.created_by}
                         </p>
                       </div>
-                      <div className="text-right">
+                      <div className="text-right flex items-center gap-2">
                         <p className="text-xs text-gray-500">
                           {format(new Date(entry.created_at), "dd/MM/yyyy HH:mm")}
                         </p>
+                        <Icons.ChevronRight className="w-4 h-4 text-gray-400" />
                       </div>
                     </div>
                   </div>
@@ -187,6 +192,85 @@ export default function ReportPage() {
           </>
         )}
       </div>
+
+      {/* Modal chi tiết báo cáo */}
+      {selectedEntry && formConfig && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white max-w-2xl w-full max-h-[90vh] overflow-hidden">
+            {/* Header */}
+            <div className="flex items-center justify-between p-4 border-b border-gray-200">
+              <h3 className="text-gray-900 font-semibold">Chi tiết báo cáo</h3>
+              <button
+                onClick={() => setSelectedEntry(null)}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <Icons.Close className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="overflow-y-auto max-h-[calc(90vh-160px)]">
+              <div className="p-4 space-y-4">
+                {/* Thông tin báo cáo */}
+                <div>
+                  <h4 className="text-sm font-semibold text-gray-900 mb-3">
+                    Thông tin báo cáo
+                  </h4>
+                  <div className="space-y-2 border border-gray-200 p-4">
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">Người tạo:</span>
+                      <span className="text-sm font-medium text-gray-900">
+                        {selectedEntry.created_by}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">Thời gian tạo:</span>
+                      <span className="text-sm font-medium text-gray-900">
+                        {format(new Date(selectedEntry.created_at), "dd/MM/yyyy HH:mm")}
+                      </span>
+                    </div>
+                    {selectedEntry.updated_by && (
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">Người cập nhật:</span>
+                        <span className="text-sm font-medium text-gray-900">
+                          {selectedEntry.updated_by}
+                        </span>
+                      </div>
+                    )}
+                    {selectedEntry.updated_at && (
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">Thời gian cập nhật:</span>
+                        <span className="text-sm font-medium text-gray-900">
+                          {format(new Date(selectedEntry.updated_at), "dd/MM/yyyy HH:mm")}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Dữ liệu báo cáo */}
+                <div>
+                  <h4 className="text-sm font-semibold text-gray-900 mb-3">
+                    Dữ liệu báo cáo
+                  </h4>
+                  <ReportEntryDetailView data={selectedEntry.data} formConfig={formConfig} />
+                </div>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="border-t border-gray-200 p-4">
+              <Button
+                variant="tertiary"
+                onClick={() => setSelectedEntry(null)}
+                className="w-full"
+              >
+                Đóng
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
