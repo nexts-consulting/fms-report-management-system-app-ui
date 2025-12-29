@@ -109,7 +109,7 @@ export default function ReportPage() {
     <>
       <LoadingOverlay active={isLoading || isLoadingEntries} />
       <ScreenHeader
-        title={`Báo cáo ${reportDefinition?.name || ''}`}
+        title={`${reportDefinition?.name || ''}`}
         onBack={() => router.back()}
       />
       <div className="flex flex-col gap-4 p-4 pt-0">
@@ -159,7 +159,7 @@ export default function ReportPage() {
                 {entries.map((entry) => (
                   <div
                     key={entry.id}
-                    className="border border-gray-200 p-4 shadow-sm bg-white cursor-pointer hover:shadow-md transition-shadow"
+                    className="border 200 p-4 bg-white cursor-pointer hover:shadow-md transition-shadow"
                     onClick={() => setSelectedEntry(entry)}
                   >
                     <div className="flex justify-between items-start">

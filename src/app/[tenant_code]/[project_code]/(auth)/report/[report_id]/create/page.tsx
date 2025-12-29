@@ -123,7 +123,7 @@ export default function ReportPage() {
       <LoadingOverlay active={isLoading || isSubmitting} />
 
       <ScreenHeader
-        title={`Báo cáo ${reportDefinition?.name || ''}`}
+        title={`${reportDefinition?.name || ''}`}
         onBack={() => router.back()}
       />
       

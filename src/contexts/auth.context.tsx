@@ -69,7 +69,6 @@ export const AuthContextProvider = (props: AuthContextProviderProps) => {
         token: refreshResponse.accessToken, // Keep for backward compatibility
       });
 
-      console.log("Token refreshed successfully");
       isRefreshingRef.current = false;
       return true;
     } catch (error) {
@@ -141,7 +140,6 @@ export const AuthContextProvider = (props: AuthContextProviderProps) => {
         const expiresIn = moment.unix(+decodedToken.exp).diff(moment.utc(), "seconds");
         if (expiresIn > 0 && expiresIn < 60) {
           // Token expires in less than 1 minute, refresh proactively
-          console.log("Token expiring soon, refreshing proactively...");
           await handleRefreshToken();
         }
       }

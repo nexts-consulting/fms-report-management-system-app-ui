@@ -1,7 +1,6 @@
 import { ExtractFnReturnType, QueryConfig } from "@/libs/react-query";
 import { supabaseFmsService } from "@/services/supabase";
 import { useQuery } from "react-query";
-import { DataSourceConfig } from "./create";
 
 export type ListReportEntriesParams = {
   tableName: string;

@@ -69,7 +69,6 @@ export const httpRequestAuthRefresh = async (
     });
 
     console.log("Perform refresh token", res.data);
-    // Transform Keycloak response to our format
     return {
       accessToken: res.data.access_token,
       refreshToken: res.data.refresh_token,
