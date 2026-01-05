@@ -57,6 +57,11 @@ export interface InputGroupItem {
    * Additional data for the item
    */
   data?: Record<string, any>;
+
+  /**
+   * Group key for grouping (used in GroupedInputGroup)
+   */
+  groupKey?: string;
 }
 
 export interface InputGroupProps {
@@ -208,13 +213,6 @@ export const InputGroup = React.memo(
 
     return (
       <div id={ids.current.container} ref={ref}>
-        {/* Label */}
-        {label && (
-          <label className={StyleUtil.cn("block text-sm font-normal text-gray-70 mb-2 line-clamp-2")}>
-            {label}
-          </label>
-        )}
-
         {/* Items */}
         <div className={styles.container}>
           {items.map((item) => {

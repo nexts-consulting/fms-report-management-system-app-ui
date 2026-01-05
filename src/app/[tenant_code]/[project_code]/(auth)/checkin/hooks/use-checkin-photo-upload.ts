@@ -1,6 +1,6 @@
 import React from "react";
-import { useNotification } from "@/kits/components/Notification";
-import { uploadFileToCloud } from "@/kits/components/ImageCaptureInputWithUpload/upload.service";
+import { useNotification } from "@/kits/components/notification";
+import { uploadFileToCloud } from "@/components/DynamicForm/services/upload.service";
 import { firebaseService } from "@/services/firebase";
 import { useTenantProjectPath } from "@/hooks/use-tenant-project-path";
 import type { KeycloakUser } from "@/types/model";

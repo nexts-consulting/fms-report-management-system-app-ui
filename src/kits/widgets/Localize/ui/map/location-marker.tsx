@@ -4,7 +4,7 @@ import { useLocalContext } from "../../contexts/local.context";
 import { JSXMarker } from "@/kits/components/leaflet/JSXMarker";
 import { Circle } from "react-leaflet";
 import { useMarkerZIndex } from "@/kits/hooks/leaflet/use-marker-zindex";
-import { RippleDotB } from "@/kits/components/RippleDotB";
+import { RippleDotB } from "@/kits/components/ripple-dot-b";
 
 export interface LocationMarkerProps {}
 

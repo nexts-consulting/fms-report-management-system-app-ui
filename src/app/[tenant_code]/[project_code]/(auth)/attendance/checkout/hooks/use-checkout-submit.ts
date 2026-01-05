@@ -1,7 +1,7 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import { useGlobalContext } from "@/contexts/global.context";
-import { useNotification } from "@/kits/components/Notification";
+import { useNotification } from "@/kits/components/notification";
 import { useTenantProjectPath } from "@/hooks/use-tenant-project-path";
 import type { CheckoutLocation } from "../common/types";
 import type { IAttendance } from "@/types/model";

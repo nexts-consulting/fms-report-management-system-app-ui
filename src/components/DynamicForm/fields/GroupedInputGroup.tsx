@@ -51,11 +51,10 @@ export const GroupedInputGroup = React.memo(
 
       items.forEach((item) => {
         let groupKey: string;
-
         if (item.data?.groupKey) {
           groupKey = item.data.groupKey;
-        } else if (groupBy && item.data?.[groupBy]) {
-          groupKey = String(item.data[groupBy]);
+        } else if (item.groupKey) {
+          groupKey = item.groupKey;
         } else {
           groupKey = "Other";
         }

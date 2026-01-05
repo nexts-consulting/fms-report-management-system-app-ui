@@ -2,8 +2,8 @@ import React from "react";
 import { constants } from "../../constants";
 import { useLocalContext } from "../../contexts/local.context";
 import { LocalEventName } from "../../enums";
-import { Icons } from "@/kits/components/Icons";
-import { IconButton } from "@/kits/components/IconButton";
+import { IconButton } from "@/kits/components/icon-button";
+import { Icons } from "@/kits/components/icons";
 export interface MapControlsProps {}
 
 export const MapControls = React.memo((props: MapControlsProps) => {

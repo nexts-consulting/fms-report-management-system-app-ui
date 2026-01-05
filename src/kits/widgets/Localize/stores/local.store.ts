@@ -3,7 +3,7 @@ import { TLocalStore } from "../types";
 import { LocationSummary } from "../ui/summary/location-summary";
 import { ShiftSummary } from "../ui/summary/shift-summary";
 import { SummaryTabKey } from "../enums";
-import { Icons } from "@/kits/components/Icons";
+import { Icons } from "@/kits/components/icons";
 
 export const createLocalStore = (
   init: Pick<

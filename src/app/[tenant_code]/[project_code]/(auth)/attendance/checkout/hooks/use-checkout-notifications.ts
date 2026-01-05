@@ -1,5 +1,5 @@
 import React from "react";
-import { useNotification } from "@/kits/components/Notification";
+import { useNotification } from "@/kits/components/notification";
 import type { CheckoutStep } from "../common/types";
 import type {
   IProjectAttendancePhotoConfig,

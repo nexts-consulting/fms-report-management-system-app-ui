@@ -1,7 +1,7 @@
 import React from "react";
 import moment from "moment";
 import { useLocalContext } from "../../contexts/local.context";
-import { Icons } from "@/kits/components/Icons";
+import { Icons } from "@/kits/components/icons";
 import { constants } from "../../constants";
 
 export interface ShiftSummaryProps {}

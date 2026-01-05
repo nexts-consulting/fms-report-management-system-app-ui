@@ -1,8 +1,8 @@
 import React from "react";
 import { useLocalContext } from "../../contexts/local.context";
 import { constants } from "../../constants";
-import { Icons } from "@/kits/components/Icons";
-import { IconButton } from "@/kits/components/IconButton";
+import { Icons } from "@/kits/components/icons";
+import { IconButton } from "@/kits/components/icon-button";
 export interface TabsControlProps {}
 
 export const TabsControl = React.memo((props: TabsControlProps) => {
