@@ -36,7 +36,7 @@ export const DynamicIcon = React.memo((props: DynamicIconProps) => {
     loadCarbonIcon(name)
       .then((icon) => {
         if (icon) {
-          setIcon(() => icon);
+          setIcon(icon as React.ElementType);
         } else {
           setError(true);
         }

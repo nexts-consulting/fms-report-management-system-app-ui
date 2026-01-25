@@ -22,7 +22,7 @@ export const Default = Template.bind({});
 Default.args = {
   location: {
     name: "Aeon Maill Ha Dong",
-    province: "Ha Noi",
+    adminDivision: "Ha Noi",
     address: "Phuong Duong Noi, Quan Ha Dong, Ha Noi",
     gps: {
       lat: 20.98953790623694,
@@ -50,7 +50,7 @@ export const WithUserOutsideLocationScope = Template.bind({});
 WithUserOutsideLocationScope.args = {
   ...Default.args,
   user: {
-    ...Default.args.user!,
+    ...Default.args?.user!,
     gps: {
       lat: 20.98437134014586,
       lng: 105.74926154054444,
@@ -63,7 +63,7 @@ export const WithUserInsideLocationScope = Template.bind({});
 WithUserInsideLocationScope.args = {
   ...Default.args,
   user: {
-    ...Default.args.user!,
+    ...Default.args?.user!,
     gps: {
       lat: 20.98943790623694,
       lng: 105.75050494741689,

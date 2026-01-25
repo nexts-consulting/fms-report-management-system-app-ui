@@ -44,8 +44,8 @@ export const CheckoutConfirm = React.memo((props: CheckoutConfirmProps) => {
         <div className="divide-y divide-gray-30">
           <ShiftInfoCard
             name={attendanceDetail.workshift_name}
-            startTime={attendanceDetail.shift_start_time}
-            endTime={attendanceDetail.shift_end_time}
+            startTime={attendanceDetail.shift_start_time ?? ""}
+            endTime={attendanceDetail.shift_end_time ?? ""}
           />
 
           <div className="grid grid-cols-2 divide-x divide-gray-30">

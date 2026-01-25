@@ -25,7 +25,7 @@ export const LocationSummary = React.memo((props: LocationSummaryProps) => {
       </div>
 
       <div className="bg-gray-10 p-4">
-        <p className="mb-[2px] line-clamp-1 text-sm font-medium">{location.province}</p>
+        <p className="mb-[2px] line-clamp-1 text-sm font-medium">{location.adminDivision}</p>
         <p className="line-clamp-1 text-xs text-gray-50">{location.address}</p>
       </div>
 

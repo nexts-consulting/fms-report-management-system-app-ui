@@ -1,17 +1,17 @@
-import { IWorkingShift } from "@/types/model";
 import moment from "moment";
 import React from "react";
 import { useTick } from "../../kits/hooks/use-tick";
+import { IWorkingShiftLocation } from "@/types/model";
 
-export const useShiftUpcoming = (shifts: IWorkingShift[]) => {
+export const useShiftUpcoming = (shifts: IWorkingShiftLocation[]) => {
   const [now, controls] = useTick({ unit: "minute" });
 
   const upcomingShiftsRealtime = React.useMemo(() => {
     const upcomingShifts = shifts
       .map((shift) => ({
         ...shift,
-        startLocal: new Date(shift.startTime),
-        endLocal: new Date(shift.endTime),
+        startLocal: new Date(shift.start_time),
+        endLocal: new Date(shift.end_time),
       }))
       .filter((shift) => {
         const startLocal = moment(shift.startLocal);

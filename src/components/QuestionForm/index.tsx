@@ -56,12 +56,6 @@ export const QuestionForm = React.memo((props: QuestionFormProps) => {
     questionCount = constants.QUESTION_COUNT,
     passingScore = constants.PASSING_SCORE,
   } = props;
-  const {
-    onComplete,
-    logoUrl = "/images/Vinamilk_new_logo.webp",
-    questionCount = constants.QUESTION_COUNT,
-    passingScore = constants.PASSING_SCORE,
-  } = props;
 
   const notification = useNotification();
 

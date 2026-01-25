@@ -5,6 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
+  '@carbon/icons-react':
+    specifier: ^11.73.0
+    version: 11.73.0(react@18.3.1)
   '@emotion/css':
     specifier: ^11.13.5
     version: 11.13.5
@@ -348,6 +351,25 @@ packages:
     dependencies:
       '@babel/helper-string-parser': 7.27.1
       '@babel/helper-validator-identifier': 7.28.5
+
+  /@carbon/icon-helpers@10.70.0:
+    resolution: {integrity: sha512-c3w4CMvdentyisIG8WvJf4W5bU39JElrMJvS57DvXUKdWayJqwG9698+ah3PwsNw815u270koIsDv69N6Gsxug==}
+    requiresBuild: true
+    dependencies:
+      '@ibm/telemetry-js': 1.11.0
+    dev: false
+
+  /@carbon/icons-react@11.73.0(react@18.3.1):
+    resolution: {integrity: sha512-nAgyfcEKzQUt+68+mvz0gQQtcn7jpRxiUsvG/uZ/MIJZoLHhtRt5u5pymU9JLNnQFJWwyIUhraDeLip7MpHjIQ==}
+    requiresBuild: true
+    peerDependencies:
+      react: '>=16'
+    dependencies:
+      '@carbon/icon-helpers': 10.70.0
+      '@ibm/telemetry-js': 1.11.0
+      prop-types: 15.8.1
+      react: 18.3.1
+    dev: false
 
   /@emnapi/core@1.7.1:
     resolution: {integrity: sha512-o1uhUASyo921r2XtHYOHy7gdkGLge8ghBEQHMWmyJFoXlpU58kIrhhN3w26lpQb6dspetweapMn2CSNwQ8I4wg==}
@@ -1310,6 +1332,11 @@ packages:
     resolution: {integrity: sha512-93zYdMES/c1D69yZiKDBj0V24vqNzB/koF26KPaagAfd3P/4gUlh3Dys5ogAK+Exi9QyzlD8x/08Zt7wIKcDcA==}
     deprecated: Use @eslint/object-schema instead
     dev: true
+
+  /@ibm/telemetry-js@1.11.0:
+    resolution: {integrity: sha512-RO/9j+URJnSfseWg9ZkEX9p+a3Ousd33DBU7rOafoZB08RqdzxFVYJ2/iM50dkBuD0o7WX7GYt1sLbNgCoE+pA==}
+    hasBin: true
+    dev: false
 
   /@img/colour@1.0.0:
     resolution: {integrity: sha512-A5P/LfWGFSl6nsckYtjw9da+19jB8hkJ6ACTGcDfEJ0aE+l2n2El7dsVM7UVHZQ9s2lmYMWlrS21YLy2IR1LUw==}

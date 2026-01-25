@@ -1,6 +1,6 @@
 import { Meta, StoryFn } from "@storybook/react";
 import { IconButton, IconButtonProps } from "..";
-import { Icons } from "@/kits/components/Icons";
+import { Icons } from "@/kits/components/icons";
 
 export default {
   title: "Components/IconButton",

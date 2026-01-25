@@ -82,7 +82,7 @@ const getSpinnerColor = (variant: VariantProps<typeof variants>["variant"]) => {
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof variants> {
-  icon?: (props: React.ComponentPropsWithoutRef<"svg">) => React.ReactNode;
+  icon?: React.ElementType;
   centered?: boolean;
   loading?: boolean;
 }

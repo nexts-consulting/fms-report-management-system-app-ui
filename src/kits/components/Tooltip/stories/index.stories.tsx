@@ -1,9 +1,9 @@
 import { Meta, StoryFn } from "@storybook/react";
-import { Tooltip, TooltipProps } from "@/kits/components/Tooltip";
+import { Tooltip, TooltipProps } from "@/kits/components/tooltip";
 import React from "react";
 import { CommonUtil } from "@/kits/utils/common.util";
-import { IconButton } from "@/kits/components/IconButton";
-import { Icons } from "@/kits/components/Icons";
+import { IconButton } from "@/kits/components/icon-button";
+import { Icons } from "@/kits/components/icons";
 
 export default {
   title: "Components/Tooltip",

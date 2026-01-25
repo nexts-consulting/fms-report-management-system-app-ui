@@ -6,7 +6,7 @@ import { StyleUtil } from "@/kits/utils";
 import { Button } from "@/kits/components/button";
 import { ScreenHeader } from "@/components/ScreenHeader";
 import { useNotification } from "@/kits/components/notification";
-import { TrashCan, Renew, Copy, View, ViewOff } from "@carbon/icons-react";
+import { TrashCan, Copy, View, ViewOff } from "@carbon/icons-react";
 
 const styles = {
   container: StyleUtil.cn("min-h-screen bg-gray-10"),

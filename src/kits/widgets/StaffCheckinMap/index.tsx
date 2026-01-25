@@ -6,9 +6,9 @@ import { useMapResize } from "@/kits/hooks/leaflet/use-map-resize";
 import L from "leaflet";
 import { JSXMarker } from "@/kits/components/leaflet/JSXMarker";
 import { StringUtil } from "@/kits/utils";
-import { RippleDotA } from "@/kits/components/RippleDotA";
-import { IconButton } from "@/kits/components/IconButton";
-import { Icons } from "@/kits/components/Icons";
+import { RippleDotA } from "@/kits/components/ripple-dot-a";
+import { IconButton } from "@/kits/components/icon-button";
+import { Icons } from "@/kits/components/icons";
 import { StyleUtil } from "@/kits/utils";
 
 const constants = {

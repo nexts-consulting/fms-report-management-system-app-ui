@@ -1,6 +1,6 @@
-import { Question } from "@/types/model";
+import { IQuestion } from "@/types/model";
 
-export const questionBank: Question[] = [
+export const questionBank: IQuestion[] = [
   {
     id: "q1",
     question: "Khi đang trưng bày hoặc vệ sinh line ụ kệ hoặc chăm sóc POSM thì có cần quan sát & tiếp cận khách không?",
