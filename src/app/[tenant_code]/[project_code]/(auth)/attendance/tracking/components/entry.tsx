@@ -16,29 +16,8 @@ import { useRouter } from "next/navigation";
 import React from "react";
 import { useAppMenuItems } from "./menuItems";
 import { useTenantProjectPath } from "@/hooks/use-tenant-project-path";
+import { DynamicIcon } from "@/components/DynamicIcon";
 
-import {
-  Box,
-  StoragePool,
-  ReportData,
-  Gift,
-  Image,
-  RecentlyViewed,
-  ShoppingCart,
-  Customer,
-} from "@carbon/icons-react";
-
-
-const iconMap: Record<string, any> = {
-  Box,
-  StoragePool,
-  ReportData,
-  Gift,
-  Image,
-  RecentlyViewed,
-  ShoppingCart,
-  Customer,
-};
 
 export const Entry = () => {
   const authStore = useAuthContext();
@@ -59,10 +38,6 @@ export const Entry = () => {
     startTime: new Date(currentAttendance?.shift_start_time ?? ""),
     endTime: new Date(currentAttendance?.shift_end_time ?? ""),
   });
-
-  const reportStatus = {
-    leaveStart: false,
-  };
 
   const handleAction = (item: any) => {
     if (item.action_type === "route") {
@@ -161,7 +136,7 @@ export const Entry = () => {
               </div>
             </div>
           </div>
-          {/* Outlet Info */}
+          {/* Location Info */}
           <div className="flex items-center justify-center gap-4 bg-white p-4">
             <Icons.Location className="shrink-0 text-gray-50" />
             <div>
@@ -183,7 +158,6 @@ export const Entry = () => {
             reportMenuItems.map((item, idx) => {
             const done = false; // TODO: Implement report status
             // TODO: Implement report status
-            const icon = iconMap[item.icon as string] || Box;
             const notchColor = false
               ? done
                 ? "bg-green-500"
@@ -197,8 +171,7 @@ export const Entry = () => {
               >
                 {/* Notch trạng thái */}
                 <div className={`absolute right-2 top-2 h-2 w-2 ${notchColor}`} />
-
-                {React.createElement(icon, { className: "mb-2 h-6 w-6 text-gray-700" })}
+                { item.icon && <div className="mb-2 h-6 w-6 text-gray-700"><DynamicIcon name={item.icon}/></div> }
                 <p className="text-center text-sm font-medium leading-tight text-gray-700">
                   {item.name ?? ""}
                 </p>

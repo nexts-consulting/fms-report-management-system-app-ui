@@ -98,8 +98,6 @@ class DropdownCacheService {
       const keyGroupCode = keyParts[1];
       const keyParent = keyParts.find((p) => p.startsWith("parent:"));
 
-      let shouldDelete = false;
-
       if (pattern.projectCode && keyProjectCode !== pattern.projectCode) {
         continue;
       }

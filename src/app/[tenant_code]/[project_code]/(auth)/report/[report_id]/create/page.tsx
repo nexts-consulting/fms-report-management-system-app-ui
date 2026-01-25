@@ -139,16 +139,6 @@ export default function ReportPage() {
             disabled={isSubmitting}
           />
         )}
-
-        {/* Submitted Data Display */}
-        {submittedData && (
-          <div className="mt-4 p-4 bg-gray-10 border border-gray-30">
-            <h3 className="text-lg font-semibold mb-4">Submitted Data:</h3>
-            <pre className="text-sm overflow-auto">
-              {JSON.stringify(submittedData, null, 2)}
-            </pre>
-          </div>
-        )}
       </div>
     </>
   );

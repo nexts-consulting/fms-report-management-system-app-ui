@@ -3,6 +3,11 @@ import { Icons } from "@/kits/components/icons";
 import { IconButton } from "@/kits/components/icon-button";
 import { LoadingBar } from "@/kits/components/loading-bar";
 import { StyleUtil } from "@/kits/utils";
+import React from "react";
+
+const constants = {
+  INSTANCE_NAME: "ScreenHeader",
+} as const;
 
 export interface ScreenHeaderProps {
   title: string;
@@ -14,7 +19,7 @@ export interface ScreenHeaderProps {
   backButtonClassName?: string;
 }
 
-export const ScreenHeader = (props: ScreenHeaderProps) => {
+export const ScreenHeader = React.memo((props: ScreenHeaderProps) => {
   const {
     title,
     onBack,
@@ -57,4 +62,6 @@ export const ScreenHeader = (props: ScreenHeaderProps) => {
       </div>
     </div>
   );
-};
+});
+
+ScreenHeader.displayName = constants.INSTANCE_NAME;

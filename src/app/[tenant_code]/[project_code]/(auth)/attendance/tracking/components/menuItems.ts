@@ -1,4 +1,3 @@
-import { IAppMenu } from "@/types/model";
 import { useAppMenuContext } from "@/contexts/app-menu.context";
 
 /**

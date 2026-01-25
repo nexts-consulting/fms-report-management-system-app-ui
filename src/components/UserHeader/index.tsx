@@ -8,6 +8,11 @@ import { UserMenu } from "../UserMenu";
 import React from "react";
 import { useAuthContext } from "@/contexts/auth.context";
 
+const constants = {
+  INSTANCE_NAME: "UserHeader",
+  DEFAULT_LOGO: "/images/nextsystem-logo.webp",
+} as const;
+
 interface UserHeaderProps {
   name: string;
   code?: string;
@@ -16,20 +21,24 @@ interface UserHeaderProps {
   renderAction?: () => React.ReactNode;
 }
 
-export const UserHeader = (props: UserHeaderProps) => {
+export const UserHeader = React.memo((props: UserHeaderProps) => {
   const { name, code, avatar, renderAction, isOnWorking = false } = props;
 
   const globalStore = useGlobalContext();
-  const navigatorOnline = globalStore.use.navigatorOnline();
-
-  const [now, controls] = useTick({ unit: "minute" });
-
-  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
-  
   const authStore = useAuthContext();
+  
+  const navigatorOnline = globalStore.use.navigatorOnline();
   const tenant = authStore.use.tenant();
   const project = authStore.use.project();
+
+  const [now, controls] = useTick({ unit: "minute" });
+  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   
+  const logoUrl = React.useMemo(
+    () => project?.logo_url || tenant?.logo_url || constants.DEFAULT_LOGO,
+    [project?.logo_url, tenant?.logo_url]
+  );
+
   React.useEffect(() => {
     if (isMenuOpen) {
       controls.on();
@@ -37,7 +46,7 @@ export const UserHeader = (props: UserHeaderProps) => {
       controls.off();
     }
   }, [controls, isMenuOpen]);
-  const logoUrl = project?.logo_url || tenant?.logo_url || "/images/nextsystem-logo.webp";
+
   return (
     <>
       <UserMenu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
@@ -100,4 +109,6 @@ export const UserHeader = (props: UserHeaderProps) => {
       </div>
     </>
   );
-};
+});
+
+UserHeader.displayName = constants.INSTANCE_NAME;

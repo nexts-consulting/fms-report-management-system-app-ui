@@ -10,7 +10,7 @@ import { ProjectConfigProvider } from "@/contexts/project-config.context";
 import { ReportDefinitionContextProvider } from "@/contexts/report-definition.context";
 import { AppMenuProvider } from "@/contexts/app-menu.context";
 import { Content } from "./content";
-import { ProjectThemeProvider } from "@/components/shared/project-theme-provider";
+import { ProjectThemeProvider } from "@/contexts/project-theme.context";
 import { queryClient } from "@/libs/react-query/react-query";
 import moment from "moment";
 import "moment/locale/vi";

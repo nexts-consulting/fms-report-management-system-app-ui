@@ -63,7 +63,7 @@ export const UserMenu = React.memo((props: UserMenuProps) => {
       active: true,
       icon: User,
       action: () => {
-        router.push(buildPath("/profile"));
+        router.push("/profile");
       },
     },
     {
@@ -72,7 +72,7 @@ export const UserMenu = React.memo((props: UserMenuProps) => {
       active: true,
       icon: Settings,
       action: () => {
-        router.push(buildPath("/configuration"));
+        router.push("/configuration");
       },
     },
     {

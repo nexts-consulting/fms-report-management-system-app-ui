@@ -1,7 +1,6 @@
 import { NextFontWithVariable } from "next/dist/compiled/@next/font";
 import { Inter } from "next/font/google";
 import { Chakra_Petch } from "next/font/google";
-import localFont from "next/font/local";
 
 export const chakraPetch = Chakra_Petch({
   subsets: ["latin"],
@@ -17,12 +16,6 @@ export const inter = Inter({
   display: "swap",
 });
 
-export const vnmSansDisplay = localFont({
-  src: "../../../public/fonts/VNM Sans Display Regular.otf",
-  variable: "--font-vnm-sans-display",
-  display: "swap",
-});
-
-const fonts: NextFontWithVariable[] = [chakraPetch, inter, vnmSansDisplay];
+const fonts: NextFontWithVariable[] = [chakraPetch, inter];
 
 export const fontVariables: string[] = fonts.map((font) => font.variable);
