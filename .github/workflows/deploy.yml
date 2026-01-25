@@ -32,9 +32,16 @@ jobs:
       - name: Build for Cloudflare Pages
         run: pnpm pages:build
 
+      # Create project if not exists (optional - will fail silently if project exists)
+      - name: Create Cloudflare Pages project (if not exists)
+        run: npx wrangler pages project create nexts-fms-app || true
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+
       # Deploy to Cloudflare Pages
       - name: Deploy to Cloudflare Pages
-        run: npx wrangler pages deploy .vercel/output
+        run: npx wrangler pages deploy .vercel/output --commit-dirty=true
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
