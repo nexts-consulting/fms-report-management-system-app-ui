@@ -32,8 +32,18 @@ jobs:
       - name: Build for Cloudflare Pages
         run: pnpm pages:build
 
+      # List build output to verify directory structure
+      - name: List build output
+        run: |
+          echo "Checking for .vercel/output..."
+          ls -la .vercel/ 2>/dev/null || echo ".vercel directory not found"
+          echo "Checking for .open-next..."
+          ls -la .open-next/ 2>/dev/null || echo ".open-next directory not found"
+          echo "Checking root directory..."
+          ls -la | grep -E "(\.vercel|\.open-next|output)" || echo "No output directories found"
+
       # Create project if not exists (optional - will fail silently if project exists)
-      - name: Create Cloudflare Pages project (if not exists)
+      - name: Create Cloudflare Pages project
         run: npx wrangler pages project create nexts-fms-app --production-branch=master || true
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
@@ -41,7 +51,17 @@ jobs:
 
       # Deploy to Cloudflare Pages
       - name: Deploy to Cloudflare Pages
-        run: npx wrangler pages deploy .vercel/output --commit-dirty=true
+        run: |
+          if [ -d ".vercel/output" ]; then
+            echo "Deploying from .vercel/output"
+            npx wrangler pages deploy .vercel/output --commit-dirty=true
+          elif [ -d ".open-next" ]; then
+            echo "Deploying from .open-next"
+            npx wrangler pages deploy .open-next --commit-dirty=true
+          else
+            echo "Error: No output directory found. Expected .vercel/output or .open-next"
+            exit 1
+          fi
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
