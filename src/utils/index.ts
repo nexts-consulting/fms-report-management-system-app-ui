@@ -2,3 +2,6 @@
 export const getRandomIntRange = (min: number, max: number): number => {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 };
+
+// time utilities
+export * from './time.util';

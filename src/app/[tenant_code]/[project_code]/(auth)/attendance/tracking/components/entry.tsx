@@ -11,12 +11,12 @@ import { LoadingOverlay } from "@/kits/components/loading-overlay";
 import { Modal } from "@/kits/components/modal";
 import { NotificationBanner } from "@/kits/components/notification-banner";
 import { TrackingProgress } from "@/kits/widgets/TrackingProgress";
-import moment from "moment";
 import { useRouter } from "next/navigation";
 import React from "react";
 import { useAppMenuItems } from "./menuItems";
 import { useTenantProjectPath } from "@/hooks/use-tenant-project-path";
 import { DynamicIcon } from "@/components/DynamicIcon";
+import { formatTime, isAfter } from "@/utils/time.util";
 
 
 export const Entry = () => {
@@ -48,7 +48,7 @@ export const Entry = () => {
   };
 
   const isShiftEnded = React.useMemo(() => {
-    return moment().isAfter(moment(currentAttendance?.shift_end_time ?? ""));
+    return isAfter(new Date(), currentAttendance?.shift_end_time ?? "");
   }, [currentAttendance]);
 
 
@@ -115,7 +115,7 @@ export const Entry = () => {
               <Icons.Login className="shrink-0 text-green-50" />
               <div>
                 <p className="line-clamp-1 text-xs font-medium text-gray-70">
-                  {moment(currentAttendance.shift_start_time ?? "").format("HH:mm A")}
+                  {formatTime(currentAttendance.shift_start_time ?? "")}
                 </p>
               </div>
             </div>
@@ -123,7 +123,7 @@ export const Entry = () => {
               <Icons.Logout className="shrink-0 text-red-50" />
               <div>
                 <p className="line-clamp-1 text-xs font-medium text-gray-70">
-                  {moment(currentAttendance.shift_end_time ?? "").format("HH:mm A")}
+                  {formatTime(currentAttendance.shift_end_time ?? "")}
                 </p>
               </div>
             </div>
