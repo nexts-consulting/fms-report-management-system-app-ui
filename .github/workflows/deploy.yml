@@ -1,8 +1,8 @@
-name: Deploy Next.js to Cloudflare Pages
+name: Deploy Next.js to Cloudflare Pages (pnpm)
 
 on:
   push:
-    branches: [master]
+    branches: [main]
 
 jobs:
   deploy:
@@ -12,23 +12,27 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Setup Node.js
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: "pnpm"
 
+      # Setup pnpm
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 9
 
-      - name: Install dependencies
+      # Install dependencies
+      - name: Install deps
         run: pnpm install --frozen-lockfile
 
+      # Build for Cloudflare Pages
       - name: Build for Cloudflare Pages
         run: pnpm pages:build
 
+      # Deploy to Cloudflare Pages
       - name: Deploy to Cloudflare Pages
         run: npx wrangler pages deploy .vercel/output/static \
           --project-name=nexts-fms-app
