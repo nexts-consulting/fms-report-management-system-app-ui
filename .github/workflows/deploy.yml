@@ -34,7 +34,7 @@ jobs:
 
       # Deploy to Cloudflare Pages
       - name: Deploy to Cloudflare Pages
-        run: npx wrangler pages deploy .vercel/output/static \
+        run: npx wrangler pages deploy .vercel/output \
           --project-name=nexts-fms-app
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}

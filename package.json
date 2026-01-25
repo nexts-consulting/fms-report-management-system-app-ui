@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "pages:build": "npx @cloudflare/next-on-pages",
+    "opennext:build": "npx @opennextjs/cloudflare build",
+    "pages:build": "pnpm build && pnpm opennext:build",
     "start": "next start",
     "lint": "next lint",
     "prettier": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,md}\""
@@ -55,6 +56,7 @@
     "zustand": "^5.0.9"
   },
   "devDependencies": {
+    "@opennextjs/cloudflare": "^1.15.1",
     "@storybook/addon-actions": "^8.6.15",
     "@storybook/addon-essentials": "^8.6.14",
     "@storybook/addon-links": "^8.6.15",
