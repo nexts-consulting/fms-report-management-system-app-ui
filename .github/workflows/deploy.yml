@@ -1,4 +1,4 @@
-name: Deploy Next.js to Cloudflare Pages (pnpm)
+name: Deploy Next.js (OpenNext) to Cloudflare Pages
 
 on:
   push:
@@ -9,59 +9,27 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      # Setup Node.js
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      # Setup pnpm
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v4
         with:
           version: 9
 
-      # Install dependencies
-      - name: Install deps
-        run: pnpm install --frozen-lockfile
+      - run: pnpm install --frozen-lockfile
 
-      # Build for Cloudflare Pages
-      - name: Build for Cloudflare Pages
-        run: pnpm pages:build
+      - run: pnpm pages:build
 
-      # List build output to verify directory structure
-      - name: List build output
-        run: |
-          echo "Checking for .vercel/output..."
-          ls -la .vercel/ 2>/dev/null || echo ".vercel directory not found"
-          echo "Checking for .open-next..."
-          ls -la .open-next/ 2>/dev/null || echo ".open-next directory not found"
-          echo "Checking root directory..."
-          ls -la | grep -E "(\.vercel|\.open-next|output)" || echo "No output directories found"
+      - run: ls -la .open-next
 
-      # Create project if not exists (optional - will fail silently if project exists)
-      - name: Create Cloudflare Pages project
-        run: npx wrangler pages project create nexts-fms-app --production-branch=master || true
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
-
-      # Deploy to Cloudflare Pages
-      - name: Deploy to Cloudflare Pages
-        run: |
-          if [ -d ".vercel/output" ]; then
-            echo "Deploying from .vercel/output"
-            npx wrangler pages deploy .vercel/output --commit-dirty=true
-          elif [ -d ".open-next" ]; then
-            echo "Deploying from .open-next"
-            npx wrangler pages deploy .open-next --commit-dirty=true
-          else
-            echo "Error: No output directory found. Expected .vercel/output or .open-next"
-            exit 1
-          fi
+      - run: |
+          npx wrangler pages deploy .open-next \
+            --project-name=nexts-fms-app \
+            --branch=master \
+            --commit-dirty=true
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
