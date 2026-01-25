@@ -3,6 +3,8 @@ import { Metadata } from "next";
 import { fontVariables } from "@/fonts";
 import { ProvidersWrapper } from "@/layouts/providers-wrapper";
 
+export const runtime = "edge";
+
 export const metadata: Metadata = {
   title: "Nexts System - FMS Report",
   description: "Provided by Nexts",
