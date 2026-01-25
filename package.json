@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "opennext:build": "npx @opennextjs/cloudflare build",
+    "opennext:build": "npx @opennextjs/cloudflare build --skipWranglerConfigCheck",
     "pages:build": "pnpm build && pnpm opennext:build",
     "start": "next start",
     "lint": "next lint",
