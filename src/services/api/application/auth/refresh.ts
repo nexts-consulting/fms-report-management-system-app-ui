@@ -68,7 +68,6 @@ export const httpRequestAuthRefresh = async (
       withCredentials: true, // Important for refresh_token cookie
     });
 
-    console.log("Perform refresh token", res.data);
     return {
       accessToken: res.data.access_token,
       refreshToken: res.data.refresh_token,
