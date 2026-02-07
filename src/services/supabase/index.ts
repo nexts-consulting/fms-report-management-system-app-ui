@@ -1,5 +1,6 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import moment from "moment";
+import { getAccessTokenCookie } from "@/utils/cookie";
 
 type SupabaseRoute = string | undefined;
 
@@ -61,18 +62,21 @@ class SupabaseService {
     }
 
     try {
-      // Fetch function to automatically add headers from localStorage
+      // Fetch function to automatically add headers from cookies and localStorage
       const fetchFunction = (url: RequestInfo | URL, options: RequestInit = {}) => {
-        // Get token and tenant code from localStorage
+        // Get token from cookies (secure storage)
         let token: string | undefined;
+        // Get tenant code from localStorage (non-sensitive data)
         let tenantCode: string | undefined;
 
         if (typeof window !== "undefined") {
           try {
+            // Read access token from secure cookie storage
+            token = getAccessTokenCookie() || undefined;
+            
+            // Read tenant code from localStorage (non-sensitive)
             const authStorage = localStorage.getItem("auth-storage");
             const authData = JSON.parse(authStorage || "{}");
-            // Prioritize accessToken, fallback to token for backward compatibility
-            token = authData.state?.accessToken || authData.state?.token;
             tenantCode = authData.state?.tenant?.code;
           } catch (error) {
             console.warn("⚠️ Failed to read auth storage:", error);
