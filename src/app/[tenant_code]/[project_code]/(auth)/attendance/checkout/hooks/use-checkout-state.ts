@@ -33,7 +33,7 @@ export const useCheckoutState = () => {
       return "gps";
     }
     // If attendance is required, start with capture
-    if (projectCheckinFlow?.require_photo_verification && projectAttendancePhotoConfig?.mode !== "NOT_REQUIRED") {
+    if (projectCheckinFlow?.require_photo_verification) {
       return "capture";
     }
     // Otherwise, go directly to submit
@@ -134,7 +134,7 @@ export const useCheckoutState = () => {
   const handleConfirmLocalize = React.useCallback(() => {
     confirmLocation();
     // Move to capture if attendance is required, otherwise go to submit
-    if (projectCheckinFlow?.require_photo_verification && projectAttendancePhotoConfig?.mode !== "NOT_REQUIRED") {
+    if (projectCheckinFlow?.require_photo_verification) {
       setCurrentStep("capture");
     } else {
       setCurrentStep("submit");
@@ -174,8 +174,7 @@ export const useCheckoutState = () => {
     ) {
       // Check if photo is required
       const isPhotoRequired =
-        projectCheckinFlow?.require_photo_verification &&
-        projectAttendancePhotoConfig?.mode !== "NOT_REQUIRED";
+        projectCheckinFlow?.require_photo_verification;
 
       // If photo is not required or not in flow, and no photo was captured, auto-submit
       if (!isPhotoRequired && !photoUrl) {

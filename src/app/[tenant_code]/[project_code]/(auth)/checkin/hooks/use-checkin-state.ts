@@ -181,8 +181,7 @@ export const useCheckinState = () => {
     ) {
       // Check if photo is required
       const isPhotoRequired =
-        projectCheckinFlow?.require_photo_verification &&
-        projectAttendancePhotoConfig?.mode !== "NOT_REQUIRED";
+        projectCheckinFlow?.require_photo_verification;
 
       // If photo is not required or not in flow, and no photo was captured, auto-submit
       if (!isPhotoRequired && !photoUrl) {
