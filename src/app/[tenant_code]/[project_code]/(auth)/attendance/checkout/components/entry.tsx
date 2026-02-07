@@ -80,7 +80,7 @@ export const Entry = () => {
 
         {currentStep === "capture" &&
           projectCheckinFlow?.require_photo_verification &&
-          projectAttendancePhotoConfig?.mode !== "NOT_REQUIRED" && (
+          (
             <CheckoutCaptureStep
               onConfirm={handleConfirmCapture}
               onCapture={handleOnCapture}
