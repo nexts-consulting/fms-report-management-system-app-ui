@@ -4,6 +4,7 @@ import type {
   GetKeycloakGroupsParams,
   KeycloakUser,
 } from "@/types/model";
+import { getAccessTokenCookie } from "@/utils/cookie";
 
 /**
  * Get Keycloak Admin API base URL
@@ -13,14 +14,11 @@ const getKeycloakAdminApiUrl = (keycloakBaseUrl: string, realm: string): string 
 };
 
 /**
- * Get access token from localStorage
+ * Get access token from secure cookie storage
  */
 const getAccessToken = (): string | null => {
   if (typeof window === "undefined") return null;
-  const authStorage = localStorage.getItem("auth-storage");
-  if (!authStorage) return null;
-  const authData = JSON.parse(authStorage);
-  return authData.state?.accessToken || null;
+  return getAccessTokenCookie();
 };
 
 /**
