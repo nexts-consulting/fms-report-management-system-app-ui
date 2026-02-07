@@ -47,10 +47,10 @@ export type AttendanceStatus = "CHECKED_IN" | "CHECKED_OUT" | "AUTO_CHECKED_OUT"
 export type TimingStatus = "ON_TIME" | "LATE" | "EARLY" | "ABSENT";
 
 // Project GPS Mode
-export type ProjectGpsMode = "REQUIRED_AT_LOCATION" | "REQUIRED_BUT_NOT_STRICT" | "VISIBLE_OPTIONAL" | "NOT_REQUIRED";
+export type ProjectGpsMode = "REQUIRED_AT_LOCATION" | "REQUIRED_BUT_NOT_STRICT" | "VISIBLE_OPTIONAL";
 
 // Project Photo Mode
-export type ProjectPhotoMode = "REQUIRE_IDENTITY_VERIFICATION" | "REQUIRE_FACE_PHOTO" | "REQUIRE_GENERIC_PHOTO" | "NOT_REQUIRED";
+export type ProjectPhotoMode = "REQUIRE_IDENTITY_VERIFICATION" | "REQUIRE_FACE_PHOTO" | "REQUIRE_GENERIC_PHOTO";
 
 // Project Workshift Mode
 export type ProjectWorkshiftMode = "FIXED_TIME_WITHIN_WORKSHIFT" | "FIXED_TIME_WITH_ASSIGNED" | "FIXED_TIME_BY_DEFAULT_TIME" | "FLEXIBLE_TIME";

@@ -33,8 +33,7 @@ export const calculateAvailableSteps = (
 const isGpsModeRequiringCoordinates = (mode: string): boolean => {
   return (
     mode === "REQUIRED_AT_LOCATION" ||
-    mode === "REQUIRED_BUT_NOT_STRICT" ||
-    mode === "VISIBLE_OPTIONAL"
+    mode === "REQUIRED_BUT_NOT_STRICT"
   );
 };
 

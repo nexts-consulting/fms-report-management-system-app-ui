@@ -14,7 +14,6 @@ export type TLocalStore = {
           | "REQUIRED_AT_LOCATION"
           | "REQUIRED_BUT_NOT_STRICT"
           | "VISIBLE_OPTIONAL"
-          | "NOT_REQUIRED";
         is_required?: boolean;
       }
     | null

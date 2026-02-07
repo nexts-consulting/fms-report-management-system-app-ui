@@ -27,19 +27,19 @@ export const ContinueButton = React.memo((props: ContinueButtonProps) => {
     const mode = gpsConfig.mode;
     const isRequired = gpsConfig.is_required ?? false;
 
+    // For VISIBLE_OPTIONAL: GPS is visible but optional, always show button regardless of GPS coordinates
+    if (mode === "VISIBLE_OPTIONAL") {
+      return true;
+    }
+
     // If GPS is not required (is_required === false), user doesn't need GPS coordinates
     // Show button if user has location (optional GPS)
-    if (!isRequired || mode === "NOT_REQUIRED") {
+    if (!isRequired) {
       return !!user?.gps;
     }
 
     // If GPS is required (is_required === true), user must have GPS coordinates
     // Then check mode to determine if strict location check is needed
-
-    // For VISIBLE_OPTIONAL: GPS is visible but optional, show when user has location
-    if (mode === "VISIBLE_OPTIONAL") {
-      return !!user?.gps;
-    }
 
     // For REQUIRED_BUT_NOT_STRICT: GPS required but not strict, show when user has location (even if not in scope)
     if (mode === "REQUIRED_BUT_NOT_STRICT") {
