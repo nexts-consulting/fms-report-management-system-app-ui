@@ -9,6 +9,7 @@ import { LoadingOverlay } from "@/kits/components/loading-overlay";
 import { useNotification } from "@/kits/components/notification";
 import { useRouter } from "next/navigation";
 import { useTenantProjectPath } from "@/hooks/use-tenant-project-path";
+import { clearTokenCookies } from "@/utils/cookie";
 
 export const LogoutConfirm = () => {
   const authStore = useAuthContext();
@@ -23,6 +24,9 @@ export const LogoutConfirm = () => {
     setFakeLoading(true);
     // Reset all states at once
     const resetStates = () => {
+      // Clear cookies first
+      clearTokenCookies();
+      
       // Reset all states in a single update
       Promise.all([
         globalStore.setState({
@@ -45,8 +49,11 @@ export const LogoutConfirm = () => {
         authStore.setState({
           authenticated: false,
           user: null,
+          token: null,
           accessToken: null,
           refreshToken: null,
+          idToken: null,
+          tokenExpiresAt: null,
         }),
       ]).then(() => {
         notification.clear();

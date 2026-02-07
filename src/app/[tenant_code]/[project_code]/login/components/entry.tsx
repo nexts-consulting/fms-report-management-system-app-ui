@@ -22,6 +22,7 @@ import { httpRequestGetTenantByCode } from "@/services/api/application/master-da
 import { httpRequestGetProjectByCode } from "@/services/api/application/master-data/tenant-projects";
 import { getUserFromAccessToken } from "@/utils/auth";
 import { useTenantProjectPath } from "@/hooks/use-tenant-project-path";
+import { clearTokenCookies } from "@/utils/cookie";
 
 export const Entry = () => {
   const authStore = useAuthContext();
@@ -247,6 +248,10 @@ export const Entry = () => {
       },
       onError(error, variables, context) {
         console.log(`[🔒] error: `, error);
+        
+        // Clear cookies on error
+        clearTokenCookies();
+        
         authStore.setState({
           authenticated: false,
           user: null,
