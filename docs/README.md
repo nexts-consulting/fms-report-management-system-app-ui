@@ -1,584 +1,197 @@
-# DynamicForm Component
-
-A powerful, flexible form system that renders forms dynamically from JSON configuration, following IBM Carbon Design principles.
-
-## Features
-
-- 🎨 **IBM Carbon Design** - Consistent, professional UI following Carbon Design System
-- 📝 **JSON-Driven** - Define forms using simple JSON configuration
-- 🔧 **Type-Safe** - Full TypeScript support with comprehensive types
-- ✅ **Validation** - Built-in validation with custom rules
-- 🔄 **Conditional Fields** - Show/hide fields based on other field values
-- 📱 **Responsive** - Grid-based layout with customizable column spans
-- 🎯 **Accessible** - ARIA labels and keyboard navigation support
-- 🗄️ **Database-Safe** - JSON configs can be stored in database (see [Database Config Guide](./FIREBASE_INTEGRATION.md))
-- ☁️ **Firebase Integration** - Built-in Firebase Storage support for image uploads
-
-## Quick Links
-
-- [Basic Usage](#basic-usage) - Get started quickly
-- [Firebase Integration Guide](./FIREBASE_INTEGRATION.md) - **NEW!** Use Firebase Storage for uploads
-- [Database Config Guide](./FIREBASE_INTEGRATION.md) - Store form configs in database
-- [Field Types](#supported-field-types) - All available field types
-- [Validation](#validation) - Form validation rules
-- [Examples](./exampleJsonConfig.json) - Complete JSON config example
-
-## Supported Field Types
-
-### Text & Number
-- `text` - Text input (supports email, password, tel, url)
-- `textarea` - Multi-line text input
-- `number` - Number input with min/max/step
-- `currency` - Currency input with formatting
-- `percentage` - Percentage input (0-100)
-- `masked` - Masked input (phone, code, id, custom patterns)
-
-### Selection
-- `select` - Single select dropdown
-- `multiselect` - Multiple selection
-- `checkbox` - Single checkbox
-- `checkboxGroup` - Group of checkboxes
-- `radioGroup` - Radio button group
-- `switch` - Toggle switch
-
-### Date & Time
-- `date` - Date picker
-- `time` - Time picker
-- `datetime` - Date and time picker
-- `dateRange` - Date range picker
-
-### Special
-- `imageCapture` - Image capture and upload (uses ImageCaptureInputWithUpload)
-
-## Installation
-
-The component is already included in the kits folder. Import it like this:
-
-```typescript
-import { DynamicForm, FormConfig } from "@/kits/components/DynamicForm";
-```
-
-## Basic Usage
-
-```typescript
-import { DynamicForm, FormConfig } from "@/kits/components/DynamicForm";
-
-const formConfig: FormConfig = {
-  title: "User Registration",
-  description: "Please fill in your information",
-  gridColumns: 12,
-  fields: [
-    {
-      name: "fullName",
-      type: "text",
-      label: "Full Name",
-      placeholder: "Enter your name",
-      required: true,
-      span: 6,
-      validation: [
-        { type: "required", message: "Name is required" },
-        { type: "minLength", value: 2 },
-      ],
-    },
-    {
-      name: "email",
-      type: "text",
-      label: "Email",
-      inputType: "email",
-      required: true,
-      span: 6,
-      validation: [
-        { type: "required" },
-        { type: "email" },
-      ],
-    },
-  ],
-};
-
-function MyForm() {
-  const handleSubmit = (data: Record<string, any>) => {
-    console.log("Form data:", data);
-  };
-
-  return (
-    <DynamicForm
-      config={formConfig}
-      onSubmit={handleSubmit}
-    />
-  );
-}
-```
-
-## Form Configuration
-
-### FormConfig
-
-```typescript
-interface FormConfig {
-  title?: string;
-  description?: string;
-  sections?: FormSection[];
-  fields?: FieldConfig[];
-  gridColumns?: number; // Default: 12
-  className?: string;
-  submitLabel?: string;
-  cancelLabel?: string;
-  showSubmit?: boolean;
-  showCancel?: boolean;
-}
-```
-
-### Field Configuration
-
-All fields share these common properties:
-
-```typescript
-interface BaseFieldConfig {
-  name: string;              // Required: unique field identifier
-  type: FieldType;          // Required: field type
-  label?: string;           // Field label
-  helperText?: string;      // Helper text below field
-  placeholder?: string;     // Placeholder text
-  defaultValue?: any;       // Default value
-  required?: boolean;       // Is field required
-  disabled?: boolean;       // Is field disabled
-  readonly?: boolean;       // Is field readonly
-  validation?: ValidationRule[];
-  conditional?: ConditionalRule[];
-  className?: string;
-  span?: number;            // Grid column span (1-12)
-}
-```
-
-## Field Types Examples
-
-### Text Input
-
-```typescript
-{
-  name: "username",
-  type: "text",
-  label: "Username",
-  inputType: "text" | "email" | "password" | "tel" | "url",
-  maxLength: 50,
-  minLength: 3,
-}
-```
-
-### Number Input
-
-```typescript
-{
-  name: "age",
-  type: "number",
-  label: "Age",
-  min: 0,
-  max: 120,
-  step: 1,
-}
-```
-
-### Currency Input
-
-```typescript
-{
-  name: "price",
-  type: "currency",
-  label: "Price",
-  currency: "VND",
-  decimals: 0,
-  min: 0,
-}
-```
-
-### Percentage Input
-
-```typescript
-{
-  name: "discount",
-  type: "percentage",
-  label: "Discount",
-  min: 0,
-  max: 100,
-  decimals: 2,
-}
-```
-
-### Masked Input
-
-```typescript
-{
-  name: "phone",
-  type: "masked",
-  label: "Phone",
-  mask: "phone", // or "code", "id", or custom pattern like "999-AAA"
-}
-```
-
-### Select Input
-
-```typescript
-{
-  name: "country",
-  type: "select",
-  label: "Country",
-  options: [
-    { label: "Vietnam", value: "vn" },
-    { label: "USA", value: "us" },
-  ],
-  // Or async options:
-  // options: async () => {
-  //   const response = await fetch('/api/countries');
-  //   return response.json();
-  // },
-}
-```
-
-### Multi-Select Input
-
-```typescript
-{
-  name: "languages",
-  type: "multiselect",
-  label: "Languages",
-  options: [
-    { label: "English", value: "en" },
-    { label: "Vietnamese", value: "vi" },
-  ],
-  maxSelections: 5,
-}
-```
-
-### Checkbox
-
-```typescript
-{
-  name: "agree",
-  type: "checkbox",
-  label: "Terms",
-  checkboxLabel: "I agree to the terms",
-}
-```
-
-### Checkbox Group
-
-```typescript
-{
-  name: "interests",
-  type: "checkboxGroup",
-  label: "Interests",
-  options: [
-    { label: "Tech", value: "tech" },
-    { label: "Sports", value: "sports" },
-  ],
-  grid: 3, // Number of columns
-}
-```
-
-### Radio Group
-
-```typescript
-{
-  name: "gender",
-  type: "radioGroup",
-  label: "Gender",
-  options: [
-    { label: "Male", value: "male" },
-    { label: "Female", value: "female" },
-  ],
-  direction: "horizontal" | "vertical",
-}
-```
-
-### Switch
-
-```typescript
-{
-  name: "notifications",
-  type: "switch",
-  label: "Notifications",
-  switchLabel: "Enable notifications",
-}
-```
-
-### Date Picker
-
-```typescript
-{
-  name: "birthDate",
-  type: "date",
-  label: "Birth Date",
-  format: "YYYY-MM-DD",
-  minDate: "1900-01-01",
-  maxDate: new Date(),
-}
-```
-
-### Time Picker
-
-```typescript
-{
-  name: "appointmentTime",
-  type: "time",
-  label: "Time",
-  format: "24h" | "12h",
-  minTime: "09:00",
-  maxTime: "17:00",
-}
-```
-
-### DateTime Picker
-
-```typescript
-{
-  name: "eventDateTime",
-  type: "datetime",
-  label: "Event Date & Time",
-  format: "YYYY-MM-DD HH:mm",
-  minDateTime: new Date(),
-}
-```
-
-### Date Range Picker
-
-```typescript
-{
-  name: "vacationRange",
-  type: "dateRange",
-  label: "Vacation Period",
-  format: "YYYY-MM-DD",
-  minDate: new Date(),
-}
-```
-
-### Image Capture
-
-#### Using Firebase Storage (Recommended)
-
-```typescript
-{
-  name: "profileImage",
-  type: "imageCapture",
-  label: "Profile Image",
-  helperText: "Upload to Firebase Storage",
-  cloudConfig: {
-    provider: "firebase",
-    path: "images/profiles",
-  },
-}
-```
-
-For JSON config (database-safe):
-```json
-{
-  "name": "profileImage",
-  "type": "imageCapture",
-  "label": "Profile Image",
-  "cloudConfig": "@@UPLOAD_PROVIDER:firebase"
-}
-```
-
-#### Using Custom Upload Function
-
-```typescript
-{
-  name: "profileImage",
-  type: "imageCapture",
-  label: "Profile Image",
-  cloudConfig: {
-    provider: "custom",
-    uploadFunction: async (file) => {
-      const formData = new FormData();
-      formData.append("image", file);
-      const response = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
-      const data = await response.json();
-      return data.url;
-    },
-  },
-}
-```
-
-**See [Firebase Integration Guide](./FIREBASE_INTEGRATION.md) for more details.**
-
-## Validation
-
-### Validation Rules
-
-```typescript
-interface ValidationRule {
-  type: "required" | "min" | "max" | "minLength" | "maxLength" | "pattern" | "email" | "custom";
-  value?: any;
-  message?: string;
-  validator?: (value: any, formData: Record<string, any>) => boolean | string;
-}
-```
-
-### Examples
-
-```typescript
-{
-  name: "email",
-  type: "text",
-  validation: [
-    { type: "required", message: "Email is required" },
-    { type: "email", message: "Invalid email format" },
-    { type: "minLength", value: 5 },
-    {
-      type: "custom",
-      validator: (value, formData) => {
-        return value.endsWith("@company.com") || "Must be company email";
-      },
-    },
-  ],
-}
-```
-
-## Conditional Fields
-
-Show/hide fields based on other field values:
-
-```typescript
-{
-  name: "vehicleModel",
-  type: "text",
-  label: "Vehicle Model",
-  conditional: [
-    {
-      field: "hasVehicle",
-      operator: "equals",
-      value: true,
-    },
-  ],
-}
-```
-
-### Conditional Operators
-
-- `equals` - Field equals value
-- `notEquals` - Field does not equal value
-- `contains` - Field contains value (for arrays/strings)
-- `notContains` - Field does not contain value
-- `greaterThan` - Field is greater than value (numbers)
-- `lessThan` - Field is less than value (numbers)
-- `isEmpty` - Field is empty
-- `isNotEmpty` - Field is not empty
-
-## Form Sections
-
-Organize fields into sections:
-
-```typescript
-const formConfig: FormConfig = {
-  sections: [
-    {
-      title: "Personal Information",
-      description: "Enter your personal details",
-      fields: [
-        { name: "name", type: "text", label: "Name" },
-        { name: "email", type: "text", label: "Email" },
-      ],
-    },
-    {
-      title: "Preferences",
-      fields: [
-        { name: "theme", type: "select", label: "Theme", options: [...] },
-      ],
-    },
-  ],
-};
-```
-
-## Controlled vs Uncontrolled
-
-### Uncontrolled (Default)
-
-```typescript
-<DynamicForm
-  config={formConfig}
-  initialValues={{ name: "John" }}
-  onSubmit={handleSubmit}
-/>
-```
-
-### Controlled
-
-```typescript
-const [formData, setFormData] = useState({});
-
-<DynamicForm
-  config={formConfig}
-  values={formData}
-  onChange={(data, fieldName, value) => {
-    setFormData(data);
-    console.log(`${fieldName} changed to:`, value);
-  }}
-  onSubmit={handleSubmit}
-/>
-```
-
-## API Reference
-
-### DynamicForm Props
-
-```typescript
-interface DynamicFormProps {
-  config: FormConfig;                    // Required: form configuration
-  initialValues?: Record<string, any>;  // Initial form values
-  values?: Record<string, any>;        // Controlled form values
-  onChange?: FormChangeHandler;         // Callback when values change
-  onSubmit?: FormSubmitHandler;         // Callback on form submit
-  onCancel?: () => void;                // Callback on cancel
-  disabled?: boolean;                    // Disable all fields
-  errors?: Record<string, string>;      // External validation errors
-  showErrors?: boolean;                 // Show validation errors (default: true)
-}
-```
-
-## Demo
-
-See the demo page at:
-`/dynamic-form-demo`
-
-Or import the demo configuration:
-
-```typescript
-import { DynamicForm } from "@/kits/components/DynamicForm";
-// See demo page for full example
-```
-
-## Design Principles
-
-This component follows IBM Carbon Design System principles:
-
-1. **Consistency** - All fields follow the same design patterns
-2. **Accessibility** - ARIA labels, keyboard navigation, focus management
-3. **Responsive** - Grid-based layout adapts to screen size
-4. **Feedback** - Clear error states and validation messages
-5. **Flexibility** - Easy to extend with new field types
-
-## Styling
-
-The component uses Tailwind CSS classes following the existing design system:
-
-- Colors: `gray-10`, `gray-70`, `primary-60`, `red-60`
-- Spacing: Consistent 8px grid
-- Typography: `text-sm`, `font-normal`, `font-semibold`
-- Focus states: `outline-primary-60`
-
-## Contributing
-
-When adding new field types:
-
-1. Create the field component in `fields/` directory
-2. Add the field type to `types.ts`
-3. Add the render case in `FieldRenderer.tsx`
-4. Update this README with examples
-5. Add to the demo page
-
-## License
-
-Part of the FMS Report Management System.
+# 📚 Form Integration Documentation Index
+
+Chào mừng đến với documentation về Form Integration System!
+
+## 🎯 Bắt đầu từ đâu?
+
+### 👨‍💻 Nếu bạn là Parent App Developer
+➡️ Bạn đã sẵn sàng! Form integration đã được triển khai hoàn chỉnh trong parent app.
 
+**Xem:** [QUICK_START.md](./QUICK_START.md) - Cách tạo form definition trong database
+
+### 👩‍💻 Nếu bạn là Child Form Developer  
+➡️ Bạn cần tích hợp form của mình với parent app.
+
+**Xem:** [IFRAME_FORM_INTEGRATION.md](./IFRAME_FORM_INTEGRATION.md) - Hướng dẫn chi tiết integration
+
+### 🏗️ Nếu bạn cần hiểu hệ thống
+➡️ Bạn muốn hiểu kiến trúc và cách hệ thống hoạt động.
+
+**Xem:** [FORM_INTEGRATION_README.md](./FORM_INTEGRATION_README.md) - Tổng quan hệ thống
+
+### 🔍 Nếu bạn là Reviewer/QA
+➡️ Bạn cần xem implementation summary và testing guide.
+
+**Xem:** [IMPLEMENTATION_SUMMARY.md](./IMPLEMENTATION_SUMMARY.md) - Chi tiết implementation
+
+---
+
+## 📖 Tài liệu đầy đủ
+
+### 1. [QUICK_START.md](./QUICK_START.md) ⚡
+**Mô tả:** Quick reference guide cho developers  
+**Thời gian đọc:** 2 phút  
+**Nội dung:**
+- Setup database
+- Minimal child form implementation  
+- Common issues & solutions
+
+### 2. [IFRAME_FORM_INTEGRATION.md](./IFRAME_FORM_INTEGRATION.md) 📡
+**Mô tả:** Chi tiết hướng dẫn integration cho child form  
+**Thời gian đọc:** 15 phút  
+**Nội dung:**
+- Message protocol specifications
+- Implementation examples (React, Vue, Vanilla JS)
+- Security best practices
+- Testing & debugging guide
+
+### 3. [FORM_INTEGRATION_README.md](./FORM_INTEGRATION_README.md) 🏗️
+**Mô tả:** Tổng quan về hệ thống  
+**Thời gian đọc:** 20 phút  
+**Nội dung:**
+- System architecture
+- Features overview
+- File structure
+- Data flow diagrams
+- Configuration guide
+- Troubleshooting
+
+### 4. [IMPLEMENTATION_SUMMARY.md](./IMPLEMENTATION_SUMMARY.md) ✅
+**Mô tả:** Summary của implementation  
+**Thời gian đọc:** 10 phút  
+**Nội dung:**
+- Implementation checklist
+- Files created/updated
+- Testing instructions
+- Technical details
+- Production readiness
+
+---
+
+## 🎨 Examples & Resources
+
+### Working Example
+- **File:** [../public/example-form.html](../public/example-form.html)
+- **Description:** Complete working example với beautiful UI
+- **Features:** 
+  - Connection status display
+  - Form với validation
+  - Communication log
+  - Success messages
+
+### Database Schema
+- **File:** [../../fms-report-management-system-admin-ui/docs/supabase-database/4. fms-form.sql](../../fms-report-management-system-admin-ui/docs/supabase-database/4.%20fms-form.sql)
+- **Description:** Form definition table schema
+
+---
+
+## 🔗 Quick Links
+
+### Parent App Code
+- Store: `src/stores/form-definition.store.ts`
+- Context: `src/contexts/form-definition.context.tsx`
+- API: `src/services/api/application/form-definition/get-by-id.ts`
+- Hook: `src/hooks/use-iframe-communication.ts`
+- Component: `src/components/IframeFormViewer.tsx`
+- Page: `src/app/[tenant_code]/[project_code]/(auth)/form/[form_id]/page.tsx`
+
+### Documentation
+- Integration Guide: `docs/IFRAME_FORM_INTEGRATION.md`
+- System Overview: `docs/FORM_INTEGRATION_README.md`
+- Quick Start: `docs/QUICK_START.md`
+- Summary: `docs/IMPLEMENTATION_SUMMARY.md`
+
+---
+
+## 📋 Common Scenarios
+
+### Scenario 1: Tạo form mới
+1. Read [QUICK_START.md](./QUICK_START.md)
+2. Insert form definition vào database
+3. Develop child form theo [IFRAME_FORM_INTEGRATION.md](./IFRAME_FORM_INTEGRATION.md)
+4. Test với example
+
+### Scenario 2: Debug integration issues
+1. Check [Troubleshooting section](./FORM_INTEGRATION_README.md#-troubleshooting)
+2. Review console logs
+3. Verify origin validation
+4. Test với example form
+
+### Scenario 3: Understand system architecture
+1. Read [Architecture section](./FORM_INTEGRATION_README.md#️-kiến-trúc)
+2. Review [Data Flow](./FORM_INTEGRATION_README.md#-data-flow)
+3. Check implementation files
+
+### Scenario 4: Review security
+1. Check [Security Features](./FORM_INTEGRATION_README.md#-security-features)
+2. Review [Security Best Practices](./IFRAME_FORM_INTEGRATION.md#-security-considerations)
+3. Verify origin validation implementation
+
+---
+
+## 🎓 Learning Path
+
+### Beginner
+1. ⭐ Read [QUICK_START.md](./QUICK_START.md)
+2. ⭐ Review [example-form.html](../public/example-form.html)
+3. ⭐ Try creating simple test form
+
+### Intermediate
+1. 📚 Read [IFRAME_FORM_INTEGRATION.md](./IFRAME_FORM_INTEGRATION.md)
+2. 📚 Understand message protocol
+3. 📚 Implement form với React/Vue
+
+### Advanced
+1. 🚀 Read [FORM_INTEGRATION_README.md](./FORM_INTEGRATION_README.md)
+2. 🚀 Study implementation code
+3. 🚀 Review security measures
+4. 🚀 Contribute improvements
+
+---
+
+## 📞 Support & Contribution
+
+### Need Help?
+1. Check documentation above
+2. Review example form
+3. Check console logs
+4. Verify database configuration
+
+### Found Issues?
+1. Document the issue
+2. Check if it's in [Troubleshooting](./FORM_INTEGRATION_README.md#-troubleshooting)
+3. Create bug report
+
+### Want to Contribute?
+1. Read implementation code
+2. Understand architecture
+3. Follow code style
+4. Add tests if applicable
+
+---
+
+## 📊 Documentation Stats
+
+- **Total Documents:** 4 main docs + 1 example
+- **Total Lines:** ~2000+ lines
+- **Code Examples:** React, Vue, Vanilla JS
+- **Diagrams:** Architecture, Data Flow
+- **Last Updated:** 2026-02-08
+
+---
+
+## ✅ Implementation Status
+
+- [x] Core functionality
+- [x] Error handling
+- [x] Security measures
+- [x] Documentation
+- [x] Examples
+- [x] Testing guide
+- [x] Production ready
+
+**Status:** READY FOR USE 🚀
+
+---
+
+**Happy Coding!** 💻✨

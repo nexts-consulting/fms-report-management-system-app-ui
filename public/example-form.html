@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Example Form - Iframe Integration</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .container {
+      background: white;
+      max-width: 800px;
+      width: 100%;
+      padding: 40px;
+    }
+
+    h1 {
+      color: #333;
+      margin-bottom: 10px;
+      font-size: 28px;
+    }
+
+    .subtitle {
+      color: #666;
+      margin-bottom: 30px;
+      font-size: 14px;
+    }
+
+    .status-card {
+      background: #f8f9fa;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-left: 4px solid #667eea;
+    }
+
+    .status-title {
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .status-badge.ready {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .status-badge.waiting {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 12px;
+      font-size: 14px;
+    }
+
+    .info-label {
+      color: #666;
+      font-weight: 500;
+    }
+
+    .info-value {
+      color: #333;
+      font-weight: 600;
+    }
+
+    .form-section {
+      margin-top: 30px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #333;
+      font-weight: 500;
+      font-size: 14px;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e1e4e8;
+      font-size: 14px;
+      transition: border-color 0.3s;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    button {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 14px 32px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      width: 100%;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .log-section {
+      margin-top: 30px;
+      padding-top: 30px;
+      border-top: 2px solid #e1e4e8;
+    }
+
+    .log-title {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+
+    .log-output {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 16px;
+      font-family: 'Monaco', 'Courier New', monospace;
+      font-size: 12px;
+      max-height: 200px;
+      overflow-y: auto;
+      line-height: 1.6;
+    }
+
+    .log-entry {
+      margin-bottom: 8px;
+    }
+
+    .log-time {
+      color: #858585;
+    }
+
+    .log-type {
+      font-weight: 600;
+    }
+
+    .log-type.info {
+      color: #4fc3f7;
+    }
+
+    .log-type.success {
+      color: #81c784;
+    }
+
+    .log-type.error {
+      color: #e57373;
+    }
+
+    .alert {
+      padding: 12px 16px;
+      margin-bottom: 20px;
+      font-size: 14px;
+    }
+
+    .alert.success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .loading {
+      animation: pulse 2s infinite;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎯 Example Form</h1>
+    <p class="subtitle">This is an example form demonstrating iframe integration with parent app</p>
+
+    <!-- Connection Status -->
+    <div class="status-card">
+      <div class="status-title">
+        📡 Connection Status
+        <span id="connectionStatus" class="status-badge waiting loading">Waiting for data...</span>
+      </div>
+      <div id="attendanceInfo" style="display: none;">
+        <div class="info-grid">
+          <span class="info-label">Location:</span>
+          <span class="info-value" id="locationName">-</span>
+          
+          <span class="info-label">Username:</span>
+          <span class="info-value" id="username">-</span>
+          
+          <span class="info-label">Shift:</span>
+          <span class="info-value" id="workshiftName">-</span>
+          
+          <span class="info-label">Check-in Time:</span>
+          <span class="info-value" id="checkinTime">-</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Success Message -->
+    <div id="successMessage" class="alert success" style="display: none;">
+      ✅ Form submitted successfully!
+    </div>
+
+    <!-- Form -->
+    <form id="exampleForm" class="form-section">
+      <div class="form-group">
+        <label for="taskType">Task Type</label>
+        <select id="taskType" required>
+          <option value="">Select task type...</option>
+          <option value="inspection">Inspection</option>
+          <option value="maintenance">Maintenance</option>
+          <option value="repair">Repair</option>
+          <option value="installation">Installation</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="description">Description</label>
+        <textarea id="description" required placeholder="Enter task description..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="priority">Priority</label>
+        <select id="priority" required>
+          <option value="">Select priority...</option>
+          <option value="low">Low</option>
+          <option value="medium">Medium</option>
+          <option value="high">High</option>
+          <option value="urgent">Urgent</option>
+        </select>
+      </div>
+
+      <button type="submit" id="submitBtn">Submit Form</button>
+    </form>
+
+    <!-- Log Section -->
+    <div class="log-section">
+      <div class="log-title">📋 Communication Log</div>
+      <div class="log-output" id="logOutput"></div>
+    </div>
+  </div>
+
+  <script>
+    let currentAttendance = null;
+    const logs = [];
+
+    // Add log entry
+    function addLog(type, message, data = null) {
+      const timestamp = new Date().toLocaleTimeString('vi-VN');
+      logs.push({ timestamp, type, message, data });
+      
+      const logOutput = document.getElementById('logOutput');
+      const logEntry = document.createElement('div');
+      logEntry.className = 'log-entry';
+      
+      let logHtml = `<span class="log-time">[${timestamp}]</span> <span class="log-type ${type}">[${type.toUpperCase()}]</span> ${message}`;
+      if (data) {
+        logHtml += `<br><span style="color: #858585">${JSON.stringify(data, null, 2)}</span>`;
+      }
+      
+      logEntry.innerHTML = logHtml;
+      logOutput.appendChild(logEntry);
+      logOutput.scrollTop = logOutput.scrollHeight;
+    }
+
+    // Update UI with attendance data
+    function updateAttendanceUI(attendance) {
+      const statusBadge = document.getElementById('connectionStatus');
+      const attendanceInfo = document.getElementById('attendanceInfo');
+      
+      if (attendance) {
+        statusBadge.textContent = 'Connected';
+        statusBadge.className = 'status-badge ready';
+        attendanceInfo.style.display = 'block';
+        
+        document.getElementById('locationName').textContent = attendance.location_name || '-';
+        document.getElementById('username').textContent = attendance.username || '-';
+        document.getElementById('workshiftName').textContent = attendance.workshift_name || '-';
+        document.getElementById('checkinTime').textContent = 
+          attendance.checkin_time ? new Date(attendance.checkin_time).toLocaleString('vi-VN') : '-';
+      } else {
+        statusBadge.textContent = 'No Active Attendance';
+        statusBadge.className = 'status-badge waiting';
+        attendanceInfo.style.display = 'none';
+      }
+    }
+
+    // Listen for messages from parent
+    window.addEventListener('message', function(event) {
+      addLog('info', 'Received message from parent', { origin: event.origin, type: event.data.type });
+
+      // In production, validate origin for security
+      // const allowedOrigins = ['https://your-parent-app.com'];
+      // if (!allowedOrigins.includes(event.origin)) {
+      //   addLog('error', 'Message from untrusted origin', { origin: event.origin });
+      //   return;
+      // }
+
+      if (event.data.type === 'INIT_FORM_DATA') {
+        currentAttendance = event.data.payload.currentAttendance;
+        addLog('success', 'Received attendance data', currentAttendance);
+        updateAttendanceUI(currentAttendance);
+      }
+    });
+
+    // Notify parent that form is ready
+    addLog('info', 'Sending FORM_READY message to parent');
+    window.parent.postMessage({ type: 'FORM_READY' }, '*');
+
+    // Handle form submission
+    document.getElementById('exampleForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const submitBtn = document.getElementById('submitBtn');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Submitting...';
+      
+      const formData = {
+        taskType: document.getElementById('taskType').value,
+        description: document.getElementById('description').value,
+        priority: document.getElementById('priority').value,
+        attendance_id: currentAttendance?.id,
+        location_code: currentAttendance?.location_code,
+        username: currentAttendance?.username,
+        submitted_at: new Date().toISOString(),
+      };
+
+      addLog('info', 'Submitting form data', formData);
+
+      // Simulate API call
+      setTimeout(() => {
+        addLog('success', 'Form submitted successfully');
+        
+        // Show success message
+        const successMessage = document.getElementById('successMessage');
+        successMessage.style.display = 'block';
+        
+        // Reset form
+        document.getElementById('exampleForm').reset();
+        
+        // Optional: Notify parent (if needed)
+        window.parent.postMessage({
+          type: 'FORM_SUBMITTED',
+          payload: { success: true, data: formData }
+        }, '*');
+        
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Submit Form';
+        
+        // Hide success message after 3 seconds
+        setTimeout(() => {
+          successMessage.style.display = 'none';
+        }, 3000);
+      }, 1500);
+    });
+
+    addLog('info', 'Form initialized and ready');
+  </script>
+</body>
+</html>
+

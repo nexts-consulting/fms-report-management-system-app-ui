@@ -464,3 +464,18 @@ export interface IReportDefinition {
   created_at?: string | null;
   updated_at?: string | null;
 }
+
+export interface IFormDefinition {
+  id: string;
+  tenant_code: string;
+  project_code: string;
+  code: string;
+  name: string;
+  description?: string;
+  app_url: string;
+  status?: "draft" | "published" | "archived" | null;
+  created_by?: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+  updated_by?: string | null;
+}

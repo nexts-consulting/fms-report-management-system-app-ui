@@ -1,151 +1,134 @@
-# ⚡ Quick Start Guide - App UI
+# 🚀 Quick Start Guide - Form Integration
 
-## 🚀 Cài đặt Nhanh
+## For Parent App Developers
 
-### 1. Clone & Install
+### 1. Create Form Definition in Database
 
-```bash
-cd fms-report-management-system-app-ui
-pnpm install  # hoặc yarn install / npm install
+```sql
+INSERT INTO fms_mst_form_definition (
+  tenant_code,
+  project_code,
+  code,
+  name,
+  description,
+  app_url,
+  status
+) VALUES (
+  'your-tenant',
+  'your-project',
+  'my-form',
+  'My Form',
+  'Form description',
+  'https://your-form-url.com',
+  'published'
+);
 ```
 
-### 2. Cấu hình Environment Variables
+### 2. Access Form
 
-Tạo file `.env.local`:
+Navigate to: `/[tenant_code]/[project_code]/form/[form_id]`
 
-```bash
-NEXT_PUBLIC_API_URL=http://localhost:8080
-NEXT_PUBLIC_IMAGE_DOMAIN=http://localhost:8080  # Optional
-```
-
-### 3. Chạy Development Server
-
-```bash
-pnpm dev
-```
-
-Truy cập: `http://localhost:3000`
-
-**Note:** Cần truy cập với tenant và project code trong URL:
-```
-http://localhost:3000/{tenant_code}/{project_code}/login
-```
+That's it! 🎉
 
 ---
 
-## 📁 Cấu trúc Chính
+## For Child Form Developers
 
+### Minimal Implementation
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <title>My Form</title>
+</head>
+<body>
+  <h1>My Form</h1>
+  <div id="info"></div>
+  
+  <script>
+    // 1. Listen for data from parent
+    window.addEventListener('message', function(event) {
+      // Security: Validate origin in production
+      if (event.data.type === 'INIT_FORM_DATA') {
+        const attendance = event.data.payload.currentAttendance;
+        
+        // Use the data
+        if (attendance) {
+          document.getElementById('info').innerHTML = `
+            Location: ${attendance.location_name}<br>
+            User: ${attendance.username}
+          `;
+        }
+      }
+    });
+    
+    // 2. Notify parent you're ready
+    window.parent.postMessage({ type: 'FORM_READY' }, '*');
+  </script>
+</body>
+</html>
 ```
-src/
-├── app/[tenant_code]/[project_code]/  # Multi-tenant + multi-project routes
-│   ├── (auth)/                        # Protected routes
-│   │   ├── lobby/                    # Main lobby
-│   │   ├── checkin/                  # Check-in flow
-│   │   ├── attendance/               # Attendance features
-│   │   ├── shift/                    # Shift management
-│   │   └── location/                 # Location selection
-│   └── login/                        # Login page
-├── components/                        # Feature components
-├── kits/                             # Reusable component library
-│   ├── components/                   # UI components
-│   └── widgets/                      # Complex widgets
-├── contexts/                         # React contexts
-├── hooks/                            # Custom hooks
-├── services/                         # API services
-└── stores/                           # Zustand stores
-```
 
----
-
-## 🔑 Key Concepts
-
-### Multi-tenant + Multi-project Routing
+### Available Data
 
 ```typescript
-// URL structure
-/{tenant_code}/{project_code}/lobby
-/{tenant_code}/{project_code}/checkin
-/{tenant_code}/{project_code}/attendance/tracking
-
-// Sử dụng hook để build paths
-import { useTenantProjectPath } from '@/hooks/use-tenant-project-path';
-
-const { tenantCode, projectCode, buildPath } = useTenantProjectPath();
-const lobbyPath = buildPath('/lobby'); // → /fms/project1/lobby
-```
-
-### Authentication
-
-- Token lưu trong Zustand store (localStorage)
-- Auto-load project configs sau khi login
-- Headers: `Authorization: Bearer <token>`
-
-### Project Configs
-
-Mỗi project có configs riêng:
-- Check-in flow settings
-- GPS verification settings
-- Photo requirements
-- Workshift configuration
-
-Configs được load tự động và cache trong global store.
-
-### API Calls
-
-```typescript
-// Service pattern
-import { axios } from '@/libs/axios';
-
-export const getAttendance = async () => {
-  const response = await axios.get('/attendance');
-  return response.data;
-};
+currentAttendance: {
+  id: number;
+  location_name: string;
+  username: string;
+  workshift_name: string;
+  checkin_time: string;
+  // ... more fields
+} | null
 ```
 
 ---
 
-## 🎯 Main Features
+## 📚 Full Documentation
 
-### 1. Check-in Flow
-- GPS verification
-- Photo capture
-- Survey (optional)
-- Submit attendance
-
-### 2. Attendance Tracking
-- Real-time tracking
-- Current shift info
-- Location tracking
-- Report access
-
-### 3. Reports
-- Stock reports
-- Sampling reports
-- Activity reports
-- OOS reports
-
-### 4. Shift Management
-- View current shift
-- Shift duration tracking
-- Upcoming shifts
+- **Integration Guide**: [IFRAME_FORM_INTEGRATION.md](./IFRAME_FORM_INTEGRATION.md)
+- **System Overview**: [FORM_INTEGRATION_README.md](./FORM_INTEGRATION_README.md)
+- **Implementation Summary**: [IMPLEMENTATION_SUMMARY.md](./IMPLEMENTATION_SUMMARY.md)
+- **Example Form**: [../public/example-form.html](../public/example-form.html)
 
 ---
 
-## 🛠️ Commands
+## 🆘 Common Issues
 
-```bash
-pnpm dev          # Development server
-pnpm build        # Build production
-pnpm start        # Run production
-pnpm lint         # ESLint
-pnpm prettier     # Format code
+### Issue: Iframe không load
+**Solution**: Check app_url in database, verify URL is accessible
+
+### Issue: Không nhận được data
+**Solution**: Check console logs, verify FORM_READY message sent
+
+### Issue: currentAttendance is null
+**Solution**: This is normal if user hasn't checked in. Handle null case in your form.
+
+---
+
+## 💬 Message Types
+
+| Type | Direction | Purpose |
+|------|-----------|---------|
+| `INIT_FORM_DATA` | Parent → Child | Send attendance data |
+| `FORM_READY` | Child → Parent | Form ready to receive data |
+| `FORM_SUBMITTED` | Child → Parent | Form submitted successfully |
+| `FORM_ERROR` | Child → Parent | Error occurred |
+
+---
+
+## 🔐 Security Note
+
+**Production**: Always validate message origin!
+
+```javascript
+const allowedOrigins = ['https://your-parent-app.com'];
+if (!allowedOrigins.includes(event.origin)) {
+  return; // Reject message
+}
 ```
 
 ---
 
-## 📖 Xem thêm
-
-- `DEPLOYMENT_GUIDE.md` - Hướng dẫn chi tiết đầy đủ
-- `ARCHITECTURE.md` - Kiến trúc và design patterns
-- Storybook stories trong `src/kits/components/*/stories/`
-
+Need help? Check the full documentation above! 📖

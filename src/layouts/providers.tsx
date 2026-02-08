@@ -8,6 +8,7 @@ import { AuthContextProvider } from "@/contexts/auth.context";
 import { GlobalContextProvider } from "@/contexts/global.context";
 import { ProjectConfigProvider } from "@/contexts/project-config.context";
 import { ReportDefinitionContextProvider } from "@/contexts/report-definition.context";
+import { FormDefinitionContextProvider } from "@/contexts/form-definition.context";
 import { AppMenuProvider } from "@/contexts/app-menu.context";
 import { Content } from "./content";
 import { ProjectThemeProvider } from "@/contexts/project-theme.context";
@@ -52,9 +53,11 @@ const Providers = (props: ProvidersProps) => {
                 <ProjectConfigProvider>
                   <AppMenuProvider>
                     <ReportDefinitionContextProvider>
-                      <ProjectThemeProvider>
-                        <Content>{children}</Content>
-                      </ProjectThemeProvider>
+                      <FormDefinitionContextProvider>
+                        <ProjectThemeProvider>
+                          <Content>{children}</Content>
+                        </ProjectThemeProvider>
+                      </FormDefinitionContextProvider>
                     </ReportDefinitionContextProvider>
                   </AppMenuProvider>
                 </ProjectConfigProvider>
