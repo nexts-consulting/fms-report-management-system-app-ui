@@ -127,6 +127,7 @@ export const IframeFormViewer: React.FC<IframeFormViewerProps> = ({
       <iframe
         ref={iframeRef}
         src={appUrl}
+        allow="camera; microphone; geolocation; clipboard-read; clipboard-write; payment; usb; serial;"
         className="w-full h-full border-0"
         title={formName || "Form"}
         onLoad={onIframeLoad}
@@ -137,14 +138,14 @@ export const IframeFormViewer: React.FC<IframeFormViewerProps> = ({
       />
 
       {/* Debug Info (only in development) */}
-      {process.env.NODE_ENV === "development" && (
+      {/* {process.env.NODE_ENV === "development" && (
         <div className="absolute bottom-2 right-2 bg-black bg-opacity-75 text-white text-xs p-2 rounded">
           <div>Ready: {isIframeReady ? "Yes" : "No"}</div>
           <div>Loading: {isLoading ? "Yes" : "No"}</div>
           <div>Error: {loadError ? "Yes" : "No"}</div>
           <div>Timeout: {loadTimeout ? "Yes" : "No"}</div>
         </div>
-      )}
+      )} */}
     </div>
   );
 };

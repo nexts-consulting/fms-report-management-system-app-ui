@@ -127,7 +127,7 @@ export default function ReportPage() {
         onBack={() => router.back()}
       />
       
-      <div className="flex flex-col gap-4 p-4 pt-0">
+      <div className="flex flex-col gap-4 p-4 pt-8">
         {hasData && !hasError && (
           <DynamicForm
             config={formConfig}

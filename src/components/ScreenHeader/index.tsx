@@ -31,7 +31,7 @@ export const ScreenHeader = React.memo((props: ScreenHeaderProps) => {
   } = props;
 
   return (
-    <div className={StyleUtil.cn("sticky top-0 z-10 mb-8", containerClassName)}>
+    <div className={StyleUtil.cn("sticky top-0 z-10", containerClassName)}>
       <div
         className={StyleUtil.cn(
           "relative h-[58px] border-b border-b-gray-20 bg-white p-4",
