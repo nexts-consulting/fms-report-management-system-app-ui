@@ -245,7 +245,7 @@ export const Entry = () => {
         onBack={() => router.back()}
       />
 
-      <div className="px-4">
+      <div className="px-4 py-0 pt-8">
         <NotificationBanner
           type="info"
           title="Tips"
