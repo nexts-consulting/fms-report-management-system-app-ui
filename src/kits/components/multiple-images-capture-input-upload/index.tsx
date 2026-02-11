@@ -12,10 +12,10 @@ import React from "react";
 import { IconButton } from "../icon-button";
 import { Icons } from "../icons";
 import { Modal } from "../modal";
-import { LoadingOverlay } from "../loading-overlay";
 import { NotificationBanner } from "../notification-banner";
 import { CloudConfig, UploadProgressCallback } from "@/kits/components/image-capture-input-upload/types";
 import { uploadFileToCloud } from "@/components/DynamicForm/services/upload.service";
+import { Button } from "../button";
 
 const constants = {
   INSTANCE_NAME: "MultipleImagesCaptureInputUpload",
@@ -118,6 +118,11 @@ export interface MultipleImagesCaptureInputUploadProps {
    * @default true
    */
   showImageIndex?: boolean;
+  /**
+   * Allow upload form library
+   * @default false
+   */
+  enableUpload?: boolean;
 }
 
 export const MultipleImagesCaptureInputUpload = React.memo(
@@ -138,6 +143,7 @@ export const MultipleImagesCaptureInputUpload = React.memo(
       onUploadSuccess,
       disabled = false,
       showImageIndex = true,
+      enableUpload = false,
     } = props;
 
     const instanceId = React.useRef(CommonUtil.nanoid("alphaLower"));
@@ -336,7 +342,7 @@ export const MultipleImagesCaptureInputUpload = React.memo(
                     )}
 
                     {/* Loading Overlay */}
-                    {isCurrentlyUploading && <LoadingOverlay />}
+                    {/* {isCurrentlyUploading && <LoadingOverlay />} */}
 
                     {/* Action Buttons */}
                     {!isCurrentlyUploading && (
@@ -390,49 +396,21 @@ export const MultipleImagesCaptureInputUpload = React.memo(
 
           {/* Add Image Button */}
           {canAddMore && (
-            <button
-              type="button"
-              id={ids.current.addButton}
-              className={StyleUtil.cn(styles.addButton, {
-                "border-red-50 bg-red-50/5": error && !hasMinImages,
-                "cursor-not-allowed opacity-50": disabled || isUploading,
-              })}
+            <Button
+              size="small"
+              icon={Icons.Camera}
               onClick={() => !disabled && !isUploading && setShowCamera(true)}
               disabled={disabled || isUploading}
             >
-              <div className={styles.buttonContent}>
-                <Icons.Add className="w-8 h-8 mb-2 text-gray-70" />
-                <p>
-                  {images.length === 0
-                    ? helperText || "Add Image"
-                    : `Add Image (${images.length}/${maxImages === Infinity ? "∞" : maxImages})`}
-                </p>
-              </div>
-            </button>
-          )}
-
-          {/* Helper Text */}
-          {helperText && images.length === 0 && (
-            <p className={styles.helperText}>{helperText}</p>
-          )}
-
-          {/* Image Count Info */}
-          {images.length > 0 && (
-            <p className={styles.helperText}>
-              {images.length} image{images.length !== 1 ? "s" : ""} uploaded
-              {!hasMinImages && minImages > 0 && (
-                <span className="text-red-60 ml-2">
-                  (Minimum {minImages} required)
-                </span>
-              )}
-            </p>
+            {helperText || "Add Image"}  ({images.length}/{maxImages === Infinity ? "∞" : maxImages})
+            </Button>
           )}
         </div>
 
         {/* Camera Capture Modal */}
         {showCamera && (
           <CameraCapture
-            enableUpload={false}
+            enableUpload={enableUpload}
             enableCancel={true}
             defaultFacingMode={defaultFacingMode}
             onConfirm={handleConfirmCapture}

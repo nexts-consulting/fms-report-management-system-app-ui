@@ -88,7 +88,7 @@ export const IframeFormViewer: React.FC<IframeFormViewerProps> = ({
 
       {/* Error State */}
       {loadError && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-50 z-10">
+        <div className="absolute inset-0 flex items-center justify-center bg-white z-10">
           <div className="max-w-md p-6 text-center">
             <div className="mb-4">
               <svg

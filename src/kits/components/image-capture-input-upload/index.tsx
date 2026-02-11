@@ -60,7 +60,6 @@ import React from "react";
 import { IconButton } from "../icon-button";
 import { Icons } from "../icons";
 import { Modal } from "../modal";
-import { LoadingOverlay } from "../loading-overlay";
 import { NotificationBanner } from "../notification-banner";
 import { CloudConfig, UploadProgressCallback } from "@/kits/components/image-capture-input-upload/types";
 import { uploadFileToCloud } from "@/components/DynamicForm/services/upload.service";
@@ -135,6 +134,12 @@ export interface ImageCaptureInputWithUploadProps {
    * Disable the component
    */
   disabled?: boolean;
+
+  /**
+   * Allow upload form library
+   * @default false
+   */
+  enableUpload?: boolean;
 }
 
 export const ImageCaptureInputWithUpload = React.memo(
@@ -151,6 +156,7 @@ export const ImageCaptureInputWithUpload = React.memo(
       onUploadError,
       onUploadSuccess,
       disabled,
+      enableUpload = false,
     } = props;
 
     const instanceId = React.useRef(CommonUtil.nanoid("alphaLower"));
@@ -295,7 +301,7 @@ export const ImageCaptureInputWithUpload = React.memo(
               )}
 
               {/* Loading Overlay */}
-              {isUploading && <LoadingOverlay />}
+              {/* {isUploading && <LoadingOverlay />} */}
 
               {/* Action Buttons */}
               {!isUploading && (
@@ -328,7 +334,7 @@ export const ImageCaptureInputWithUpload = React.memo(
         {/* Camera Capture Modal */}
         {showCamera && (
           <CameraCapture
-            enableUpload={false}
+            enableUpload={enableUpload}
             enableCancel={true}
             defaultFacingMode={defaultFacingMode}
             onConfirm={handleConfirmCapture}
