@@ -5,7 +5,7 @@ const loginSchema = z.object({
     .string()
     .min(1, { message: "Tên đăng nhập không được để trống" })
     .min(3, { message: "Tên đăng nhập tối thiểu 3 kí tự" })
-    .max(20, { message: "Tên đăng nhập tối đa 20 kí tự" }),
+    .max(50, { message: "Tên đăng nhập tối đa 50 kí tự" }),
   password: z.string().min(1, { message: "Mật khẩu không được để trống" }),
 });
 
