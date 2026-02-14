@@ -13,7 +13,15 @@ export type ListReportEntriesParams = {
 export type ReportEntry = {
   id: string;
   unique_value: string;
+  entry_label: string;
   data: Record<string, any>;
+  additional_data_1: Record<string, any>;
+  additional_data_2: Record<string, any>;
+  workshift_id: number;
+  workshift_name: string;
+  location_code: string;
+  location_name: string;
+  attendance_id: string;
   created_by: string;
   updated_by?: string | null;
   created_at: string;
@@ -27,7 +35,7 @@ export type ListReportEntriesResponse = {
 
 /**
  * List report entries from the specified table
- * 
+ *
  * @param params - Parameters for listing report entries
  * @returns List of report entries
  */
@@ -46,9 +54,7 @@ export const httpRequestListReportEntries = async (
     if (date) {
       const startDate = `${date}T00:00:00.000Z`;
       const endDate = `${date}T23:59:59.999Z`;
-      query = query
-        .gte("created_at", startDate)
-        .lte("created_at", endDate);
+      query = query.gte("created_at", startDate).lte("created_at", endDate);
     }
 
     // Pagination
@@ -96,4 +102,3 @@ export const useQueryReportEntries = ({ params, config }: QueryOptions) => {
     ...config,
   });
 };
-

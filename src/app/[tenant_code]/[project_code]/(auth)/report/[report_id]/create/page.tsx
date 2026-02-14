@@ -8,10 +8,10 @@ import { LoadingOverlay } from "@/kits/components/loading-overlay";
 import { useRouter, useParams } from "next/navigation";
 import { hydrateFormConfig } from "@/components/DynamicForm/formConfigSerializer";
 import { useReportDefinition } from "@/contexts/report-definition.context";
-import { useTenantProjectPath } from "@/hooks/use-tenant-project-path";
 import { useAuthContext } from "@/contexts/auth.context";
 import { useNotification } from "@/kits/components/notification";
 import { httpRequestCreateReportEntry } from "@/services/api/application/report-entry/create";
+import { useGlobalContext } from "@/contexts/global.context";
 
 export default function ReportPage() {
   const [formData, setFormData] = React.useState<Record<string, any>>({});
@@ -21,9 +21,11 @@ export default function ReportPage() {
   const params = useParams();
   const reportId = params?.report_id as string;
   const authStore = useAuthContext();
+  const globalStore = useGlobalContext();
   const user = authStore.use.user();
+  const currentAttendance = globalStore.use.currentAttendance();
   const notification = useNotification();
-  
+
   const { data: reportDefinition, isLoading, error } = useReportDefinition(reportId);
 
   // Hydrate form config from report definition
@@ -34,7 +36,6 @@ export default function ReportPage() {
     return hydrateFormConfig(reportDefinition.form_definition);
   }, [reportDefinition?.form_definition]);
 
- 
   const formConfig = hydratedFormConfig || null;
 
   const handleSubmit = async (data: Record<string, any>) => {
@@ -65,7 +66,8 @@ export default function ReportPage() {
     if (!dataSourceConfig?.table_name) {
       notification.error({
         title: "Lỗi",
-        description: "Không tìm thấy cấu hình bảng dữ liệu. Vui lòng kiểm tra lại cấu hình báo cáo.",
+        description:
+          "Không tìm thấy cấu hình bảng dữ liệu. Vui lòng kiểm tra lại cấu hình báo cáo.",
       });
       return;
     }
@@ -78,10 +80,17 @@ export default function ReportPage() {
         schema: dataSourceConfig.schema || "public",
         data,
         createdBy: user.username,
+        additionalData1: {},
+        additionalData2: {},
+        workshiftId: currentAttendance?.workshift_id ?? 0,
+        workshiftName: currentAttendance?.workshift_name ?? "",
+        locationCode: currentAttendance?.location_code ?? "",
+        locationName: currentAttendance?.location_name ?? "",
+        attendanceId: currentAttendance?.id?.toString() ?? "",
       });
 
       setSubmittedData(data);
-      
+
       notification.success({
         title: "Thành công",
         description: "Báo cáo đã được lưu thành công",
@@ -93,10 +102,9 @@ export default function ReportPage() {
       }, 1500);
     } catch (err: any) {
       console.error("Error saving report entry:", err);
-      
-      const errorMessage =
-        err?.message || "Có lỗi xảy ra khi lưu báo cáo. Vui lòng thử lại.";
-      
+
+      const errorMessage = err?.message || "Có lỗi xảy ra khi lưu báo cáo. Vui lòng thử lại.";
+
       notification.error({
         title: "Lỗi",
         description: errorMessage,
@@ -122,11 +130,8 @@ export default function ReportPage() {
     <>
       <LoadingOverlay active={isLoading || isSubmitting} />
 
-      <ScreenHeader
-        title={`${reportDefinition?.name || ''}`}
-        onBack={() => router.back()}
-      />
-      
+      <ScreenHeader title={`${reportDefinition?.name || ""}`} onBack={() => router.back()} />
+
       <div className="flex flex-col gap-4 p-4 pt-8">
         {hasData && !hasError && (
           <DynamicForm
@@ -143,4 +148,3 @@ export default function ReportPage() {
     </>
   );
 }
-

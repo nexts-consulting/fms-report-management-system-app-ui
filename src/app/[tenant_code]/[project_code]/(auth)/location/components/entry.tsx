@@ -21,7 +21,10 @@ import { useTenantProjectPath } from "@/hooks/use-tenant-project-path";
 import { ILocation } from "@/types/model";
 import { useQueryLocationByAdminDivision } from "@/services/api/application/location/list-by-admin-division";
 import { useQueryAdminDivisionList } from "@/services/api/application/admin-division/list";
-import { buildAdminDivisionTree, getAllChildDivisionIds } from "@/services/api/application/admin-division/list";
+import {
+  buildAdminDivisionTree,
+  getAllChildDivisionIds,
+} from "@/services/api/application/admin-division/list";
 
 export const Entry = () => {
   const authStore = useAuthContext();
@@ -40,10 +43,12 @@ export const Entry = () => {
 
   // State for dynamic cascade dropdowns - array stores selected division for each level
   // selectedLevels[0] = level 1, selectedLevels[1] = level 2, ...
-  const [selectedLevels, setSelectedLevels] = React.useState<({
-    label: string;
-    value: IAdminDivision;
-  } | null)[]>([]);
+  const [selectedLevels, setSelectedLevels] = React.useState<
+    ({
+      label: string;
+      value: IAdminDivision;
+    } | null)[]
+  >([]);
 
   const [selectedLocation, setSelectedLocation] = React.useState<ILocation | null>(null);
 
@@ -73,8 +78,11 @@ export const Entry = () => {
 
   // Calculate max level from divisions
   const maxLevel = React.useMemo(() => {
-    if (!adminDivisionListQuery.data?.data || adminDivisionListQuery.data.data.length === 0) return 0;
-    return Math.max(...adminDivisionListQuery.data.data.map((d: IAdminDivisionWithChildren) => d.level));
+    if (!adminDivisionListQuery.data?.data || adminDivisionListQuery.data.data.length === 0)
+      return 0;
+    return Math.max(
+      ...adminDivisionListQuery.data.data.map((d: IAdminDivisionWithChildren) => d.level),
+    );
   }, [adminDivisionListQuery.data]);
 
   // Sync selectedLevels with maxLevel
@@ -114,7 +122,10 @@ export const Entry = () => {
 
   // Get options for a specific level
   const getLevelOptions = React.useCallback(
-    (level: number, parentId: number | null): Array<{ key: string; label: string; value: IAdminDivision }> => {
+    (
+      level: number,
+      parentId: number | null,
+    ): Array<{ key: string; label: string; value: IAdminDivision }> => {
       if (level === 1) {
         // Level 1: root divisions
         return adminDivisionTree.map((division: IAdminDivisionWithChildren, index: number) => ({
@@ -233,7 +244,7 @@ export const Entry = () => {
     if (currentAttendance) {
       router.push(buildPath("/attendance/tracking"));
     }
-  }, [currentAttendance]);
+  }, [currentAttendance, router, buildPath]);
 
   return (
     <>
@@ -253,11 +264,11 @@ export const Entry = () => {
         />
 
         {/* Tile - Dynamic Division Dropdowns */}
-        <div className="mt-4 w-full bg-white px-4 py-12 space-y-4">
+        <div className="mt-4 w-full space-y-4 bg-white px-4 py-12">
           {maxLevel > 0 &&
             Array.from({ length: maxLevel }, (_, index) => {
               const level = index + 1;
-              const parentId = level === 1 ? null : selectedLevels[level - 2]?.value.id ?? null;
+              const parentId = level === 1 ? null : (selectedLevels[level - 2]?.value.id ?? null);
               const options = getLevelOptions(level, parentId);
               const shouldShow =
                 level === 1
@@ -270,11 +281,17 @@ export const Entry = () => {
                 <SelectModal
                   key={`division-level-${level}`}
                   label={level === 1 ? "Khu vực" : ""}
-                  placeholder={level === 1 ? "Chọn khu vực" : `Chọn khu vực Level ${level} (tùy chọn)`}
+                  placeholder={
+                    level === 1 ? "Chọn khu vực" : `Chọn khu vực Level ${level} (tùy chọn)`
+                  }
                   searchPlaceholder="Tìm kiếm khu vực"
                   options={options}
                   error={level === 1 ? adminDivisionListQuery.isError : false}
-                  loading={level === 1 ? adminDivisionListQuery.isLoading || adminDivisionListQuery.isFetching : false}
+                  loading={
+                    level === 1
+                      ? adminDivisionListQuery.isLoading || adminDivisionListQuery.isFetching
+                      : false
+                  }
                   selectedOption={selectedLevels[level - 1] ?? null}
                   onSelect={(option) => handleLevelChange(level, option)}
                   messages={{
@@ -305,11 +322,11 @@ export const Entry = () => {
       <Modal
         isOpen={!!selectedLocation}
         onClose={() => setSelectedLocation(null)}
-        title='Xác nhận địa điểm'
+        title="Xác nhận địa điểm"
       >
         {selectedLocation && (
           <div className="bg-gray-10 p-4">
-            <div className="flex flex-col mb-4" >
+            <div className="mb-4 flex flex-col">
               <header className="flex items-center gap-2">
                 <p className="text-sm font-medium">Tên địa điểm: </p>
                 <p className="text-sm text-gray-70">{selectedLocation.name}</p>
@@ -391,7 +408,7 @@ const LocationCard = (props: LocationCardProps) => {
         role="button"
         tabIndex={0}
         className={StyleUtil.cn(
-          "block w-full bg-white p-4 text-left hover:bg-gray-10 cursor-pointer",
+          "block w-full cursor-pointer bg-white p-4 text-left hover:bg-gray-10",
           "outline outline-1 -outline-offset-1 outline-gray-30",
           "focus:bg-gray-10 focus:outline-primary-60",
         )}

@@ -16,7 +16,7 @@ import { Icons } from "@/kits/components/icons";
 
 export default function ReportPage() {
   const router = useRouter();
-  
+
   const params = useParams();
 
   const INITIAL_PAGE_SIZE = 50;
@@ -26,7 +26,7 @@ export default function ReportPage() {
 
   const reportId = params?.report_id as string;
   const { buildPath } = useTenantProjectPath();
-  
+
   const { data: reportDefinition, isLoading, error } = useReportDefinition(reportId);
 
   const hasError = !!error;
@@ -53,7 +53,11 @@ export default function ReportPage() {
   }, [reportDefinition?.form_definition]);
 
   // Query report entries
-  const { data: entriesData, isLoading: isLoadingEntries, isFetching } = useQueryReportEntries({
+  const {
+    data: entriesData,
+    isLoading: isLoadingEntries,
+    isFetching,
+  } = useQueryReportEntries({
     params: {
       tableName: dataSourceConfig?.table_name || "",
       schema: dataSourceConfig?.schema || "public",
@@ -75,7 +79,7 @@ export default function ReportPage() {
   // Generate label from entry data using entryLabelColumn
   const getEntryLabel = (entry: ReportEntry): string => {
     if (!formConfig?.entryLabelColumn || !entry.data) {
-      return entry.unique_value || entry.id;
+      return entry.entry_label || entry.unique_value || entry.id;
     }
 
     const labelColumns = formConfig.entryLabelColumn;
@@ -108,10 +112,7 @@ export default function ReportPage() {
   return (
     <>
       <LoadingOverlay active={isLoading || isLoadingEntries} />
-      <ScreenHeader
-        title={`${reportDefinition?.name || ''}`}
-        onBack={() => router.back()}
-      />
+      <ScreenHeader title={`${reportDefinition?.name || ""}`} onBack={() => router.back()} />
       <div className="flex flex-col gap-4 p-4 pt-8">
         {hasData && !hasError && (
           <>
@@ -136,12 +137,7 @@ export default function ReportPage() {
                 />
               </div>
               <div className="shrink-0">
-                <Button
-                  variant="tertiary"
-                  size="medium"
-                  centered
-                  onClick={handleRefresh}
-                >
+                <Button variant="tertiary" size="medium" centered onClick={handleRefresh}>
                   Làm mới dữ liệu
                 </Button>
               </div>
@@ -151,7 +147,7 @@ export default function ReportPage() {
             {reportDefinition?.data_source_type === "table" && dataSourceConfig?.table_name && (
               <div className="flex flex-col gap-4">
                 {entries.length === 0 && !isLoadingEntries && (
-                  <div className="text-center text-gray-500 py-8">
+                  <div className="py-8 text-center text-gray-500">
                     Không có dữ liệu báo cáo cho ngày đã chọn
                   </div>
                 )}
@@ -159,23 +155,21 @@ export default function ReportPage() {
                 {entries.map((entry) => (
                   <div
                     key={entry.id}
-                    className="border 200 p-4 bg-white cursor-pointer hover:shadow-md transition-shadow"
+                    className="200 cursor-pointer border bg-white p-4 transition-shadow hover:shadow-md"
                     onClick={() => setSelectedEntry(entry)}
                   >
-                    <div className="flex justify-between items-start">
+                    <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <h3 className="text-sm font-semibold text-gray-600 mb-1">
+                        <h3 className="mb-1 text-sm font-semibold text-gray-600">
                           {getEntryLabel(entry)}
                         </h3>
-                        <p className="text-xs text-gray-800 mb-2">
-                          Người tạo: {entry.created_by}
-                        </p>
+                        <p className="mb-2 text-xs text-gray-800">Người tạo: {entry.created_by}</p>
                       </div>
-                      <div className="text-right flex items-center gap-2">
+                      <div className="flex items-center gap-2 text-right">
                         <p className="text-xs text-gray-500">
                           {format(new Date(entry.created_at), "dd/MM/yyyy HH:mm")}
                         </p>
-                        <Icons.ChevronRight className="w-4 h-4 text-gray-400" />
+                        <Icons.ChevronRight className="h-4 w-4 text-gray-400" />
                       </div>
                     </div>
                   </div>
@@ -183,7 +177,7 @@ export default function ReportPage() {
 
                 {/* Show total count */}
                 {entries.length > 0 && (
-                  <div className="text-center text-sm text-gray-500 py-2">
+                  <div className="py-2 text-center text-sm text-gray-500">
                     Hiển thị {entries.length} / {totalEntries} bản ghi
                   </div>
                 )}
@@ -195,27 +189,25 @@ export default function ReportPage() {
 
       {/* Modal chi tiết báo cáo */}
       {selectedEntry && formConfig && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white max-w-2xl w-full max-h-[90vh] overflow-hidden">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+          <div className="max-h-[90vh] w-full max-w-2xl overflow-hidden bg-white">
             {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b border-gray-200">
-              <h3 className="text-gray-900 font-semibold">Chi tiết báo cáo</h3>
+            <div className="flex items-center justify-between border-b border-gray-200 p-4">
+              <h3 className="font-semibold text-gray-900">Chi tiết báo cáo</h3>
               <button
                 onClick={() => setSelectedEntry(null)}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
+                className="text-gray-400 transition-colors hover:text-gray-600"
               >
-                <Icons.Close className="w-5 h-5" />
+                <Icons.Close className="h-5 w-5" />
               </button>
             </div>
 
             {/* Content */}
-            <div className="overflow-y-auto max-h-[calc(90vh-160px)]">
-              <div className="p-4 space-y-4">
+            <div className="max-h-[calc(90vh-160px)] overflow-y-auto">
+              <div className="space-y-4 p-4">
                 {/* Thông tin báo cáo */}
                 <div>
-                  <h4 className="text-sm font-semibold text-gray-900 mb-3">
-                    Thông tin báo cáo
-                  </h4>
+                  <h4 className="mb-3 text-sm font-semibold text-gray-900">Thông tin báo cáo</h4>
                   <div className="space-y-2 border border-gray-200 p-4">
                     <div className="flex justify-between">
                       <span className="text-sm text-gray-600">Người tạo:</span>
@@ -250,9 +242,7 @@ export default function ReportPage() {
 
                 {/* Dữ liệu báo cáo */}
                 <div>
-                  <h4 className="text-sm font-semibold text-gray-900 mb-3">
-                    Dữ liệu báo cáo
-                  </h4>
+                  <h4 className="mb-3 text-sm font-semibold text-gray-900">Dữ liệu báo cáo</h4>
                   <ReportEntryDetailView data={selectedEntry.data} formConfig={formConfig} />
                 </div>
               </div>
@@ -260,11 +250,7 @@ export default function ReportPage() {
 
             {/* Footer */}
             <div className="border-t border-gray-200 p-4">
-              <Button
-                variant="tertiary"
-                onClick={() => setSelectedEntry(null)}
-                className="w-full"
-              >
+              <Button variant="tertiary" onClick={() => setSelectedEntry(null)} className="w-full">
                 Đóng
               </Button>
             </div>

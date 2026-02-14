@@ -1,6 +1,6 @@
 /**
  * Multiple Images Capture Input Upload Component
- * 
+ *
  * Allows users to capture and upload multiple images to cloud storage.
  * Returns an array of URLs instead of a single URL.
  */
@@ -13,7 +13,10 @@ import { IconButton } from "../icon-button";
 import { Icons } from "../icons";
 import { Modal } from "../modal";
 import { NotificationBanner } from "../notification-banner";
-import { CloudConfig, UploadProgressCallback } from "@/kits/components/image-capture-input-upload/types";
+import {
+  CloudConfig,
+  UploadProgressCallback,
+} from "@/kits/components/image-capture-input-upload/types";
 import { uploadFileToCloud } from "@/components/DynamicForm/services/upload.service";
 import { Button } from "../button";
 
@@ -34,13 +37,8 @@ const styles = {
     "text-sm text-gray-70",
   ),
   helperText: StyleUtil.cn("text-sm mt-1 text-gray-70 line-clamp-3"),
-  imagesGrid: StyleUtil.cn(
-    "grid gap-4 mb-4",
-  ),
-  imageCard: StyleUtil.cn(
-    "relative group",
-    "border border-gray-30 bg-white overflow-hidden",
-  ),
+  imagesGrid: StyleUtil.cn("grid gap-4 mb-4"),
+  imageCard: StyleUtil.cn("relative group", "border border-gray-30 bg-white overflow-hidden"),
   uploadProgress: StyleUtil.cn(
     "absolute inset-0 flex items-center justify-center",
     "bg-black/50 text-white text-sm font-medium z-10",
@@ -150,7 +148,11 @@ export const MultipleImagesCaptureInputUpload = React.memo(
 
     const ids = React.useRef({
       container: StringUtil.createElementId(constants.INSTANCE_NAME, instanceId.current),
-      addButton: StringUtil.createElementId(constants.INSTANCE_NAME, instanceId.current, "add-button"),
+      addButton: StringUtil.createElementId(
+        constants.INSTANCE_NAME,
+        instanceId.current,
+        "add-button",
+      ),
     });
 
     const [showCamera, setShowCamera] = React.useState(false);
@@ -203,14 +205,10 @@ export const MultipleImagesCaptureInputUpload = React.memo(
         setValue(newImages);
 
         // Upload to cloud
-        const result = await uploadFileToCloud(
-          file,
-          cloudConfig,
-          (progress) => {
-            setUploadProgress((prev) => new Map(prev).set(imageIndex, progress));
-            onUploadProgress?.(imageIndex, progress);
-          },
-        );
+        const result = await uploadFileToCloud(file, cloudConfig, (progress) => {
+          setUploadProgress((prev) => new Map(prev).set(imageIndex, progress));
+          onUploadProgress?.(imageIndex, progress);
+        });
 
         // Clean up temporary preview
         URL.revokeObjectURL(tempPreview);
@@ -276,16 +274,7 @@ export const MultipleImagesCaptureInputUpload = React.memo(
       <>
         <div id={ids.current.container} ref={ref} className="relative mb-2">
           {/* Label */}
-          {label && (
-            <label className={styles.label}>
-              {label}
-              {minImages > 0 && (
-                <span className="text-xs ml-2">
-                  (Min: {minImages}, Max: {maxImages === Infinity ? "∞" : maxImages})
-                </span>
-              )}
-            </label>
-          )}
+          {label && <label className={styles.label}>{label}</label>}
 
           {/* Upload Errors */}
           {uploadErrors.size > 0 && (
@@ -326,9 +315,7 @@ export const MultipleImagesCaptureInputUpload = React.memo(
 
                     {/* Image Index Badge */}
                     {showImageIndex && !isCurrentlyUploading && (
-                      <div className={styles.imageIndex}>
-                        {index + 1}
-                      </div>
+                      <div className={styles.imageIndex}>{index + 1}</div>
                     )}
 
                     {/* Upload Progress Overlay */}
@@ -336,7 +323,7 @@ export const MultipleImagesCaptureInputUpload = React.memo(
                       <div className={styles.uploadProgress}>
                         <div className="text-center">
                           <p>Uploading...</p>
-                          <p className="text-xs mt-1">{Math.round(progress)}%</p>
+                          <p className="mt-1 text-xs">{Math.round(progress)}%</p>
                         </div>
                       </div>
                     )}
@@ -346,7 +333,7 @@ export const MultipleImagesCaptureInputUpload = React.memo(
 
                     {/* Action Buttons */}
                     {!isCurrentlyUploading && (
-                      <div className="absolute inset-0 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity bg-black/40">
+                      <div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
                         {/* Maximize */}
                         <IconButton
                           size="medium"
@@ -402,7 +389,8 @@ export const MultipleImagesCaptureInputUpload = React.memo(
               onClick={() => !disabled && !isUploading && setShowCamera(true)}
               disabled={disabled || isUploading}
             >
-            {helperText || "Add Image"}  ({images.length}/{maxImages === Infinity ? "∞" : maxImages})
+              {helperText || "Add Image"} ({images.length}/
+              {maxImages === Infinity ? "∞" : maxImages})
             </Button>
           )}
         </div>
@@ -440,5 +428,7 @@ export const MultipleImagesCaptureInputUpload = React.memo(
 MultipleImagesCaptureInputUpload.displayName = constants.INSTANCE_NAME;
 
 // Export types
-export type { CloudConfig, UploadProgressCallback } from "@/kits/components/image-capture-input-upload/types";
-
+export type {
+  CloudConfig,
+  UploadProgressCallback,
+} from "@/kits/components/image-capture-input-upload/types";

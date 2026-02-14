@@ -34,7 +34,7 @@ export default function ReportPage() {
     window.addEventListener("message", handler);
     return () => window.removeEventListener("message", handler);
   }, []);
-  
+
   const refetchForm = () => {
     reportDefinitionPreviewQuery.refetch();
   };
@@ -45,7 +45,7 @@ export default function ReportPage() {
     }
     return hydrateFormConfig(reportDefinitionPreviewQuery.data.data.form_preview_definition);
   }, [reportDefinitionPreviewQuery.data?.data?.form_preview_definition]);
-  
+
   const formConfig = hydratedJsonConfig;
 
   const handleSubmit = (data: Record<string, any>) => {
@@ -62,7 +62,8 @@ export default function ReportPage() {
     setSubmittedData(null);
   };
 
-  const isLoading = reportDefinitionPreviewQuery.isLoading || reportDefinitionPreviewQuery.isFetching;
+  const isLoading =
+    reportDefinitionPreviewQuery.isLoading || reportDefinitionPreviewQuery.isFetching;
   const hasError = reportDefinitionPreviewQuery.isError;
   const hasData = !!formConfig;
 
@@ -70,10 +71,8 @@ export default function ReportPage() {
     <>
       <LoadingOverlay active={isLoading} />
 
-      <ScreenHeader
-        title="Preview Mode"
-      />
-      <div className="flex flex-col gap-4 p-4 pt-0">
+      <ScreenHeader title="Preview Mode" />
+      <div className="flex flex-col gap-4 p-4 pt-6">
         {hasData && !hasError && (
           <DynamicForm
             config={formConfig}
@@ -84,11 +83,9 @@ export default function ReportPage() {
           />
         )}
         {submittedData && (
-          <div className="mt-4 p-4 bg-white border">
-            <h3 className="text-lg font-semibold mb-4">Submitted Data:</h3>
-            <pre className="text-sm overflow-auto">
-              {JSON.stringify(submittedData, null, 2)}
-            </pre>
+          <div className="mt-4 border bg-white p-4">
+            <h3 className="mb-4 text-lg font-semibold">Submitted Data:</h3>
+            <pre className="overflow-auto text-sm">{JSON.stringify(submittedData, null, 2)}</pre>
           </div>
         )}
       </div>

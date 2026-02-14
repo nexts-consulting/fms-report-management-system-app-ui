@@ -1,12 +1,19 @@
 /**
  * DynamicForm Component
- * 
+ *
  * Renders a form dynamically based on JSON configuration
  * following IBM Carbon Design principles
  */
 
 import React from "react";
-import { FormConfig, FieldConfig, FormSection, FormValidationResult, FormSubmitHandler, FormChangeHandler } from "./types";
+import {
+  FormConfig,
+  FieldConfig,
+  FormSection,
+  FormValidationResult,
+  FormSubmitHandler,
+  FormChangeHandler,
+} from "./types";
 import { FieldRenderer } from "./FieldRenderer";
 import { validateForm, shouldDisplayField } from "./utils";
 import { StyleUtil } from "@/kits/utils";
@@ -31,7 +38,14 @@ export {
 } from "./formConfigSerializer";
 
 // Export types
-export type { FormConfig, FieldConfig, FormSection, FormValidationResult, FormSubmitHandler, FormChangeHandler } from "./types";
+export type {
+  FormConfig,
+  FieldConfig,
+  FormSection,
+  FormValidationResult,
+  FormSubmitHandler,
+  FormChangeHandler,
+} from "./types";
 
 const constants = {
   INSTANCE_NAME: "DynamicForm",
@@ -205,7 +219,7 @@ export const DynamicForm = React.memo<DynamicFormProps>((props) => {
         childFieldsToReset.forEach((childFieldName) => {
           delete newValues[childFieldName];
         });
-        
+
         // Use functional update to ensure we always work with latest state
         setInternalValues((prev) => {
           const updatedValues = { ...prev, [fieldName]: value };
@@ -214,7 +228,7 @@ export const DynamicForm = React.memo<DynamicFormProps>((props) => {
           });
           return updatedValues;
         });
-        
+
         // Call onChangeProp AFTER setState to avoid "Cannot update component while rendering" error
         // Use setTimeout to defer until after the current render cycle
         if (onChangeProp) {
@@ -225,7 +239,10 @@ export const DynamicForm = React.memo<DynamicFormProps>((props) => {
       }
 
       // Clear validation error for this field and child fields
-      if (validationErrors[fieldName] || childFieldsToReset.some((name) => validationErrors[name])) {
+      if (
+        validationErrors[fieldName] ||
+        childFieldsToReset.some((name) => validationErrors[name])
+      ) {
         setValidationErrors((prev) => {
           const next = { ...prev };
           delete next[fieldName];
@@ -236,7 +253,7 @@ export const DynamicForm = React.memo<DynamicFormProps>((props) => {
         });
       }
     },
-    [valuesProp, isControlled, onChangeProp, validationErrors, allFields],
+    [valuesProp, isControlled, onChangeProp, validationErrors, allFields, internalValues],
   );
 
   // Validate form
@@ -275,7 +292,7 @@ export const DynamicForm = React.memo<DynamicFormProps>((props) => {
   const allErrors = React.useMemo(() => {
     const errors: Array<{ fieldName: string; message: string; label?: string }> = [];
     const combinedErrors = { ...externalErrors, ...validationErrors };
-    
+
     Object.keys(combinedErrors).forEach((fieldName) => {
       const field = allFields.find((f) => f.name === fieldName);
       errors.push({
@@ -284,7 +301,7 @@ export const DynamicForm = React.memo<DynamicFormProps>((props) => {
         label: field?.label || fieldName,
       });
     });
-    
+
     return errors;
   }, [externalErrors, validationErrors, allFields]);
 
@@ -327,9 +344,14 @@ export const DynamicForm = React.memo<DynamicFormProps>((props) => {
       }
 
       return (
-        <div key={section.title || "default"} className={StyleUtil.cn(styles.section, section.className)}>
+        <div
+          key={section.title || "default"}
+          className={StyleUtil.cn(styles.section, section.className)}
+        >
           {section.title && <h3 className={styles.sectionTitle}>{section.title}</h3>}
-          {section.description && <p className={styles.sectionDescription}>{section.description}</p>}
+          {section.description && (
+            <p className={styles.sectionDescription}>{section.description}</p>
+          )}
           <div
             className={styles.sectionContent(
               section.borderLeft,
@@ -359,9 +381,7 @@ export const DynamicForm = React.memo<DynamicFormProps>((props) => {
               })
             ) : (
               // For regular sections, use grid layout
-              <div className={styles.fieldsGrid(gridColumns)}>
-                {visibleFields.map(renderField)}
-              </div>
+              <div className={styles.fieldsGrid(gridColumns)}>{visibleFields.map(renderField)}</div>
             )}
           </div>
         </div>
@@ -388,7 +408,7 @@ export const DynamicForm = React.memo<DynamicFormProps>((props) => {
             type="error"
             title={`Vui lòng kiểm tra lại các trường`}
             description={
-              <ul className={StyleUtil.cn("list-disc list-inside space-y-1 mt-2")}>
+              <ul className={StyleUtil.cn("mt-2 list-inside list-disc space-y-1")}>
                 {allErrors.map((error, index) => (
                   <li key={index} className={styles.errorListItem}>
                     <strong>{error.label}:</strong> {error.message}
@@ -425,4 +445,3 @@ DynamicForm.displayName = constants.INSTANCE_NAME;
 export * from "./types";
 export { validateForm, shouldDisplayField } from "./utils";
 export { FieldRenderer } from "./FieldRenderer";
-
