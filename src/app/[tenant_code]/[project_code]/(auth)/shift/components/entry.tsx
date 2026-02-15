@@ -22,10 +22,7 @@ import { useQueryWorkingShiftListByLocationToday } from "@/services/api/applicat
 import { useQueryWorkingShiftListByUserToday } from "@/services/api/application/working-shift/list-by-user-today";
 import { createWorkingShiftFromDefaultProjectTime } from "@/services/api/application/working-shift/create-from-default-project-time";
 
-import {
-  IProjectWorkshiftConfig,
-  IWorkingShiftLocation,
-} from "@/types/model";
+import { IProjectWorkshiftConfig, IWorkingShiftLocation } from "@/types/model";
 import moment from "moment";
 import { useRouter, useParams } from "next/navigation";
 import React from "react";
@@ -52,10 +49,8 @@ export const Entry = () => {
 
   const notification = useNotification();
 
-  
-  const [selectedWorkingShift, setSelectedWorkingShift] = React.useState<IWorkingShiftLocation | null>(
-    null,
-  );
+  const [selectedWorkingShift, setSelectedWorkingShift] =
+    React.useState<IWorkingShiftLocation | null>(null);
   const [confirmLoading, setConfirmLoading] = React.useState(false);
   const [workshiftList, setWorkshiftList] = React.useState<IWorkingShiftLocation[]>([]);
   const [isLoadingWorkshifts, setIsLoadingWorkshifts] = React.useState(false);
@@ -166,10 +161,7 @@ export const Entry = () => {
             ) {
               if (userWorkshiftsQuery.data?.data) {
                 shifts = userWorkshiftsQuery.data.data;
-              } else if (
-                !userWorkshiftsQuery.isLoading &&
-                !userWorkshiftsQuery.isFetching
-              ) {
+              } else if (!userWorkshiftsQuery.isLoading && !userWorkshiftsQuery.isFetching) {
                 // Query completed but no data
                 shifts = [];
               } else {
@@ -271,13 +263,9 @@ export const Entry = () => {
     <>
       <LoadingOverlay active={confirmLoading} />
 
-      <ScreenHeader
-        title="Ca làm việc"
-        loading={isLoading}
-        onBack={() => router.back()}
-      />
+      <ScreenHeader title="Ca làm việc" loading={isLoading} onBack={() => router.back()} />
 
-      <div className="px-4">
+      <div className="px-4 pt-6">
         {projectWorkshiftConfig === null && (
           <NotificationBanner
             type="warning"
@@ -302,8 +290,7 @@ export const Entry = () => {
                     : "Không có ca làm việc nào trong ngày hôm nay..."
               }
             />
-          )
-        }
+          )}
 
         {upcomingShifts.length > 0 && (
           <div className="mt-4 divide-y divide-gray-30">
@@ -317,7 +304,7 @@ export const Entry = () => {
 
         <div className="my-4 flex items-center">
           <div className="flex-1 border-t border-gray-30" />
-          <span className="mx-4 text-sm text-gray-60 font-medium">Tất cả ca làm</span>
+          <span className="mx-4 text-sm font-medium text-gray-60">Tất cả ca làm</span>
           <div className="flex-1 border-t border-gray-30" />
         </div>
 
@@ -394,11 +381,11 @@ const StandOutWorkingShiftCard = (props: StandOutWorkingShiftCardProps) => {
 
   const shiftStatusMapped =
     shiftStatusMapping[
-    shiftStatus.notYetStarted
-      ? "notYetStarted"
-      : shiftStatus.hasStarted
-        ? "hasStarted"
-        : "hasEnded"
+      shiftStatus.notYetStarted
+        ? "notYetStarted"
+        : shiftStatus.hasStarted
+          ? "hasStarted"
+          : "hasEnded"
     ];
 
   // Check if button should be disabled based on check-in time restrictions
@@ -484,11 +471,14 @@ const StandOutWorkingShiftCard = (props: StandOutWorkingShiftCardProps) => {
           Tham gia
         </Button>
 
-        {(checkinTimeAllowed.reason || (!shiftStatus.hasEnded && getShiftTimeMessage(shiftStatus, shiftTime))) && (
-          <p className={StyleUtil.cn(
-            "mt-2 text-xs",
-            checkinTimeAllowed.reason ? "text-red-50" : "text-gray-50"
-          )}>
+        {(checkinTimeAllowed.reason ||
+          (!shiftStatus.hasEnded && getShiftTimeMessage(shiftStatus, shiftTime))) && (
+          <p
+            className={StyleUtil.cn(
+              "mt-2 text-xs",
+              checkinTimeAllowed.reason ? "text-red-50" : "text-gray-50",
+            )}
+          >
             {checkinTimeAllowed.reason || getShiftTimeMessage(shiftStatus, shiftTime)}
           </p>
         )}
@@ -520,11 +510,11 @@ const WorkingShiftCard = (props: WorkingShiftCardProps) => {
 
   const shiftStatusMapped =
     shiftStatusMapping[
-    shiftStatus.notYetStarted
-      ? "notYetStarted"
-      : shiftStatus.hasStarted
-        ? "hasStarted"
-        : "hasEnded"
+      shiftStatus.notYetStarted
+        ? "notYetStarted"
+        : shiftStatus.hasStarted
+          ? "hasStarted"
+          : "hasEnded"
     ];
 
   // Check if button should be disabled based on check-in time restrictions
@@ -569,13 +559,11 @@ const WorkingShiftCard = (props: WorkingShiftCardProps) => {
         <p className="line-clamp-1 text-xs text-gray-50">{workingDurationFormated}</p>
       </div>
       {checkinTimeAllowed.reason && (
-          <p className="mt-2 text-xs text-red-50">
-            {checkinTimeAllowed.reason}
-          </p>
-        )}
+        <p className="mt-2 text-xs text-red-50">{checkinTimeAllowed.reason}</p>
+      )}
       {/* Location & Join Button */}
       <div className="mt-6">
-        <div className="flex items-center justify-between mb-2">
+        <div className="mb-2 flex items-center justify-between">
           <div className="flex items-center justify-start">
             <Icons.Location className="h-4 w-4 text-gray-70" />
             <p className="ml-2 text-xs text-gray-70">{workingShift.location.name}</p>

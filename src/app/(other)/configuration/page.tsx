@@ -10,20 +10,17 @@ import { TrashCan, Copy, View, ViewOff } from "@carbon/icons-react";
 
 const styles = {
   container: StyleUtil.cn("min-h-screen bg-gray-10"),
-  content: StyleUtil.cn("px-4 pb-8"),
+  content: StyleUtil.cn("px-4 pb-8 pt-6"),
   section: StyleUtil.cn("mb-6"),
   sectionTitle: StyleUtil.cn("text-sm font-medium text-gray-100 mb-3"),
-  card: StyleUtil.cn(
-    "bg-white p-4 mb-3",
-    "outline outline-1 -outline-offset-1 outline-gray-30",
-  ),
+  card: StyleUtil.cn("bg-white p-4 mb-3", "outline outline-1 -outline-offset-1 outline-gray-30"),
   cardHeader: StyleUtil.cn("mb-3"),
   cardTitle: StyleUtil.cn("text-sm font-medium text-gray-100 mb-1"),
   cardDescription: StyleUtil.cn("text-xs text-gray-70"),
   buttonGroup: StyleUtil.cn("flex gap-2 w-full"),
   warningText: StyleUtil.cn("text-xs text-red-50 mt-2"),
   debugDataContainer: StyleUtil.cn(
-    "mt-3 p-3 bg-gray-10 rounded max-h-[300px] overflow-y-auto text-xs font-mono"
+    "mt-3 p-3 bg-gray-10 rounded max-h-[300px] overflow-y-auto text-xs font-mono",
   ),
   debugKey: StyleUtil.cn("text-gray-100 font-semibold break-all"),
   debugValue: StyleUtil.cn("text-gray-70 break-all whitespace-pre-wrap"),
@@ -48,9 +45,11 @@ export default function ConfigurationPage() {
     // Kiểm tra quyền camera
     try {
       if (navigator.permissions) {
-        const cameraResult = await navigator.permissions.query({ name: 'camera' as PermissionName });
+        const cameraResult = await navigator.permissions.query({
+          name: "camera" as PermissionName,
+        });
         setCameraPermission(cameraResult.state);
-        
+
         // Lắng nghe thay đổi
         cameraResult.onchange = () => {
           setCameraPermission(cameraResult.state);
@@ -71,9 +70,11 @@ export default function ConfigurationPage() {
     // Kiểm tra quyền vị trí
     try {
       if (navigator.permissions) {
-        const locationResult = await navigator.permissions.query({ name: 'geolocation' as PermissionName });
+        const locationResult = await navigator.permissions.query({
+          name: "geolocation" as PermissionName,
+        });
         setLocationPermission(locationResult.state);
-        
+
         // Lắng nghe thay đổi
         locationResult.onchange = () => {
           setLocationPermission(locationResult.state);
@@ -136,7 +137,7 @@ export default function ConfigurationPage() {
 
   const getLocalStorageData = () => {
     const data: Record<string, any> = {};
-    
+
     try {
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
@@ -160,13 +161,15 @@ export default function ConfigurationPage() {
 
   const formatDebugData = () => {
     const data = getLocalStorageData();
-    
+
     // Thêm thông tin hệ thống
     const debugInfo = {
       timestamp: new Date().toISOString(),
-      userAgent: typeof window !== 'undefined' ? window.navigator.userAgent : 'N/A',
-      screenSize: typeof window !== 'undefined' ? `${window.screen.width}x${window.screen.height}` : 'N/A',
-      viewport: typeof window !== 'undefined' ? `${window.innerWidth}x${window.innerHeight}` : 'N/A',
+      userAgent: typeof window !== "undefined" ? window.navigator.userAgent : "N/A",
+      screenSize:
+        typeof window !== "undefined" ? `${window.screen.width}x${window.screen.height}` : "N/A",
+      viewport:
+        typeof window !== "undefined" ? `${window.innerWidth}x${window.innerHeight}` : "N/A",
       permissions: {
         camera: cameraPermission,
         location: locationPermission,
@@ -181,14 +184,14 @@ export default function ConfigurationPage() {
     try {
       setIsCopying(true);
       const debugData = formatDebugData();
-      
+
       await navigator.clipboard.writeText(debugData);
-      
+
       notification.success({
         title: "Đã sao chép",
         description: "Thông tin debug đã được sao chép vào clipboard",
       });
-      
+
       setIsCopying(false);
     } catch (error) {
       notification.error({
@@ -205,10 +208,7 @@ export default function ConfigurationPage() {
 
   return (
     <div className={styles.container}>
-      <ScreenHeader
-        title="Cấu hình hệ thống"
-        onBack={() => router.back()}
-      />
+      <ScreenHeader title="Cấu hình hệ thống" onBack={() => router.back()} />
 
       <div className={styles.content}>
         {/* Data Management Section */}
@@ -220,11 +220,10 @@ export default function ConfigurationPage() {
             <div className={styles.cardHeader}>
               <h3 className={styles.cardTitle}>Xóa dữ liệu cấu hình</h3>
               <p className={styles.cardDescription}>
-                Xóa toàn bộ dữ liệu được lưu trên thiết bị này để tải lại cấu hình mới nhất từ server.
+                Xóa toàn bộ dữ liệu được lưu trên thiết bị này để tải lại cấu hình mới nhất từ
+                server.
               </p>
-              <p className={styles.warningText}>
-                Cảnh báo: Hành động này không thể hoàn tác!
-              </p>
+              <p className={styles.warningText}>Cảnh báo: Hành động này không thể hoàn tác!</p>
             </div>
             <div className={styles.buttonGroup}>
               <Button
@@ -250,7 +249,8 @@ export default function ConfigurationPage() {
             <div className={styles.cardHeader}>
               <h3 className={styles.cardTitle}>Camera</h3>
               <p className={styles.cardDescription}>
-                Trạng thái: <span className={getPermissionDisplay(cameraPermission).color}>
+                Trạng thái:{" "}
+                <span className={getPermissionDisplay(cameraPermission).color}>
                   {getPermissionDisplay(cameraPermission).text}
                 </span>
               </p>
@@ -266,13 +266,15 @@ export default function ConfigurationPage() {
             <div className={styles.cardHeader}>
               <h3 className={styles.cardTitle}>Vị trí</h3>
               <p className={styles.cardDescription}>
-                Trạng thái: <span className={getPermissionDisplay(locationPermission).color}>
+                Trạng thái:{" "}
+                <span className={getPermissionDisplay(locationPermission).color}>
                   {getPermissionDisplay(locationPermission).text}
                 </span>
               </p>
               {locationPermission === "denied" && (
                 <p className={styles.warningText}>
-                  Vui lòng cấp quyền truy cập vị trí trong cài đặt trình duyệt để sử dụng tính năng định vị.
+                  Vui lòng cấp quyền truy cập vị trí trong cài đặt trình duyệt để sử dụng tính năng
+                  định vị.
                 </p>
               )}
             </div>
@@ -286,9 +288,7 @@ export default function ConfigurationPage() {
           <div className={styles.card}>
             <div className={styles.cardHeader}>
               <h3 className={styles.cardTitle}>Phiên bản</h3>
-              <p className={styles.cardDescription}>
-                Version: 1.0.0
-              </p>
+              <p className={styles.cardDescription}>Version: 1.0.0</p>
             </div>
           </div>
 
@@ -296,7 +296,7 @@ export default function ConfigurationPage() {
             <div className={styles.cardHeader}>
               <h3 className={styles.cardTitle}>Thông tin trình duyệt</h3>
               <p className={styles.cardDescription}>
-                User Agent: {typeof window !== 'undefined' ? window.navigator.userAgent : 'N/A'}
+                User Agent: {typeof window !== "undefined" ? window.navigator.userAgent : "N/A"}
               </p>
             </div>
           </div>
@@ -309,9 +309,7 @@ export default function ConfigurationPage() {
           <div className={styles.card}>
             <div className={styles.cardHeader}>
               <h3 className={styles.cardTitle}>Thông tin cấu hình</h3>
-              <p className={styles.cardDescription}>
-                Xem và sao chép thông tin hệ thống
-              </p>
+              <p className={styles.cardDescription}>Xem và sao chép thông tin hệ thống</p>
             </div>
 
             <div className={styles.buttonGroup}>
@@ -341,9 +339,7 @@ export default function ConfigurationPage() {
 
             {showDebugData && (
               <div className={styles.debugDataContainer}>
-                <pre className={styles.debugValue}>
-                  {formatDebugData()}
-                </pre>
+                <pre className={styles.debugValue}>{formatDebugData()}</pre>
               </div>
             )}
           </div>
@@ -352,9 +348,8 @@ export default function ConfigurationPage() {
             <div className={styles.cardHeader}>
               <h3 className={styles.cardTitle}>Hướng dẫn gửi thông tin</h3>
               <p className={styles.cardDescription}>
-                1. Nhấn nút "Sao chép" để copy thông tin debug
-                2. Gửi thông tin đã copy cho admin qua email hoặc chat
-                3. Admin sẽ phân tích và hỗ trợ bạn khắc phục vấn đề
+                1. Nhấn nút "Sao chép" để copy thông tin debug 2. Gửi thông tin đã copy cho admin
+                qua email hoặc chat 3. Admin sẽ phân tích và hỗ trợ bạn khắc phục vấn đề
               </p>
             </div>
           </div>
@@ -363,4 +358,3 @@ export default function ConfigurationPage() {
     </div>
   );
 }
-
