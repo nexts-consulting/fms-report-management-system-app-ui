@@ -2,6 +2,7 @@
 
 import { CheckoutConfirm } from "@/components/CheckoutConfirm";
 import { LeaveStartConfirm } from "@/components/LeaveStartConfirm";
+import { LeaveEndConfirm } from "@/components/LeaveEndConfirm";
 import { UserHeader } from "@/components/UserHeader";
 import { useAuthContext } from "@/contexts/auth.context";
 import { useGlobalContext } from "@/contexts/global.context";
@@ -11,12 +12,13 @@ import { LoadingOverlay } from "@/kits/components/loading-overlay";
 import { Modal } from "@/kits/components/modal";
 import { NotificationBanner } from "@/kits/components/notification-banner";
 import { TrackingProgress } from "@/kits/widgets/TrackingProgress";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import React from "react";
 import { useAppMenuItems } from "./menuItems";
 import { useTenantProjectPath } from "@/hooks/use-tenant-project-path";
 import { DynamicIcon } from "@/components/DynamicIcon";
 import { formatTime, isAfter } from "@/utils/time.util";
+import { useQueryCurrentLeaveRequest } from "@/services/api/application/leave-request/get-current";
 
 
 export const Entry = () => {
@@ -29,6 +31,8 @@ export const Entry = () => {
   const showLeaveConfirmation = globalStore.use.showLeaveConfirmation();
 
   const router = useRouter();
+  const params = useParams();
+  const projectCode = params?.project_code as string;
   
   const { buildPath } = useTenantProjectPath();
   const [confirmCheckoutLoading, setConfirmCheckoutLoading] = React.useState(false);
@@ -39,10 +43,28 @@ export const Entry = () => {
     endTime: new Date(currentAttendance?.shift_end_time ?? ""),
   });
 
+  // Check for incomplete leave request on mount (handles refresh / navigation back)
+  const incompleteLeaveQuery = useQueryCurrentLeaveRequest({
+    params: {
+      username: user?.username || "",
+      projectCode: projectCode || "",
+    },
+    config: {
+      enabled: Boolean(user?.username && projectCode && currentAttendance),
+    },
+  });
+
+  React.useEffect(() => {
+    if (incompleteLeaveQuery.data?.data) {
+      // There's an incomplete leave request → force open end confirmation dialog
+      globalStore.setState({ showLeaveEndConfirmation: true });
+    }
+  }, [incompleteLeaveQuery.data, globalStore]);
+
   const handleAction = (item: any) => {
     if (item.action_type === "route") {
       router.push( buildPath(item.path ?? ""));
-    } else if (item.action_type === "modal") {
+    } else if (item.action_type === "popup") {
       globalStore.setState({ [item.action_value ?? ""]: true });
     }
   };
@@ -208,6 +230,9 @@ export const Entry = () => {
       >
         <LeaveStartConfirm />
       </Modal>
+
+      {/* Leave End Confirm - blocks all actions until user confirms end */}
+      <LeaveEndConfirm />
     </>
   );
 };

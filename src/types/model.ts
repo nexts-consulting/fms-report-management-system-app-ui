@@ -479,3 +479,27 @@ export interface IFormDefinition {
   updated_at?: string | null;
   updated_by?: string | null;
 }
+
+/**
+ * Leave Request Model
+ * Maps to table: fms_app_data_leave_request
+ */
+export interface ILeaveRequest {
+  id: number;
+  project_code: string;
+  username: string;
+  workshift_id: number;
+  workshift_name: string;
+  location_id: number;
+  location_code: string;
+  location_name: string;
+  checkin_time: string | null;
+  checkout_time: string | null;
+  checkin_photo_url: string | null;
+  checkout_photo_url: string | null;
+  checkin_lat: number | null;
+  checkin_lng: number | null;
+  checkout_lat: number | null;
+  checkout_lng: number | null;
+  leave_type: string | null;
+}
