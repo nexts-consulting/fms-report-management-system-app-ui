@@ -21,11 +21,10 @@ import { useParams } from "next/navigation";
 const leaveTypeOptions = [
   { value: "LUNCH_BREAK", label: "Đi ăn trưa/tối" },
   { value: "RESTROOM", label: "Đi vệ sinh" },
-  { value: "BREAK_TIME", label: "Giải lao" },
+  { value: "BREAK_TIME", label: "Nghỉ giữa ca" },
   { value: "GET_SUPPLIES", label: "Lấy hàng/vật dụng" },
   { value: "PRIVATE_TASK", label: "Công việc riêng" },
-  { value: "QUICK_MEETING", label: "Họp nhanh với quản lý" },
-  { value: "PHONE_CALL", label: "Nghe điện thoại khẩn" },
+  { value: "QUICK_MEETING", label: "Trao đổi với quản lý" },
   { value: "OTHER_REASON", label: "Lý do khác" },
 ];
 
