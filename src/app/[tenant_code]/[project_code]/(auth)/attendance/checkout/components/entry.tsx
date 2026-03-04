@@ -8,6 +8,7 @@ import { CheckoutHeader } from "./CheckoutHeader";
 import { CheckoutGpsStep } from "./CheckoutGpsStep";
 import { CheckoutCaptureStep } from "./CheckoutCaptureStep";
 import { CheckoutSubmitStep } from "./CheckoutSubmitStep";
+import { buildAttendancePhotoTimeMarkConfig } from "@/utils/attendance-photo-timemark.util";
 
 /**
  * Main entry component for check-out process
@@ -44,6 +45,13 @@ export const Entry = () => {
     handleConfirmCapture,
     handleOnCameraError,
   } = useCheckoutState();
+
+  const checkoutTimeMarkConfig = buildAttendancePhotoTimeMarkConfig({
+    actionLabel: "Check out",
+    shiftName: currentAttendance?.workshift_name,
+    employeeName: [user.firstName, user.lastName].filter(Boolean).join(" ") || user.username,
+    locationName: selectedLocation?.name || currentAttendance?.location_name,
+  });
 
   // Redirect if no attendance
   if (!currentAttendance) {
@@ -82,6 +90,7 @@ export const Entry = () => {
           projectCheckinFlow?.require_photo_verification &&
           (
             <CheckoutCaptureStep
+              timeMarkConfig={checkoutTimeMarkConfig}
               onConfirm={handleConfirmCapture}
               onCapture={handleOnCapture}
               onError={handleOnCameraError}

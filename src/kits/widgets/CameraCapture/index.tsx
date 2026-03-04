@@ -6,6 +6,12 @@ import { ImageUtil } from "@/kits/utils/image.util";
 import React, { useRef, useState, useCallback } from "react";
 import { createPortal } from "react-dom";
 import Webcam from "react-webcam";
+import {
+  applyCameraCaptureTimeMark,
+  type CameraCaptureTimeMarkConfig,
+} from "./timemark";
+
+export type { CameraCaptureTimeMarkConfig } from "./timemark";
 
 const constants = {
   INSTANCE_NAME: "CameraCapture",
@@ -15,6 +21,7 @@ interface CameraCaptureProps {
   enableUpload?: boolean;
   enableCancel?: boolean;
   defaultFacingMode?: "user" | "environment";
+  timeMarkConfig?: CameraCaptureTimeMarkConfig;
   onCapture?: (image: string) => void;
   onError?: (error: string) => void;
   onConfirm?: (file: File) => void;
@@ -87,6 +94,7 @@ export const CameraCapture = (props: CameraCaptureProps) => {
     enableUpload = true,
     enableCancel = true,
     defaultFacingMode = "user",
+    timeMarkConfig,
     onCapture,
     onError,
     onConfirm,
@@ -123,11 +131,19 @@ export const CameraCapture = (props: CameraCaptureProps) => {
     }
   };
 
+  const handleProcessCapture = useCallback(
+    async (sourceImage: string) => {
+      const markedImage = await applyCameraCaptureTimeMark(sourceImage, timeMarkConfig);
+      setImageSrc(markedImage);
+      onCapture?.(markedImage);
+    },
+    [onCapture, timeMarkConfig],
+  );
+
   const handleCapture = () => {
     const image = webcamRef.current?.getScreenshot();
     if (image) {
-      setImageSrc(image);
-      onCapture?.(image);
+      void handleProcessCapture(image);
     }
   };
 
@@ -147,8 +163,7 @@ export const CameraCapture = (props: CameraCaptureProps) => {
       reader.onload = () => {
         if (reader.result) {
           const result = reader.result.toString();
-          setImageSrc(result);
-          onCapture?.(result);
+          void handleProcessCapture(result);
         }
       };
       reader.readAsDataURL(file);

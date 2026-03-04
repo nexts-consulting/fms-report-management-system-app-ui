@@ -11,6 +11,7 @@ import { CheckinGpsStep } from "./CheckinGpsStep";
 import { CheckinCaptureStep } from "./CheckinCaptureStep";
 import { CheckinSubmitStep } from "./CheckinSubmitStep";
 import { CheckinSurveyStep } from "./CheckinSurveyStep";
+import { buildAttendancePhotoTimeMarkConfig } from "@/utils/attendance-photo-timemark.util";
 
 /**
  * Main entry component for check-in process
@@ -52,6 +53,13 @@ export const Entry = () => {
     handleSurveyComplete,
   } = useCheckinState();
 
+  const checkinTimeMarkConfig = buildAttendancePhotoTimeMarkConfig({
+    actionLabel: "Check in",
+    shiftName: selectedWorkingShift?.name,
+    employeeName: [user.firstName, user.lastName].filter(Boolean).join(" ") || user.username,
+    locationName: selectedLocation?.name || selectedWorkingShift?.location?.name,
+  });
+
   // Redirect if no working shift selected
   React.useEffect(() => {
     if (!selectedWorkingShift) {
@@ -91,6 +99,7 @@ export const Entry = () => {
           projectCheckinFlow?.require_photo_verification &&
           (
             <CheckinCaptureStep
+              timeMarkConfig={checkinTimeMarkConfig}
               onConfirm={handleConfirmCapture}
               onCapture={handleOnCapture}
               onError={handleOnCameraError}
