@@ -18,6 +18,7 @@ export const Entry = () => {
   const selectedAdminDivision = globalStore.use.selectedAdminDivision();
   const selectedLocation = globalStore.use.selectedLocation();
   const currentAttendance = globalStore.use.currentAttendance();
+  const isCheckingCurrentShift = globalStore.use.isCheckingCurrentShift();
 
   const searchParams = useSearchParams();
 
@@ -25,6 +26,8 @@ export const Entry = () => {
   const { buildPath } = useTenantProjectPath();
 
   React.useEffect(() => {
+    if (isCheckingCurrentShift) return;
+
     if (searchParams.get("force") === "true") {
       globalStore.setState({
         selectedWorkingShift: null,
@@ -36,7 +39,7 @@ export const Entry = () => {
     if (currentAttendance) {
       router.replace(buildPath("/attendance/tracking"));
     }
-  }, [currentAttendance]);
+  }, [currentAttendance, isCheckingCurrentShift, searchParams, globalStore, router, buildPath]);
 
   React.useEffect(() => {
     if (!selectedAdminDivision || !selectedLocation) {

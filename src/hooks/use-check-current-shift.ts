@@ -14,6 +14,7 @@ export const useCheckCurrentShift = () => {
   const projectCode = params?.project_code as string;
 
   const globalStore = useGlobalContext();
+  const isQueryEnabled = Boolean(user?.username && projectCode);
 
   // Centralized state reset for current shift
   const resetShiftStates = () => {
@@ -31,7 +32,7 @@ export const useCheckCurrentShift = () => {
       project_code: projectCode || "",
     },
     config: {
-      enabled: Boolean(user?.username && projectCode),
+      enabled: isQueryEnabled,
       onSuccess: (data) => {
         if (data.data) {
           globalStore.setState({ currentAttendance: data.data });
@@ -46,6 +47,22 @@ export const useCheckCurrentShift = () => {
   });
 
   const attendanceData = currentAttendanceQuery.data?.data;
+
+  React.useEffect(() => {
+    if (!isQueryEnabled) {
+      globalStore.setState({ isCheckingCurrentShift: false });
+      return;
+    }
+
+    globalStore.setState({
+      isCheckingCurrentShift: currentAttendanceQuery.isLoading || currentAttendanceQuery.isFetching,
+    });
+  }, [
+    isQueryEnabled,
+    currentAttendanceQuery.isLoading,
+    currentAttendanceQuery.isFetching,
+    globalStore,
+  ]);
 
   // Query workshift by ID - only when attendance data exists and has workshift_id
   const workshiftQuery = useQueryWorkshiftById({
@@ -66,8 +83,8 @@ export const useCheckCurrentShift = () => {
   useEffect(() => {
     if (!user) return;
 
-    // If query is still loading, don't update state
-    if (currentAttendanceQuery.isLoading) return;
+    // If query is still loading/fetching, don't update state
+    if (currentAttendanceQuery.isLoading || currentAttendanceQuery.isFetching) return;
 
     // If there's an error or no data, reset states
     if (currentAttendanceQuery.isError || !attendanceData) {
@@ -111,6 +128,8 @@ export const useCheckCurrentShift = () => {
     projectCode,
     attendanceData,
     currentAttendanceQuery.isSuccess,
+    currentAttendanceQuery.isLoading,
+    currentAttendanceQuery.isFetching,
     workshiftQuery.isSuccess,
     locationQuery.isSuccess,
     globalStore,

@@ -17,6 +17,7 @@ interface UseCheckinSubmitOptions {
   availableSteps: CheckinStep[];
   onStepChange: (stepIndex: number) => void;
   onSuccess?: () => void;
+  onError?: (error: unknown) => void;
 }
 
 export const useCheckinSubmit = ({
@@ -27,15 +28,19 @@ export const useCheckinSubmit = ({
   availableSteps,
   onStepChange,
   onSuccess,
+  onError,
 }: UseCheckinSubmitOptions) => {
   const router = useRouter();
   const notification = useNotification();
   const globalStore = useGlobalContext();
   const { buildPath, projectCode } = useTenantProjectPath();
+  const submitInFlightRef = React.useRef(false);
+  const lastSubmitSignatureRef = React.useRef<string | null>(null);
 
   // Handle checkin success
   const handleCheckinSuccess = React.useCallback(
     (data: { data: any }) => {
+      submitInFlightRef.current = false;
       globalStore.setState({
         currentAttendance: data.data,
       });
@@ -69,6 +74,8 @@ export const useCheckinSubmit = ({
   // Handle checkin error
   const handleCheckinError = React.useCallback(
     (error: any) => {
+      submitInFlightRef.current = false;
+      lastSubmitSignatureRef.current = null;
       console.error("Checkin error:", error);
       const errorMessage = getErrorMessage(error);
 
@@ -79,8 +86,9 @@ export const useCheckinSubmit = ({
           immortal: true,
         },
       });
+      onError?.(error);
     },
-    [notification],
+    [notification, onError],
   );
 
   const attendanceCheckinMutation = useMutationAttendanceCheckin({
@@ -93,20 +101,23 @@ export const useCheckinSubmit = ({
   const submitCheckin = React.useCallback(
     (photoUrl?: string) => {
       if (!workingShiftLocation || !checkinLocation || !projectCode || !user?.username) {
-        return;
+        return false;
       }
-      attendanceCheckinMutation.mutate({
+
+      const payload = {
         userId: user.id,
         shiftId: workingShiftLocation.id,
-        location: checkinLocation ? {
-          lat: checkinLocation.lat,
-          lng: checkinLocation.lng,
-          acc: checkinLocation.acc,
-        } : {
-          lat: 0,
-          lng: 0,
-          acc: 0,
-        },
+        location: checkinLocation
+          ? {
+              lat: checkinLocation.lat,
+              lng: checkinLocation.lng,
+              acc: checkinLocation.acc,
+            }
+          : {
+              lat: 0,
+              lng: 0,
+              acc: 0,
+            },
         photoUrl: photoUrl || "",
         projectCode,
         username: user.username,
@@ -115,8 +126,30 @@ export const useCheckinSubmit = ({
         locationCode: workingShiftLocation.location.code,
         locationName: workingShiftLocation.location.name,
         workshiftStartTime: workingShiftLocation.start_time,
-        workshiftEndTime: workingShiftLocation.end_time
+        workshiftEndTime: workingShiftLocation.end_time,
+      };
+
+      const submitSignature = JSON.stringify({
+        shiftId: payload.shiftId,
+        username: payload.username,
+        photoUrl: payload.photoUrl,
+        lat: payload.location.lat,
+        lng: payload.location.lng,
       });
+
+      if (submitInFlightRef.current || attendanceCheckinMutation.isLoading) {
+        return false;
+      }
+
+      if (lastSubmitSignatureRef.current === submitSignature) {
+        return false;
+      }
+
+      submitInFlightRef.current = true;
+      lastSubmitSignatureRef.current = submitSignature;
+
+      attendanceCheckinMutation.mutate(payload);
+      return true;
     },
     [workingShiftLocation, checkinLocation, user, attendanceCheckinMutation, projectCode],
   );

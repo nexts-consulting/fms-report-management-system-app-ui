@@ -25,10 +25,16 @@ export const useCheckinPhotoUpload = ({
   
   const notification = useNotification();
   const uploadNotificationIdRef = React.useRef<string | null>(null);
+  const uploadInFlightRef = React.useRef(false);
   const { buildPath } = useTenantProjectPath();
 
   const uploadPhoto = React.useCallback(
     async (file: File) => {
+      if (uploadInFlightRef.current) {
+        return;
+      }
+
+      uploadInFlightRef.current = true;
       setUserImageFile(file);
       setIsUploadingPhoto(true);
 
@@ -115,6 +121,8 @@ export const useCheckinPhotoUpload = ({
         }
 
         onUploadError?.(error as Error);
+      } finally {
+        uploadInFlightRef.current = false;
       }
     },
     [user.id, buildPath, notification, onUploadSuccess, onUploadError],

@@ -30,8 +30,6 @@ const Providers = (props: ProvidersProps) => {
       <ErrorBoundary
         FallbackComponent={() => <></>}
         onError={(error, errorInfo) => {
-          // Don't show error boundary for API errors (AxiosError or Supabase/PostgREST errors)
-          // They're handled by onError callbacks
           const isApiErr =
             error instanceof AxiosError ||
             (error &&

@@ -42,6 +42,7 @@ export const useCheckinState = () => {
   const [currentTipIndex, setCurrentTipIndex] = React.useState(0);
   const [allbeDone, setAllbeDone] = React.useState(false);
   const hasAutoSubmittedRef = React.useRef(false);
+  const hasSubmittedCheckinRef = React.useRef(false);
 
   // Geolocation hook
   const {
@@ -70,7 +71,7 @@ export const useCheckinState = () => {
 
   // Checkin submit hook
   const {
-    submitCheckin,
+    submitCheckin : submit,
     isLoading: isSubmitting,
   } = useCheckinSubmit({
     user,
@@ -83,7 +84,24 @@ export const useCheckinState = () => {
       setCurrentTipIndex(1);
       setAllbeDone(true);
     },
+    onError: () => {
+      hasSubmittedCheckinRef.current = false;
+    },
   });
+
+  const submitCheckin = React.useCallback(
+    (photoUrl?: string) => {
+      if (hasSubmittedCheckinRef.current) {
+        return;
+      }
+      hasSubmittedCheckinRef.current = true;
+      const didSubmit = submit(photoUrl);
+      if (!didSubmit) {
+        hasSubmittedCheckinRef.current = false;
+      }
+    },
+    [submit],
+  );
 
   // Notifications hook
   const {
@@ -116,7 +134,7 @@ export const useCheckinState = () => {
     user,
     onUploadSuccess: (photoUrl) => {
       goToNextStep();
-      submitCheckin(photoUrl);
+      submit(photoUrl);
     },
   });
 
@@ -187,7 +205,7 @@ export const useCheckinState = () => {
       if (!isPhotoRequired && !photoUrl) {
         hasAutoSubmittedRef.current = true;
         // Submit without photo
-        submitCheckin();
+        submit();
       }
     }
   }, [
@@ -197,7 +215,7 @@ export const useCheckinState = () => {
     photoUrl,
     isUploadingPhoto,
     isSubmitting,
-    submitCheckin,
+    submit,
   ]);
 
   return {
@@ -232,6 +250,6 @@ export const useCheckinState = () => {
     handleConfirmCapture,
     handleOnCameraError,
     handleSurveyComplete,
-    submitCheckin,
+    submitCheckin: submit,
   };
 };

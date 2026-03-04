@@ -12,6 +12,7 @@ import {
 } from "@/types/model";
 
 export type GlobalStore = {
+  isCheckingCurrentShift: boolean;
   navigatorOnline: boolean;
   showNavigation: boolean;
   selectedAdminDivision: IAdminDivision | null;
@@ -41,6 +42,7 @@ export const createGlobalStore = () => {
         (set) => ({
           caroColors: ["#050ba9", "#47c9fa"],
           timeoutIds: [],
+          isCheckingCurrentShift: true,
           navigatorOnline: true,
           showNavigation: false,
           selectedAdminDivision: null,
