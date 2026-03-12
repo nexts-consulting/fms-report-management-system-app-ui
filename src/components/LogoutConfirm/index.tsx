@@ -11,6 +11,8 @@ import { useRouter } from "next/navigation";
 import { useTenantProjectPath } from "@/hooks/use-tenant-project-path";
 import { clearTokenCookies } from "@/utils/cookie";
 
+const LOCAL_STORAGE_PROFILE_KEY = "user-profile";
+
 export const LogoutConfirm = () => {
   const authStore = useAuthContext();
   const globalStore = useGlobalContext();
@@ -49,6 +51,7 @@ export const LogoutConfirm = () => {
         authStore.setState({
           authenticated: false,
           user: null,
+          userProfile: null,
           token: null,
           accessToken: null,
           refreshToken: null,
@@ -56,6 +59,7 @@ export const LogoutConfirm = () => {
           tokenExpiresAt: null,
         }),
       ]).then(() => {
+        localStorage.removeItem(LOCAL_STORAGE_PROFILE_KEY);
         notification.clear();
         setFakeLoading(false);
         router.replace(buildPath("/login"));

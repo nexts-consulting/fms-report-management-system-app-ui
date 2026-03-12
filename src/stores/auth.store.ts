@@ -1,4 +1,4 @@
-import { KeycloakUser } from "@/types/model";
+import { IUserProfile, KeycloakUser } from "@/types/model";
 import { createStore } from "zustand";
 import { persist, devtools, PersistStorage, StorageValue } from "zustand/middleware";
 import { ITenant, ITenantProject } from "@/types/model";
@@ -22,6 +22,7 @@ export type AuthStore = {
   tokenExpiresAt: number | null | undefined;
   authenticated: boolean | undefined;
   user: KeycloakUser | null | undefined;
+  userProfile: IUserProfile | null | undefined;
   tenant: ITenant | null | undefined;
   project: ITenantProject | null | undefined;
 };
@@ -134,6 +135,7 @@ export const createAuthStore = () => {
           tokenExpiresAt: undefined,
           authenticated: undefined,
           user: undefined,
+          userProfile: undefined,
           tenant: undefined,
           project: undefined,
         }),
@@ -148,6 +150,7 @@ export const createAuthStore = () => {
             idToken: state.idToken,
             tokenExpiresAt: state.tokenExpiresAt,
             user: state.user,
+            userProfile: state.userProfile,
             tenant: state.tenant,
             project: state.project,
           }),

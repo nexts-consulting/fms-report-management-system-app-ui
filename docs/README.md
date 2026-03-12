@@ -1,31 +1,5 @@
 # 📚 Form Integration Documentation Index
 
-Chào mừng đến với documentation về Form Integration System!
-
-## 🎯 Bắt đầu từ đâu?
-
-### 👨‍💻 Nếu bạn là Parent App Developer
-➡️ Bạn đã sẵn sàng! Form integration đã được triển khai hoàn chỉnh trong parent app.
-
-**Xem:** [QUICK_START.md](./QUICK_START.md) - Cách tạo form definition trong database
-
-### 👩‍💻 Nếu bạn là Child Form Developer  
-➡️ Bạn cần tích hợp form của mình với parent app.
-
-**Xem:** [IFRAME_FORM_INTEGRATION.md](./IFRAME_FORM_INTEGRATION.md) - Hướng dẫn chi tiết integration
-
-### 🏗️ Nếu bạn cần hiểu hệ thống
-➡️ Bạn muốn hiểu kiến trúc và cách hệ thống hoạt động.
-
-**Xem:** [FORM_INTEGRATION_README.md](./FORM_INTEGRATION_README.md) - Tổng quan hệ thống
-
-### 🔍 Nếu bạn là Reviewer/QA
-➡️ Bạn cần xem implementation summary và testing guide.
-
-**Xem:** [IMPLEMENTATION_SUMMARY.md](./IMPLEMENTATION_SUMMARY.md) - Chi tiết implementation
-
----
-
 ## 📖 Tài liệu đầy đủ
 
 ### 1. [QUICK_START.md](./QUICK_START.md) ⚡

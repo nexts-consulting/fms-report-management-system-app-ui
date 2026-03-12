@@ -8,6 +8,10 @@ import moment from "moment";
 import { useNotification } from "@/kits/components/notification";
 import { httpRequestAuthRefresh } from "@/services/api/application/auth/refresh";
 import { useGlobalContext } from "./global.context";
+import { httpRequestGetUserProfileByKeycloakId } from "@/services/api/application/master-data/user-profiles";
+import { IUserProfile } from "@/types/model";
+
+const LOCAL_STORAGE_PROFILE_KEY = "user-profile";
 
 export interface IAuthContext extends StoreApi<AuthStore> {}
 export const AuthContext = createContext<IAuthContext | undefined>(undefined);
@@ -33,8 +37,10 @@ export const AuthContextProvider = (props: AuthContextProviderProps) => {
   const refreshToken = storeSelectors.use.refreshToken();
   const tenant = storeSelectors.use.tenant();
   const project = storeSelectors.use.project();
+  const user = storeSelectors.use.user();
 
   const isRefreshingRef = React.useRef(false);
+  const profileFetchOwnerRef = React.useRef<string | null>(null);
 
   const handleRefreshToken = async (): Promise<boolean> => {
     // Prevent multiple simultaneous refresh attempts
@@ -94,6 +100,7 @@ export const AuthContextProvider = (props: AuthContextProviderProps) => {
           });
           storeSelectors.setState({
             user: null,
+            userProfile: null,
             token: null,
             accessToken: null,
             idToken: null,
@@ -126,6 +133,7 @@ export const AuthContextProvider = (props: AuthContextProviderProps) => {
           });
           storeSelectors.setState({
             user: null,
+            userProfile: null,
             token: null,
             accessToken: null,
             idToken: null,
@@ -150,6 +158,7 @@ export const AuthContextProvider = (props: AuthContextProviderProps) => {
       });
       storeSelectors.setState({
         user: null,
+        userProfile: null,
         token: null,
         accessToken: null,
         idToken: null,
@@ -177,6 +186,7 @@ export const AuthContextProvider = (props: AuthContextProviderProps) => {
       timeoutRef = setTimeout(() => {
         storeSelectors.setState({
           user: null,
+          userProfile: null,
           token: null,
           accessToken: null,
           idToken: null,
@@ -196,6 +206,58 @@ export const AuthContextProvider = (props: AuthContextProviderProps) => {
       }
     };
   }, [accessToken, tokenExpiresAt, refreshToken, tenant, projectAuthConfig]);
+
+  React.useEffect(() => {
+    const syncUserProfile = async () => {
+      const userId = user?.id;
+
+      if (!userId) {
+        profileFetchOwnerRef.current = null;
+        localStorage.removeItem(LOCAL_STORAGE_PROFILE_KEY);
+        storeSelectors.setState({ userProfile: null });
+        return;
+      }
+
+      if (profileFetchOwnerRef.current === userId) {
+        return;
+      }
+      profileFetchOwnerRef.current = userId;
+
+      const cachedProfileRaw = localStorage.getItem(LOCAL_STORAGE_PROFILE_KEY);
+      if (cachedProfileRaw) {
+        try {
+          const cachedProfile = JSON.parse(cachedProfileRaw) as IUserProfile;
+          if (cachedProfile?.keycloak_user_id === userId) {
+            storeSelectors.setState({ userProfile: cachedProfile });
+          } else {
+            localStorage.removeItem(LOCAL_STORAGE_PROFILE_KEY);
+            storeSelectors.setState({ userProfile: null });
+          }
+        } catch {
+          localStorage.removeItem(LOCAL_STORAGE_PROFILE_KEY);
+          storeSelectors.setState({ userProfile: null });
+        }
+      } else {
+        storeSelectors.setState({ userProfile: null });
+      }
+
+      try {
+        const profile = await httpRequestGetUserProfileByKeycloakId(userId);
+        if (profile) {
+          storeSelectors.setState({ userProfile: profile });
+          localStorage.setItem(LOCAL_STORAGE_PROFILE_KEY, JSON.stringify(profile));
+        } else {
+          storeSelectors.setState({ userProfile: null });
+          localStorage.removeItem(LOCAL_STORAGE_PROFILE_KEY);
+        }
+      } catch (error) {
+        // Keep app usable even when profile API fails.
+        console.error("Failed to sync user profile after login:", error);
+      }
+    };
+
+    syncUserProfile();
+  }, [user?.id]);
 
   return <AuthContext.Provider value={storeRef.current}>{children}</AuthContext.Provider>;
 };

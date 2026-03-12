@@ -5,12 +5,13 @@ import { useNotification } from "@/kits/components/notification";
 import { useTenantProjectPath } from "@/hooks/use-tenant-project-path";
 import type { CheckinStep, CheckinLocation } from "../../app/[tenant_code]/[project_code]/(auth)/checkin/common/types";
 import type { IProjectCheckinFlow } from "@/types/model";
-import type { IWorkingShiftLocation, KeycloakUser } from "@/types/model";
+import type { IWorkingShiftLocation, IUserProfile, KeycloakUser } from "@/types/model";
 import { CHECKIN_SUCCESS_REDIRECT_DELAY } from "../../app/[tenant_code]/[project_code]/(auth)/checkin/common/config";
 import { useMutationAttendanceCheckin } from "@/services/api/application/attendance/checkin";
 
 interface UseCheckinSubmitOptions {
   user: KeycloakUser;
+  userProfile?: IUserProfile | null;
   workingShiftLocation: IWorkingShiftLocation | null | undefined;
   checkinLocation: CheckinLocation | null;
   checkinFlow: IProjectCheckinFlow | null | undefined;
@@ -22,6 +23,7 @@ interface UseCheckinSubmitOptions {
 
 export const useCheckinSubmit = ({
   user,
+  userProfile,
   workingShiftLocation,
   checkinLocation,
   checkinFlow,
@@ -119,6 +121,7 @@ export const useCheckinSubmit = ({
               acc: 0,
             },
         photoUrl: photoUrl || "",
+        profilePortraitUrl: userProfile?.portrait_image_url || null,
         projectCode,
         username: user.username,
         workshiftName: workingShiftLocation.name,
@@ -151,7 +154,7 @@ export const useCheckinSubmit = ({
       attendanceCheckinMutation.mutate(payload);
       return true;
     },
-    [workingShiftLocation, checkinLocation, user, attendanceCheckinMutation, projectCode],
+    [workingShiftLocation, checkinLocation, user, userProfile, attendanceCheckinMutation, projectCode],
   );
 
   return {

@@ -9,6 +9,7 @@ export type CheckinMutationParams = {
   shiftId: number;
   location: CheckinLocation;
   photoUrl: string;
+  profilePortraitUrl?: string | null;
   projectCode: string;
   username: string;
   workshiftName: string;
@@ -63,6 +64,7 @@ export const httpRequestAttendanceCheckin = async (
       shiftId,
       location,
       photoUrl,
+      profilePortraitUrl,
       workshiftName,
       locationId,
       locationCode,
@@ -100,7 +102,11 @@ export const httpRequestAttendanceCheckin = async (
         checkin_lng: location.lng,
         checkout_lat: null,
         checkout_lng: null,
-        metadata: {},
+        metadata: {
+          profile: {
+            portrait_image_url: profilePortraitUrl || null,
+          },
+        },
       })
       .select()
       .single();

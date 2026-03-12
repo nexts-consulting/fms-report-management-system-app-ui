@@ -16,6 +16,7 @@ import { getCheckinLocation } from "../common/utils";
 export const useCheckinState = () => {
   const authStore = useAuthContext();
   const user = authStore.use.user()!;
+  const userProfile = authStore.use.userProfile();
 
   const globalStore = useGlobalContext();
   const selectedWorkingShift = globalStore.use.selectedWorkingShift();
@@ -75,6 +76,7 @@ export const useCheckinState = () => {
     isLoading: isSubmitting,
   } = useCheckinSubmit({
     user,
+    userProfile,
     workingShiftLocation: selectedWorkingShift,
     checkinLocation,
     checkinFlow: projectCheckinFlow,

@@ -24,6 +24,8 @@ import { getUserFromAccessToken } from "@/utils/auth";
 import { useTenantProjectPath } from "@/hooks/use-tenant-project-path";
 import { clearTokenCookies } from "@/utils/cookie";
 
+const LOCAL_STORAGE_PROFILE_KEY = "user-profile";
+
 export const Entry = () => {
   const authStore = useAuthContext();
   const user = authStore.use.user();
@@ -243,7 +245,9 @@ export const Entry = () => {
           idToken: data.idToken,
           tokenExpiresAt: expiresAt,
           user: userInfo,
+          userProfile: null,
         });
+        localStorage.removeItem(LOCAL_STORAGE_PROFILE_KEY);
 
       },
       onError(error, variables, context) {
@@ -255,12 +259,14 @@ export const Entry = () => {
         authStore.setState({
           authenticated: false,
           user: null,
+          userProfile: null,
           token: null,
           accessToken: null,
           refreshToken: null,
           idToken: null,
           tokenExpiresAt: null,
         });
+        localStorage.removeItem(LOCAL_STORAGE_PROFILE_KEY);
 
         let errorMessage = "Tên đăng nhập hoặc mật khẩu không chính xác!";
         if (error && typeof error === "object" && "response" in error) {

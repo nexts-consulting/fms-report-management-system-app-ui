@@ -37,6 +37,17 @@ const getTenantInfo = (): { keycloak_base_url: string; keycloak_realm: string } 
   };
 };
 
+const normalizeKeycloakAttributeValue = (
+  value: string | boolean | number | string[],
+): string[] => {
+  if (Array.isArray(value)) {
+    return value.map((item) => String(item));
+  }
+  return [String(value)];
+};
+
+const PROFILE_UPDATED_ATTRIBUTE_KEY = "profile_updated";
+
 /**
  * Get list of users from Keycloak
  */
@@ -172,4 +183,67 @@ export const httpRequestGetUserGroups = async (userId: string): Promise<Keycloak
     console.error("Error fetching user groups:", error);
     throw error;
   }
+};
+
+/**
+ * Update Keycloak user attributes while preserving existing attributes
+ */
+export const httpRequestUpdateKeycloakUserAttributes = async (
+  userId: string,
+  attributes: Record<string, string | boolean | number | string[]>,
+): Promise<void> => {
+  const tenantInfo = getTenantInfo();
+  const accessToken = getAccessToken();
+
+  if (!tenantInfo || !accessToken) {
+    throw new Error("Tenant information or access token not available");
+  }
+
+  const adminApiUrl = getKeycloakAdminApiUrl(
+    tenantInfo.keycloak_base_url,
+    tenantInfo.keycloak_realm,
+  );
+
+  try {
+    const currentUser = await httpRequestGetKeycloakUser(userId);
+    const currentAttributes = currentUser.attributes || {};
+
+    const normalizedUpdates = Object.fromEntries(
+      Object.entries(attributes).map(([key, value]) => [
+        key,
+        normalizeKeycloakAttributeValue(value),
+      ]),
+    ) as Record<string, string[]>;
+
+    await Axios.put(
+      `${adminApiUrl}/users/${userId}`,
+      {
+        attributes: {
+          ...currentAttributes,
+          ...normalizedUpdates,
+        },
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+      },
+    );
+  } catch (error: any) {
+    console.error("Error updating Keycloak user attributes:", error);
+    throw error;
+  }
+};
+
+/**
+ * Mark whether user has updated profile (single flag for admin filtering)
+ */
+export const httpRequestMarkKeycloakProfileUpdated = async (
+  userId: string,
+  isUpdated: boolean = true,
+): Promise<void> => {
+  return httpRequestUpdateKeycloakUserAttributes(userId, {
+    [PROFILE_UPDATED_ATTRIBUTE_KEY]: isUpdated,
+  });
 };

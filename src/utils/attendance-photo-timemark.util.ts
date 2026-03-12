@@ -20,7 +20,6 @@ export const buildAttendancePhotoTimeMarkConfig = (
     textColor: "#FFFFFF",
     timestampLabel: "Thời gian",
     showTimestamp: true,
-    fontSize: 18,
     textLines: [
       `Loại: ${actionLabel}`,
       `Ca: ${shiftName?.trim() || FALLBACK_VALUE}`,

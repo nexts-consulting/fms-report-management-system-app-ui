@@ -406,6 +406,41 @@ export interface KeycloakUser {
   clientRoles?: Record<string, string[]>;
 }
 
+// USER PROFILE MODELS
+export interface IUserProfile {
+  id: string;
+  keycloak_user_id: string | null;
+  keycloak_username: string | null;
+  employee_code: string | null;
+  fullname: string;
+  gender: string | null;
+  date_of_birth: string | null;
+  phone: string | null;
+  email: string | null;
+  national_id: string | null;
+  national_id_issue_date: string | null;
+  national_id_issue_place: string | null;
+  payment_account_number: string | null;
+  payment_account_name: string | null;
+  payment_account_bank: string | null;
+  payment_account_branch: string | null;
+  address_line: string | null;
+  ward: string | null;
+  province: string | null;
+  country: string | null;
+  portrait_image_url: string | null;
+  national_id_front_url: string | null;
+  national_id_back_url: string | null;
+  hire_date: string | null;
+  contract_start_date: string | null;
+  contract_end_date: string | null;
+  position: string | null;
+  department: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+  is_active: boolean | null;
+}
+
 export interface GetKeycloakUsersParams {
   search?: string;
   username?: string;
