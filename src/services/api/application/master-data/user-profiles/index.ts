@@ -30,6 +30,7 @@ export type UpsertUserProfilePayload = {
   position?: string | null;
   department?: string | null;
   is_active?: boolean | null;
+  projects?: string[] | null;
 };
 
 export const httpRequestGetUserProfileByKeycloakId = async (

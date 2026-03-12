@@ -16,6 +16,7 @@ import {
 } from "@/services/api/application/master-data/user-profiles";
 import { httpRequestMarkKeycloakProfileUpdated } from "@/services/api/application/management/keycloak/users";
 import profileOptionsData from "@/data/profile-options.json";
+import { useTenantProjectPath } from "@/hooks/use-tenant-project-path";
 import { IUserProfile } from "@/types/model";
 import { useRouter } from "next/navigation";
 import React from "react";
@@ -75,6 +76,15 @@ const styles = {
 const toInputValue = (value?: string | null): string => value || "";
 const findSelectedOption = (options: DropdownOption[], value: string): DropdownOption | null =>
   options.find((item) => item.value === value) ?? null;
+const normalizeProjectCodes = (projects: unknown): string[] => {
+  if (!Array.isArray(projects)) return [];
+  return projects.filter((item): item is string => typeof item === "string" && item.trim().length > 0);
+};
+const mergeProjectCode = (projects: string[], projectCode: string | null): string[] => {
+  if (!projectCode) return projects;
+  if (projects.includes(projectCode)) return projects;
+  return [...projects, projectCode];
+};
 
 const REQUIRED_FIELD_LABELS: Partial<Record<keyof UserProfileFormState, string>> = {
   fullname: "Họ và tên",
@@ -178,6 +188,7 @@ const createInitialForm = (
 
 export default function ProfilePage() {
   const router = useRouter();
+  const { projectCode } = useTenantProjectPath();
   const notification = useNotification();
   const authStore = useAuthContext();
   const user = authStore.use.user();
@@ -188,6 +199,7 @@ export default function ProfilePage() {
   const [isSaving, setIsSaving] = React.useState(false);
   const [isExistingProfile, setIsExistingProfile] = React.useState(false);
   const [validationErrors, setValidationErrors] = React.useState<ValidationErrors>({});
+  const [profileProjects, setProfileProjects] = React.useState<string[]>([]);
   const genders = React.useMemo(() => profileOptionsData.genders as DropdownOption[], []);
   const banks = React.useMemo(() => profileOptionsData.banks as DropdownOption[], []);
   const nationalIdIssuePlaces = React.useMemo(
@@ -244,6 +256,7 @@ export default function ProfilePage() {
           if (cachedProfile?.keycloak_user_id === user.id) {
             setForm(mapProfileToForm(cachedProfile));
             setIsExistingProfile(true);
+            setProfileProjects(normalizeProjectCodes(cachedProfile.projects));
             authStore.setState({ userProfile: cachedProfile });
           }
         }
@@ -254,10 +267,12 @@ export default function ProfilePage() {
           setForm(mapProfileToForm(profile));
           setValidationErrors({});
           setIsExistingProfile(true);
+          setProfileProjects(normalizeProjectCodes(profile.projects));
           authStore.setState({ userProfile: profile });
           localStorage.setItem(LOCAL_STORAGE_PROFILE_KEY, JSON.stringify(profile));
         } else {
           setIsExistingProfile(false);
+          setProfileProjects([]);
           authStore.setState({ userProfile: null });
           localStorage.removeItem(LOCAL_STORAGE_PROFILE_KEY);
           setForm(createInitialForm(user));
@@ -299,6 +314,7 @@ export default function ProfilePage() {
     setIsSaving(true);
     try {
       let isKeycloakAttrUpdated = true;
+      const nextProjects = mergeProjectCode(profileProjects, projectCode);
       const savedProfile = await httpRequestUpsertUserProfile({
         keycloak_user_id: form.keycloak_user_id,
         keycloak_username: form.keycloak_username,
@@ -328,6 +344,7 @@ export default function ProfilePage() {
         position: form.position,
         department: form.department,
         is_active: form.is_active,
+        projects: nextProjects,
       });
 
       try {
@@ -340,6 +357,7 @@ export default function ProfilePage() {
       setForm(mapProfileToForm(savedProfile));
       setValidationErrors({});
       setIsExistingProfile(true);
+      setProfileProjects(normalizeProjectCodes(savedProfile.projects));
       authStore.setState({ userProfile: savedProfile });
       localStorage.setItem(LOCAL_STORAGE_PROFILE_KEY, JSON.stringify(savedProfile));
 
