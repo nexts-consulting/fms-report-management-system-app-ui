@@ -157,8 +157,13 @@ export const MultipleImagesCaptureInputUpload = React.memo(
 
     const [showCamera, setShowCamera] = React.useState(false);
     const [maximizedIndex, setMaximizedIndex] = React.useState<number | null>(null);
-    const [uploadingImages, setUploadingImages] = React.useState<Set<number>>(new Set());
-    const [uploadProgress, setUploadProgress] = React.useState<Map<number, number>>(new Map());
+    const [pendingCaptures, setPendingCaptures] = React.useState<
+      Array<{
+        id: string;
+        previewUrl: string;
+        progress: number;
+      }>
+    >([]);
     const [uploadErrors, setUploadErrors] = React.useState<Map<number, string>>(new Map());
 
     const [value, setValue] = useControllableState({
@@ -169,7 +174,21 @@ export const MultipleImagesCaptureInputUpload = React.memo(
 
     const images = value || [];
     const canAddMore = images.length < maxImages;
-    const hasMinImages = images.length >= minImages;
+    const canRemoveImage = images.length > minImages;
+    const totalImages = images.length + pendingCaptures.length;
+    const pendingCapturesRef = React.useRef(pendingCaptures);
+
+    React.useEffect(() => {
+      pendingCapturesRef.current = pendingCaptures;
+    }, [pendingCaptures]);
+
+    React.useEffect(() => {
+      return () => {
+        pendingCapturesRef.current.forEach((capture) => {
+          URL.revokeObjectURL(capture.previewUrl);
+        });
+      };
+    }, []);
 
     const getGridClass = () => {
       switch (gridColumns) {
@@ -188,61 +207,50 @@ export const MultipleImagesCaptureInputUpload = React.memo(
 
     const handleConfirmCapture = async (file: File) => {
       setShowCamera(false);
+      const pendingId = CommonUtil.nanoid("alphaLower");
+      const tempPreview = URL.createObjectURL(file);
+      const displayIndex = totalImages;
 
-      // Calculate next image index
-      const imageIndex = images.length;
-
-      // Add uploading state
-      setUploadingImages((prev) => new Set(prev).add(imageIndex));
-      setUploadProgress((prev) => new Map(prev).set(imageIndex, 0));
+      setPendingCaptures((prev) => [
+        ...prev,
+        {
+          id: pendingId,
+          previewUrl: tempPreview,
+          progress: 0,
+        },
+      ]);
 
       try {
-        // Create temporary preview
-        const tempPreview = URL.createObjectURL(file);
-
-        // Add temporary image to array
-        const newImages = [...images, tempPreview];
-        setValue(newImages);
-
         // Upload to cloud
         const result = await uploadFileToCloud(file, cloudConfig, (progress) => {
-          setUploadProgress((prev) => new Map(prev).set(imageIndex, progress));
-          onUploadProgress?.(imageIndex, progress);
+          setPendingCaptures((prev) =>
+            prev.map((capture) =>
+              capture.id === pendingId ? { ...capture, progress } : capture,
+            ),
+          );
+          onUploadProgress?.(displayIndex, progress);
         });
 
-        // Clean up temporary preview
-        URL.revokeObjectURL(tempPreview);
-
-        // Replace temporary preview with actual URL
-        const finalImages = [...images, result.url];
-        setValue(finalImages);
-        onUploadSuccess?.(imageIndex, result.url);
+        // Only persist uploaded cloud URL to form value
+        setValue((prev = []) => {
+          const nextImages = [...prev, result.url];
+          onUploadSuccess?.(nextImages.length - 1, result.url);
+          return nextImages;
+        });
 
         // Clear error if exists
         setUploadErrors((prev) => {
           const newMap = new Map(prev);
-          newMap.delete(imageIndex);
+          newMap.delete(displayIndex);
           return newMap;
         });
       } catch (error) {
-        // Remove failed image from array
-        setValue(images);
-
         const errorMessage = error instanceof Error ? error.message : "Upload failed";
-        setUploadErrors((prev) => new Map(prev).set(imageIndex, errorMessage));
-        onUploadError?.(imageIndex, error instanceof Error ? error : new Error(errorMessage));
+        setUploadErrors((prev) => new Map(prev).set(displayIndex, errorMessage));
+        onUploadError?.(displayIndex, error instanceof Error ? error : new Error(errorMessage));
       } finally {
-        // Remove uploading state
-        setUploadingImages((prev) => {
-          const newSet = new Set(prev);
-          newSet.delete(imageIndex);
-          return newSet;
-        });
-        setUploadProgress((prev) => {
-          const newMap = new Map(prev);
-          newMap.delete(imageIndex);
-          return newMap;
-        });
+        URL.revokeObjectURL(tempPreview);
+        setPendingCaptures((prev) => prev.filter((capture) => capture.id !== pendingId));
       }
     };
 
@@ -268,7 +276,23 @@ export const MultipleImagesCaptureInputUpload = React.memo(
       setValue(newImages);
     };
 
-    const isUploading = uploadingImages.size > 0;
+    const isUploading = pendingCaptures.length > 0;
+    const displayImages = [
+      ...images.map((imageUrl, index) => ({
+        key: `uploaded-${index}`,
+        imageUrl,
+        index,
+        isCurrentlyUploading: false,
+        progress: 0,
+      })),
+      ...pendingCaptures.map((capture, index) => ({
+        key: capture.id,
+        imageUrl: capture.previewUrl,
+        index: images.length + index,
+        isCurrentlyUploading: true,
+        progress: capture.progress,
+      })),
+    ];
 
     return (
       <>
@@ -299,14 +323,11 @@ export const MultipleImagesCaptureInputUpload = React.memo(
           )}
 
           {/* Images Grid */}
-          {images.length > 0 && (
+          {displayImages.length > 0 && (
             <div className={StyleUtil.cn(styles.imagesGrid, getGridClass())}>
-              {images.map((imageUrl, index) => {
-                const isCurrentlyUploading = uploadingImages.has(index);
-                const progress = uploadProgress.get(index) || 0;
-
+              {displayImages.map(({ key, imageUrl, index, isCurrentlyUploading, progress }) => {
                 return (
-                  <div key={`image-${index}`} className={styles.imageCard}>
+                  <div key={key} className={styles.imageCard}>
                     <img
                       src={imageUrl}
                       alt={`Image ${index + 1}`}
@@ -371,7 +392,7 @@ export const MultipleImagesCaptureInputUpload = React.memo(
                           variant="danger"
                           icon={Icons.CloseLarge}
                           onClick={() => handleRemoveImage(index)}
-                          disabled={disabled}
+                          disabled={disabled || !canRemoveImage}
                         />
                       </div>
                     )}
@@ -389,7 +410,7 @@ export const MultipleImagesCaptureInputUpload = React.memo(
               onClick={() => !disabled && !isUploading && setShowCamera(true)}
               disabled={disabled || isUploading}
             >
-              {helperText || "Add Image"} ({images.length}/
+              {helperText || "Add Image"} ({totalImages}/
               {maxImages === Infinity ? "∞" : maxImages})
             </Button>
           )}
