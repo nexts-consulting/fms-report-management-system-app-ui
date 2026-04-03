@@ -124,6 +124,7 @@ export const LeaveStartConfirm = React.memo(() => {
       checkoutLat: checkoutLat,
       checkoutLng: checkoutLng,
       leaveType: data.leaveType,
+      note: data.note ?? "",
     });
   });
 

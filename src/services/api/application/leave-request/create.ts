@@ -15,6 +15,7 @@ export type CreateLeaveRequestParams = {
   checkoutLat?: number;
   checkoutLng?: number;
   leaveType?: string;
+  note?: string;
 };
 
 export type CreateLeaveRequestResponseData = {
@@ -50,6 +51,7 @@ export const httpRequestCreateLeaveRequest = async (
         checkin_lat: null,
         checkin_lng: null,
         leave_type: params.leaveType || null,
+        note: params.note || null,
       })
       .select()
       .single();
