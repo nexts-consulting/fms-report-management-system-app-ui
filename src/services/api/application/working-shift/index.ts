@@ -223,22 +223,37 @@ export const httpRequestGetLocationWorkshiftsByDateRange = async (
   endDate: string,
 ): Promise<ILocationWorkshift[]> => {
   try {
-    const { data, error } = await supabaseFmsService.client
-      .from("fms_app_data_location_workshifts")
-      .select(
-        `
-        *,
-        fms_mst_locations!inner(id, name, code, address, latitude, longitude, checkin_radius_meters, admin_division_id, metadata, created_at, updated_at),
-        fms_app_data_workshifts!inner(id, name, start_time, end_time, status)
-      `,
-      )
-      .eq("project_code", projectCode)
-      .order("created_at", { ascending: false });
+    const pageSize = 1000;
+    let offset = 0;
+    const allRows: any[] = [];
 
-    if (error) throw error;
+    while (true) {
+      const { data, error } = await supabaseFmsService.client
+        .from("fms_app_data_location_workshifts")
+        .select(
+          `
+          *,
+          fms_mst_locations!inner(id, name, code, address, latitude, longitude, checkin_radius_meters, admin_division_id, metadata, created_at, updated_at),
+          fms_app_data_workshifts!inner(id, name, start_time, end_time, status)
+        `,
+        )
+        .eq("project_code", projectCode)
+        .lte("fms_app_data_workshifts.start_time", endDate)
+        .gte("fms_app_data_workshifts.end_time", startDate)
+        .order("created_at", { ascending: false })
+        .range(offset, offset + pageSize - 1);
+
+      if (error) throw error;
+      if (!data || data.length === 0) break;
+
+      allRows.push(...data);
+      if (data.length < pageSize) break;
+
+      offset += pageSize;
+    }
 
     // Transform joined data
-    const transformedData = (data || []).map((item: any) => ({
+    const transformedData = allRows.map((item: any) => ({
       ...item,
       location_name: item.fms_mst_locations?.name,
       location_code: item.fms_mst_locations?.code,
@@ -258,22 +273,7 @@ export const httpRequestGetLocationWorkshiftsByDateRange = async (
       workshift_status: item.fms_app_data_workshifts?.status,
     }));
 
-    // Filter workshifts that overlap with the date range
-    const start = dayjs(startDate).startOf("day");
-    const end = dayjs(endDate).endOf("day");
-
-    const filtered = transformedData.filter((item: any) => {
-      if (!item.workshift_start_time) return false;
-      const wsStart = dayjs(item.workshift_start_time);
-      const wsEnd = dayjs(item.workshift_end_time);
-      
-      return (
-        (wsStart.isBefore(end) || wsStart.isSame(end, "day")) &&
-        (wsEnd.isAfter(start) || wsEnd.isSame(start, "day"))
-      );
-    });
-
-    return filtered as ILocationWorkshift[];
+    return transformedData as ILocationWorkshift[];
   } catch (error) {
     console.error("Error fetching location workshifts by date range:", error);
     throw error;
