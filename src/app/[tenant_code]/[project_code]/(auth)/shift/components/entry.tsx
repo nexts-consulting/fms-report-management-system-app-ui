@@ -32,6 +32,8 @@ import { createFlexibleWorkingShift } from "@/services/api/application/working-s
 export const Entry = () => {
   const globalStore = useGlobalContext();
   const selectedLocation = globalStore.use.selectedLocation();
+  const currentAttendance = globalStore.use.currentAttendance();
+  const isCheckingCurrentShift = globalStore.use.isCheckingCurrentShift();
 
   const authStore = useAuthContext();
   const user = authStore.use.user();
@@ -43,6 +45,17 @@ export const Entry = () => {
   const router = useRouter();
   const params = useParams();
   const { buildPath } = useTenantProjectPath();
+
+  // Guard: if user already has an open shift, don't let them pick another
+  // shift and check in twice. Wait until current-shift hydration finishes
+  // before deciding.
+  React.useEffect(() => {
+    if (isCheckingCurrentShift) return;
+
+    if (currentAttendance) {
+      router.replace(buildPath("/attendance/tracking"));
+    }
+  }, [isCheckingCurrentShift, currentAttendance, router, buildPath]);
 
   const projectCode = (params?.project_code as string) || project?.code || "";
   const username = user?.username || "";
@@ -258,6 +271,12 @@ export const Entry = () => {
   const handleCancel = React.useCallback(() => {
     setSelectedWorkingShift(null);
   }, []);
+
+  // Avoid flashing the shift picker (and tempting a second check-in) while
+  // we still don't know whether the user already has an open shift.
+  if (isCheckingCurrentShift || currentAttendance) {
+    return <LoadingOverlay active={true} />;
+  }
 
   return (
     <>
