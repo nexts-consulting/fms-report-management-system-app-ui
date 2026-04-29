@@ -33,7 +33,7 @@ export const Entry = () => {
   const router = useRouter();
   const params = useParams();
   const projectCode = params?.project_code as string;
-  
+
   const { buildPath } = useTenantProjectPath();
   const [confirmCheckoutLoading, setConfirmCheckoutLoading] = React.useState(false);
   const { menuItems: reportMenuItems, isLoading: isLoadingMenus } = useAppMenuItems();
@@ -63,7 +63,7 @@ export const Entry = () => {
 
   const handleAction = (item: any) => {
     if (item.action_type === "route") {
-      router.push( buildPath(item.path ?? ""));
+      router.push(buildPath(item.path ?? ""));
     } else if (item.action_type === "popup") {
       globalStore.setState({ [item.action_value ?? ""]: true });
     }
@@ -94,7 +94,12 @@ export const Entry = () => {
     };
   }, []);
 
-  if (!currentAttendance) {
+  const [mounted, setMounted] = React.useState(false);
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted || !currentAttendance) {
     return <></>;
   }
 
@@ -116,7 +121,7 @@ export const Entry = () => {
             type="success"
             title="Hoàn thành ca làm việc"
             description={
-              <p>Ca làm việc của bạn đã hoàn thành, vui lòng check out để kết thúc ca làm việc!</p>
+              <p>Ca làm việc của bạn đã kết thúc, vui lòng check out để hoàn thành ca làm việc!</p>
             }
             closeable={false}
           />
@@ -178,29 +183,29 @@ export const Entry = () => {
             </div>
           ) : (
             reportMenuItems.map((item, idx) => {
-            const done = false; // TODO: Implement report status
-            // TODO: Implement report status
-            const notchColor = false
-              ? done
-                ? "bg-green-500"
-                : "bg-red-500"
-              : "bg-gray-500";
-            return (
-              <div
-                key={idx}
-                onClick={() => handleAction(item)}
-                className="relative flex h-28 w-full cursor-pointer flex-col items-center justify-center border border-gray-200 bg-white p-4 shadow-sm transition hover:shadow"
-              >
-                {/* Notch trạng thái */}
-                <div className={`absolute right-2 top-2 h-2 w-2 ${notchColor}`} />
-                { item.icon && <div className="mb-2 h-6 w-6 text-gray-700"><DynamicIcon name={item.icon}/></div> }
-                <p className="text-center text-sm font-medium leading-tight text-gray-700">
-                  {item.name ?? ""}
-                </p>
-              </div>
-            );
-          })
-        )}
+              const done = false; // TODO: Implement report status
+              // TODO: Implement report status
+              const notchColor = false
+                ? done
+                  ? "bg-green-500"
+                  : "bg-red-500"
+                : "bg-gray-500";
+              return (
+                <div
+                  key={idx}
+                  onClick={() => handleAction(item)}
+                  className="relative flex h-28 w-full cursor-pointer flex-col items-center justify-center border border-gray-200 bg-white p-4 shadow-sm transition hover:shadow"
+                >
+                  {/* Notch trạng thái */}
+                  <div className={`absolute right-2 top-2 h-2 w-2 ${notchColor}`} />
+                  {item.icon && <div className="mb-2 h-6 w-6 text-gray-700"><DynamicIcon name={item.icon} /></div>}
+                  <p className="text-center text-sm font-medium leading-tight text-gray-700">
+                    {item.name ?? ""}
+                  </p>
+                </div>
+              );
+            })
+          )}
         </div>
       </div>
 

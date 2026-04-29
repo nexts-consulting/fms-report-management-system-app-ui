@@ -393,12 +393,6 @@ export default function ProfilePage() {
           <h2 className={styles.sectionTitle}>Thông tin đồng bộ Keycloak</h2>
           <div className={styles.fieldGrid}>
             <TextInput
-              label="Keycloak User ID"
-              value={form.keycloak_user_id}
-              disabled
-              placeholder="Được đồng bộ từ đăng nhập"
-            />
-            <TextInput
               label="Keycloak Username"
               value={form.keycloak_username}
               disabled
@@ -619,7 +613,7 @@ export default function ProfilePage() {
         </div> */}
 
         <div className={styles.card}>
-          <h2 className={styles.sectionTitle}>Ảnh hồ sơ (Firebase Storage)</h2>
+          <h2 className={styles.sectionTitle}>Ảnh hồ sơ</h2>
           <div className={styles.fieldGrid}>
             <ImageCaptureInputWithUpload
               label="Ảnh chân dung"

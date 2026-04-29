@@ -1,3 +1,5 @@
+"use client";
+
 import { Icons } from "@/kits/components/icons";
 import { IAttendance, ILocation } from "@/types/model";
 import {
@@ -8,6 +10,8 @@ import {
 } from "@/components/shared";
 import moment from "moment";
 import React from "react";
+import { useGlobalContext } from "@/contexts/global.context";
+import { validatePostShiftTasks } from "@/services/api/application/attendance/validate-post-shift-tasks";
 
 interface CheckoutConfirmProps {
   attendanceDetail: IAttendance;
@@ -18,6 +22,31 @@ interface CheckoutConfirmProps {
 
 export const CheckoutConfirm = React.memo((props: CheckoutConfirmProps) => {
   const { attendanceDetail, location, onConfirm, onCancel } = props;
+
+  const globalStore = useGlobalContext();
+  const projectCheckinFlow = globalStore.use.projectCheckinFlow();
+  const projectMetadata = globalStore.use.projectMetadata();
+
+  const [validationErrors, setValidationErrors] = React.useState<string[]>([]);
+  const [isValidating, setIsValidating] = React.useState(false);
+
+  React.useEffect(() => {
+    setIsValidating(true);
+
+    validatePostShiftTasks({
+      attendanceId: attendanceDetail.id,
+      projectCheckinFlow,
+      projectMetadata,
+    }).then(({ errors }) => {
+      setValidationErrors(errors);
+      setIsValidating(false);
+    });
+  }, [attendanceDetail.id, projectCheckinFlow, projectMetadata]);
+
+  const handleConfirm = React.useCallback(() => {
+    if (validationErrors.length > 0 || isValidating) return;
+    onConfirm();
+  }, [validationErrors, isValidating, onConfirm]);
 
   const totalTrackingTimeFormated = React.useMemo(() => {
     const duration = moment.duration(moment().diff(moment(attendanceDetail.checkin_time)));
@@ -72,14 +101,36 @@ export const CheckoutConfirm = React.memo((props: CheckoutConfirmProps) => {
           name={location?.name ?? ""}
           address={location?.address ?? ""}
         />
+
+        {/* Post-shift task validation */}
+        {isValidating && (
+          <div className="mt-3 flex items-center gap-2 text-sm text-gray-60">
+            <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-gray-40 border-t-gray-70" />
+            <span>Đang kiểm tra nhiệm vụ sau ca...</span>
+          </div>
+        )}
+
+        {!isValidating && validationErrors.length > 0 && (
+          <div className="mt-3 rounded border border-red-30 bg-red-10 p-3">
+            <p className="mb-1 text-sm font-medium text-red-60">Chưa hoàn thành các công việc sau ca:</p>
+            <ul className="list-disc pl-4">
+              {validationErrors.map((err, idx) => (
+                <li key={idx} className="text-sm text-red-50">
+                  {err}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
 
       {/* Confirmation Buttons */}
       <ConfirmationButtons
         onCancel={onCancel}
-        onConfirm={onConfirm}
+        onConfirm={handleConfirm}
         confirmIcon={Icons.Logout}
         confirmLabel="Check out"
+        confirmDisabled={isValidating || validationErrors.length > 0}
       />
     </>
   );

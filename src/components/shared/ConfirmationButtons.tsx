@@ -8,10 +8,11 @@ interface ConfirmationButtonsProps {
   confirmIcon: typeof Icons.Login;
   confirmLabel: string;
   cancelLabel?: string;
+  confirmDisabled?: boolean;
 }
 
 export const ConfirmationButtons = React.memo((props: ConfirmationButtonsProps) => {
-  const { onCancel, onConfirm, confirmIcon, confirmLabel, cancelLabel = "Hủy bỏ" } = props;
+  const { onCancel, onConfirm, confirmIcon, confirmLabel, cancelLabel = "Hủy bỏ", confirmDisabled } = props;
 
   return (
     <div className="grid grid-cols-2">
@@ -24,7 +25,13 @@ export const ConfirmationButtons = React.memo((props: ConfirmationButtonsProps) 
       >
         {cancelLabel}
       </Button>
-      <Button icon={confirmIcon} size="large" className="w-full" onClick={onConfirm}>
+      <Button
+        icon={confirmIcon}
+        size="large"
+        className="w-full"
+        onClick={onConfirm}
+        disabled={confirmDisabled}
+      >
         {confirmLabel}
       </Button>
     </div>

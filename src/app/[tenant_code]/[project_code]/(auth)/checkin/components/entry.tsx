@@ -3,6 +3,7 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import { useAuthContext } from "@/contexts/auth.context";
+import { useGlobalContext } from "@/contexts/global.context";
 import { LoadingOverlay } from "@/kits/components/loading-overlay";
 import { useTenantProjectPath } from "@/hooks/use-tenant-project-path";
 import { useCheckinState } from "../hooks/use-checkin-state";
@@ -22,6 +23,10 @@ export const Entry = () => {
   const { buildPath } = useTenantProjectPath();
   const authStore = useAuthContext();
   const user = authStore.use.user()!;
+
+  const globalStore = useGlobalContext();
+  const currentAttendance = globalStore.use.currentAttendance();
+  const isCheckingCurrentShift = globalStore.use.isCheckingCurrentShift();
 
   const {
     // Config
@@ -60,15 +65,33 @@ export const Entry = () => {
     locationName: selectedLocation?.name || selectedWorkingShift?.location?.name,
   });
 
-  // Redirect if no working shift selected
+
   React.useEffect(() => {
+    if (isCheckingCurrentShift) return;
+
+    if (currentAttendance) {
+      router.replace(buildPath("/attendance/tracking"));
+      return;
+    }
+
     if (!selectedWorkingShift) {
       router.replace(buildPath("/shift"));
     }
-  }, [selectedWorkingShift, router, buildPath]);
+  }, [
+    isCheckingCurrentShift,
+    currentAttendance,
+    selectedWorkingShift,
+    router,
+    buildPath,
+  ]);
 
-  // Wait for configs to load
-  if (isLoadingConfigs || !selectedWorkingShift) {
+  // Wait for configs and current-shift check to finish before rendering the flow
+  if (
+    isLoadingConfigs ||
+    isCheckingCurrentShift ||
+    currentAttendance ||
+    !selectedWorkingShift
+  ) {
     return <></>;
   }
 

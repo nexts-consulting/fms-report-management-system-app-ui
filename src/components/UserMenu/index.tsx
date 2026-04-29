@@ -41,10 +41,6 @@ export const UserMenu = React.memo((props: UserMenuProps) => {
   const globalStore = useGlobalContext();
   const currentAttendance = globalStore.use.currentAttendance();
 
-  const isCheckoutAvailable = React.useMemo(() => {
-    return true;
-  }, [currentAttendance]);
-
   const router = useRouter();
   const notification = useNotification();
 
@@ -81,15 +77,6 @@ export const UserMenu = React.memo((props: UserMenuProps) => {
       className: "",
       active: !!currentAttendance,
       action: () => {
-        if (!isCheckoutAvailable) {
-          notification.warning({
-            title: "Chưa thể check out",
-            description: "Vui lòng hoàn tất các báo cáo trước khi check out!",
-          });
-          onClose();
-          return;
-        }
-
         setTimeout(() => {
           globalStore.setState({ showCheckoutConfirmation: true });
           onClose();
