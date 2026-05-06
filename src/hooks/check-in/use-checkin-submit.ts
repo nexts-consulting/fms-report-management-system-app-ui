@@ -106,6 +106,18 @@ export const useCheckinSubmit = ({
         return false;
       }
 
+      const location = workingShiftLocation.location;
+      if (!location?.id || !location?.name || !location?.code) {
+        notification.error({
+          title: "Thiếu dữ liệu địa điểm",
+          description: "Không thể check-in vì ca làm việc chưa có địa điểm hợp lệ.",
+          options: {
+            immortal: true,
+          },
+        });
+        return false;
+      }
+
       const payload = {
         userId: user.id,
         shiftId: workingShiftLocation.id,
@@ -125,9 +137,9 @@ export const useCheckinSubmit = ({
         projectCode,
         username: user.username,
         workshiftName: workingShiftLocation.name,
-        locationId: workingShiftLocation.location.id,
-        locationCode: workingShiftLocation.location.code,
-        locationName: workingShiftLocation.location.name,
+        locationId: location.id,
+        locationCode: location.code,
+        locationName: location.name,
         workshiftStartTime: workingShiftLocation.start_time,
         workshiftEndTime: workingShiftLocation.end_time,
       };
@@ -154,7 +166,15 @@ export const useCheckinSubmit = ({
       attendanceCheckinMutation.mutate(payload);
       return true;
     },
-    [workingShiftLocation, checkinLocation, user, userProfile, attendanceCheckinMutation, projectCode],
+    [
+      workingShiftLocation,
+      checkinLocation,
+      user,
+      userProfile,
+      attendanceCheckinMutation,
+      projectCode,
+      notification,
+    ],
   );
 
   return {

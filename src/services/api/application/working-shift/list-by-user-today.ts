@@ -17,38 +17,32 @@ export type WorkingShiftListByUserTodayResponseData = {
 };
 
 /**
- * Create a placeholder location for user workshifts
- * Note: User workshifts don't have location info, so we'll use a placeholder
- */
-const createPlaceholderLocation = (): ILocationModel => {
-  return {
-    id: 0,
-    project_code: "",
-    code: "",
-    name: "Địa điểm chưa xác định",
-    address: "",
-    latitude: 0,
-    longitude: 0,
-    checkin_radius_meters: 100,
-    created_at: "",
-    updated_at: "",
-    admin_division_id: null,
-    metadata: {},
-  };
-};
-
-/**
  * Map IUserWorkshift to IWorkingShift
  */
 const mapUserWorkshiftToWorkingShift = (
   userWorkshift: IUserWorkshift,
 ): IWorkingShiftLocation => {
+  const location: ILocationModel = {
+    id: userWorkshift.location_id,
+    project_code: userWorkshift.project_code,
+    code: userWorkshift.location_code || "",
+    name: userWorkshift.location_name || "Địa điểm chưa xác định",
+    address: userWorkshift.location_address || "",
+    latitude: userWorkshift.location_latitude ?? 0,
+    longitude: userWorkshift.location_longitude ?? 0,
+    checkin_radius_meters: userWorkshift.location_checkin_radius_meters ?? 100,
+    created_at: userWorkshift.created_at,
+    updated_at: userWorkshift.updated_at,
+    admin_division_id: userWorkshift.location_admin_division_id ?? null,
+    metadata: userWorkshift.location_metadata || {},
+  };
+
   return {
     id: userWorkshift.workshift_id,
     name: userWorkshift.workshift_name || "Ca làm việc",
     start_time: userWorkshift.workshift_start_time || "",
     end_time: userWorkshift.workshift_end_time || "",
-    location: createPlaceholderLocation(),
+    location,
   };
 };
 
@@ -66,15 +60,11 @@ export const httpRequestWorkingShiftListByUserToday = async (
       params.projectCode,
       startDate,
       endDate,
-    );
-
-    // Filter by username
-    const filtered = userWorkshifts.filter(
-      (uw) => uw.username === params.username,
+      params.username,
     );
 
     // Map to IWorkingShift format
-    const data = filtered.map((uw) => mapUserWorkshiftToWorkingShift(uw));
+    const data = userWorkshifts.map((uw) => mapUserWorkshiftToWorkingShift(uw));
 
     return { data };
   } catch (error) {

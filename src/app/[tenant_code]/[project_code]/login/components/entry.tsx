@@ -23,6 +23,7 @@ import { httpRequestGetProjectByCode } from "@/services/api/application/master-d
 import { getUserFromAccessToken } from "@/utils/auth";
 import { useTenantProjectPath } from "@/hooks/use-tenant-project-path";
 import { clearTokenCookies } from "@/utils/cookie";
+import { isAssignedWorkshiftMode } from "@/utils/workshift-mode";
 
 const LOCAL_STORAGE_PROFILE_KEY = "user-profile";
 
@@ -36,6 +37,7 @@ export const Entry = () => {
   const selectedAdminDivision = globalStore.use.selectedAdminDivision();
   const selectedLocation = globalStore.use.selectedLocation();
   const projectAuthConfig = globalStore.use.projectAuthConfig();
+  const projectWorkshiftConfig = globalStore.use.projectWorkshiftConfig();
 
   const router = useRouter();
   const params = useParams();
@@ -327,14 +329,30 @@ export const Entry = () => {
   };
 
   React.useEffect(() => {
+    if (projectWorkshiftConfig === undefined) return;
+
     if (user) {
+      if (isAssignedWorkshiftMode(projectWorkshiftConfig)) {
+        router.replace(buildPath("/lobby"));
+        return;
+      }
+
       if (!selectedAdminDivision || !selectedLocation) {
         router.replace(buildPath("/location"));
       } else {
         router.replace(buildPath("/lobby"));
       }
     }
-  }, [user, tenantCode, projectCode, router, selectedAdminDivision, selectedLocation]);
+  }, [
+    user,
+    tenantCode,
+    projectCode,
+    router,
+    selectedAdminDivision,
+    selectedLocation,
+    projectWorkshiftConfig,
+    buildPath,
+  ]);
 
   // Show loading while fetching tenant/project or waiting for configs to load
   // ProjectConfigProvider will automatically load configs when project is set

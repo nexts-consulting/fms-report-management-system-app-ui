@@ -30,8 +30,8 @@ export function useTenantProjectPath() {
 
   /**
    * Build path with tenant code and project code prefix
-   * @param path - Path without tenant/project code (e.g., "/lobby")
-   * @returns Path with tenant and project code (e.g., "/fms/project1/lobby")
+   * @param path - Path without tenant/project code
+   * @returns Path with tenant and project code
    */
   const buildPath = (path: string): string => {
     return buildPathWithTenantAndProject(path, tenantCode, projectCode);

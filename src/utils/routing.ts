@@ -4,10 +4,10 @@
 
 /**
  * Build path with tenant code and project code prefix
- * @param path - Path without tenant/project code (e.g., "/lobby", "/attendance/tracking")
+ * @param path - Path without tenant/project code
  * @param tenantCode - Tenant code from params or auth store
  * @param projectCode - Project code from params or auth store
- * @returns Path with tenant and project code (e.g., "/fms/project1/lobby")
+ * @returns Path with tenant and project code
  */
 export function buildPathWithTenantAndProject(
   path: string,
@@ -33,7 +33,7 @@ export function buildPathWithTenantAndProject(
 
 /**
  * Get tenant code and project code from current pathname
- * @param pathname - Current pathname (e.g., "/fms/project1/lobby")
+ * @param pathname - Current pathname
  * @returns Object with tenantCode and projectCode or null
  */
 export function getTenantAndProjectCodeFromPath(pathname: string): {
@@ -49,8 +49,8 @@ export function getTenantAndProjectCodeFromPath(pathname: string): {
 
 /**
  * Remove tenant code and project code from path
- * @param path - Path with tenant and project code (e.g., "/fms/project1/lobby")
- * @returns Path without tenant and project code (e.g., "/lobby")
+ * @param path - Path with tenant and project code
+ * @returns Path without tenant and project code
  */
 export function removeTenantAndProjectCodeFromPath(path: string): string {
   const segments = path.split("/").filter(Boolean);

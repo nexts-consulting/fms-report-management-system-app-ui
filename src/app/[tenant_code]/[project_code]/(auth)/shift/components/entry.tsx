@@ -256,8 +256,11 @@ export const Entry = () => {
   const upcomingShifts = useShiftUpcoming(workshiftList);
 
   const handleConfirm = React.useCallback(() => {
+    if (!selectedWorkingShift) return;
+
     globalStore.setState({
       selectedWorkingShift: selectedWorkingShift,
+      selectedLocation: selectedWorkingShift.location,
     });
 
     setConfirmLoading(true);
@@ -266,7 +269,7 @@ export const Entry = () => {
       setConfirmLoading(false);
       router.push(buildPath("/checkin"));
     }, 1000);
-  }, [selectedWorkingShift]);
+  }, [selectedWorkingShift, globalStore, router, buildPath]);
 
   const handleCancel = React.useCallback(() => {
     setSelectedWorkingShift(null);

@@ -290,6 +290,7 @@ export const httpRequestGetUserWorkshifts = async (
       .select(
         `
         *,
+        fms_mst_locations!inner(id, name, code, address, latitude, longitude, checkin_radius_meters, admin_division_id, metadata),
         fms_app_data_workshifts!inner(name, start_time, end_time, status)
       `,
         { count: "exact" },
@@ -298,6 +299,10 @@ export const httpRequestGetUserWorkshifts = async (
 
     if (params.username) {
       query = query.eq("username", params.username);
+    }
+
+    if (params.location_id) {
+      query = query.eq("location_id", params.location_id);
     }
 
     if (params.workshift_id) {
@@ -323,6 +328,15 @@ export const httpRequestGetUserWorkshifts = async (
     // Transform joined data
     const transformedData = (data || []).map((item: any) => ({
       ...item,
+      location_id: item.fms_mst_locations?.id ?? item.location_id,
+      location_name: item.fms_mst_locations?.name,
+      location_code: item.fms_mst_locations?.code,
+      location_address: item.fms_mst_locations?.address,
+      location_latitude: item.fms_mst_locations?.latitude,
+      location_longitude: item.fms_mst_locations?.longitude,
+      location_checkin_radius_meters: item.fms_mst_locations?.checkin_radius_meters,
+      location_admin_division_id: item.fms_mst_locations?.admin_division_id,
+      location_metadata: item.fms_mst_locations?.metadata,
       workshift_name: item.fms_app_data_workshifts?.name,
       workshift_start_time: item.fms_app_data_workshifts?.start_time,
       workshift_end_time: item.fms_app_data_workshifts?.end_time,
@@ -362,24 +376,43 @@ export const httpRequestGetUserWorkshiftsByDateRange = async (
   projectCode: string,
   startDate: string,
   endDate: string,
+  username?: string,
 ): Promise<IUserWorkshift[]> => {
   try {
-    const { data, error } = await supabaseFmsService.client
+    let query = supabaseFmsService.client
       .from("fms_app_data_user_workshifts")
       .select(
         `
         *,
+        fms_mst_locations!inner(id, name, code, address, latitude, longitude, checkin_radius_meters, admin_division_id, metadata),
         fms_app_data_workshifts!inner(id, name, start_time, end_time, status)
       `,
       )
       .eq("project_code", projectCode)
+      .lte("fms_app_data_workshifts.start_time", endDate)
+      .gte("fms_app_data_workshifts.end_time", startDate)
       .order("created_at", { ascending: false });
+
+    if (username) {
+      query = query.eq("username", username);
+    }
+
+    const { data, error } = await query;
 
     if (error) throw error;
 
     // Transform joined data
     const transformedData = (data || []).map((item: any) => ({
       ...item,
+      location_id: item.fms_mst_locations?.id ?? item.location_id,
+      location_name: item.fms_mst_locations?.name,
+      location_code: item.fms_mst_locations?.code,
+      location_address: item.fms_mst_locations?.address,
+      location_latitude: item.fms_mst_locations?.latitude,
+      location_longitude: item.fms_mst_locations?.longitude,
+      location_checkin_radius_meters: item.fms_mst_locations?.checkin_radius_meters,
+      location_admin_division_id: item.fms_mst_locations?.admin_division_id,
+      location_metadata: item.fms_mst_locations?.metadata,
       workshift_id: item.fms_app_data_workshifts?.id,
       workshift_name: item.fms_app_data_workshifts?.name,
       workshift_start_time: item.fms_app_data_workshifts?.start_time,
@@ -387,22 +420,7 @@ export const httpRequestGetUserWorkshiftsByDateRange = async (
       workshift_status: item.fms_app_data_workshifts?.status,
     }));
 
-    // Filter workshifts that overlap with the date range
-    const start = dayjs(startDate).startOf("day");
-    const end = dayjs(endDate).endOf("day");
-
-    const filtered = transformedData.filter((item: any) => {
-      if (!item.workshift_start_time) return false;
-      const wsStart = dayjs(item.workshift_start_time);
-      const wsEnd = dayjs(item.workshift_end_time);
-      
-      return (
-        (wsStart.isBefore(end) || wsStart.isSame(end, "day")) &&
-        (wsEnd.isAfter(start) || wsEnd.isSame(start, "day"))
-      );
-    });
-
-    return filtered as IUserWorkshift[];
+    return transformedData as IUserWorkshift[];
   } catch (error) {
     console.error("Error fetching user workshifts by date range:", error);
     throw error;

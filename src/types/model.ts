@@ -200,6 +200,7 @@ export interface IUserWorkshift {
   id: number;
   project_code: string;
   username: string;
+  location_id: number;
   workshift_id: number;
   created_at: string;
   updated_at: string;
@@ -221,6 +222,7 @@ export interface IUserWorkshift {
 export interface GetUserWorkshiftsParams {
   project_code: string;
   username?: string;
+  location_id?: number;
   workshift_id?: number;
   limit?: number;
   offset?: number;

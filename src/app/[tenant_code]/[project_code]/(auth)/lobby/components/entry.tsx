@@ -9,6 +9,8 @@ import { StyleUtil } from "@/kits/utils";
 import { useRouter, useSearchParams } from "next/navigation";
 import React from "react";
 import { useTenantProjectPath } from "@/hooks/use-tenant-project-path";
+import { useProjectConfigs } from "@/hooks/project/use-project-configs";
+import { isAssignedWorkshiftMode } from "@/utils/workshift-mode";
 
 export const Entry = () => {
   const authStore = useAuthContext();
@@ -24,6 +26,7 @@ export const Entry = () => {
 
   const router = useRouter();
   const { buildPath } = useTenantProjectPath();
+  const { projectWorkshiftConfig } = useProjectConfigs();
 
   React.useEffect(() => {
     if (isCheckingCurrentShift) return;
@@ -42,10 +45,13 @@ export const Entry = () => {
   }, [currentAttendance, isCheckingCurrentShift, searchParams, globalStore, router, buildPath]);
 
   React.useEffect(() => {
+    if (projectWorkshiftConfig === undefined) return;
+    if (isAssignedWorkshiftMode(projectWorkshiftConfig)) return;
+
     if (!selectedAdminDivision || !selectedLocation) {
       router.replace(buildPath("/location"));
     }
-  }, [selectedAdminDivision, selectedLocation]);
+  }, [selectedAdminDivision, selectedLocation, projectWorkshiftConfig, router, buildPath]);
 
   return (
     <>
@@ -102,24 +108,26 @@ export const Entry = () => {
               <Icons.ArrowRight className="h-6 w-6 shrink-0 text-primary-60" />
             </div>
           </button>
-          <button
-            type="button"
-            className={StyleUtil.cn(
-              "block w-full bg-white p-4 text-left hover:bg-gray-10",
-              "outline outline-1 -outline-offset-1 outline-gray-30",
-              "focus:bg-gray-10 focus:outline-primary-60",
-            )}
-            onClick={() => router.push(buildPath("/location"))}
-          >
-            <div className="mb-8">
-              <p className="text-sm">Thay đổi địa điểm</p>
-            </div>
+          {!isAssignedWorkshiftMode(projectWorkshiftConfig) && (
+            <button
+              type="button"
+              className={StyleUtil.cn(
+                "block w-full bg-white p-4 text-left hover:bg-gray-10",
+                "outline outline-1 -outline-offset-1 outline-gray-30",
+                "focus:bg-gray-10 focus:outline-primary-60",
+              )}
+              onClick={() => router.push(buildPath("/location"))}
+            >
+              <div className="mb-8">
+                <p className="text-sm">Thay đổi địa điểm</p>
+              </div>
 
-            <div className="mt-4 flex items-center justify-between">
-              <Icons.Location className="h-6 w-6 shrink-0 text-gray-50" />
-              <Icons.ArrowRight className="h-6 w-6 shrink-0 text-primary-60" />
-            </div>
-          </button>
+              <div className="mt-4 flex items-center justify-between">
+                <Icons.Location className="h-6 w-6 shrink-0 text-gray-50" />
+                <Icons.ArrowRight className="h-6 w-6 shrink-0 text-primary-60" />
+              </div>
+            </button>
+          )}
         </div>
       </div>
 
