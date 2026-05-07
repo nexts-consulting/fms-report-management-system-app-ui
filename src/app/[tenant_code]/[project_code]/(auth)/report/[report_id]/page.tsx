@@ -13,9 +13,12 @@ import { useQueryReportEntries, ReportEntry } from "@/services/api/application/r
 import { FormConfig } from "@/components/DynamicForm/types";
 import { ReportEntryDetailView } from "@/components/ReportEntryDetailView";
 import { Icons } from "@/kits/components/icons";
+import { useGlobalContext } from "@/contexts/global.context";
 
 export default function ReportPage() {
   const router = useRouter();
+  const globalStore = useGlobalContext();
+  const currentAttendance = globalStore.use.currentAttendance();
 
   const params = useParams();
 
@@ -62,11 +65,15 @@ export default function ReportPage() {
       tableName: dataSourceConfig?.table_name || "",
       schema: dataSourceConfig?.schema || "public",
       date: dateString,
+      attendanceId: currentAttendance?.id?.toString(),
       page: 0,
       size: pageSize,
     },
     config: {
-      enabled: !!dataSourceConfig?.table_name && reportDefinition?.data_source_type === "table",
+      enabled:
+        !!dataSourceConfig?.table_name &&
+        reportDefinition?.data_source_type === "table" &&
+        !!currentAttendance?.id,
     },
   });
 

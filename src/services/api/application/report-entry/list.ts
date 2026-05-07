@@ -6,6 +6,7 @@ export type ListReportEntriesParams = {
   tableName: string;
   schema?: string;
   date?: string;
+  attendanceId?: string;
   page?: number;
   size?: number;
 };
@@ -43,7 +44,7 @@ export const httpRequestListReportEntries = async (
   params: ListReportEntriesParams,
 ): Promise<ListReportEntriesResponse> => {
   try {
-    const { tableName, schema, date, page = 0, size = 10 } = params;
+    const { tableName, schema, date, attendanceId, page = 0, size = 10 } = params;
 
     let query = supabaseFmsService.client
       .from(tableName)
@@ -55,6 +56,11 @@ export const httpRequestListReportEntries = async (
       const startDate = `${date}T00:00:00.000Z`;
       const endDate = `${date}T23:59:59.999Z`;
       query = query.gte("created_at", startDate).lte("created_at", endDate);
+    }
+
+    // Filter by current attendance
+    if (attendanceId) {
+      query = query.eq("attendance_id", attendanceId);
     }
 
     // Pagination

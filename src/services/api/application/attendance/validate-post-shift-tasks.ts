@@ -5,17 +5,43 @@ interface PostShiftTaskRule {
   field: string;
   table: string;
   error_mesage: string;
+  roles_apply?: Array<string | null>;
 }
 
 export interface ValidatePostShiftTasksParams {
   attendanceId: number;
   projectCheckinFlow: IProjectCheckinFlow | null;
   projectMetadata: IProjectMetadata[] | null;
+  userRoles?: string[];
 }
 
 export interface ValidatePostShiftTasksResult {
   valid: boolean;
   errors: string[];
+}
+
+function shouldApplyRuleByRoles(rule: PostShiftTaskRule, userRoles: string[]): boolean {
+  if (!Array.isArray(rule.roles_apply) || rule.roles_apply.length === 0) {
+    return true;
+  }
+
+  const allowedRoles = rule.roles_apply
+    .filter((role): role is string => typeof role === "string")
+    .map((role) => role.trim())
+    .filter(Boolean);
+
+  const applyWhenNoRole = rule.roles_apply.some((role) => role === null);
+  const normalizedUserRoles = userRoles.map((role) => role.trim()).filter(Boolean);
+
+  if (normalizedUserRoles.length === 0) {
+    return applyWhenNoRole;
+  }
+
+  if (allowedRoles.length === 0) {
+    return false;
+  }
+
+  return normalizedUserRoles.some((role) => allowedRoles.includes(role));
 }
 
 /**
@@ -28,7 +54,7 @@ export interface ValidatePostShiftTasksResult {
 export async function validatePostShiftTasks(
   params: ValidatePostShiftTasksParams,
 ): Promise<ValidatePostShiftTasksResult> {
-  const { attendanceId, projectCheckinFlow, projectMetadata } = params;
+  const { attendanceId, projectCheckinFlow, projectMetadata, userRoles = [] } = params;
 
   if (!projectCheckinFlow?.require_post_shift_task) {
     return { valid: true, errors: [] };
@@ -47,6 +73,10 @@ export async function validatePostShiftTasks(
   const errors: string[] = [];
 
   for (const rule of rules) {
+    if (!shouldApplyRuleByRoles(rule, userRoles)) {
+      continue;
+    }
+
     const { field, table, error_mesage } = rule;
     if (!field || !table) continue;
 

@@ -11,7 +11,9 @@ import {
 import moment from "moment";
 import React from "react";
 import { useGlobalContext } from "@/contexts/global.context";
+import { useAuthContext } from "@/contexts/auth.context";
 import { validatePostShiftTasks } from "@/services/api/application/attendance/validate-post-shift-tasks";
+import { getAllRoles } from "@/utils/auth";
 
 interface CheckoutConfirmProps {
   attendanceDetail: IAttendance;
@@ -24,8 +26,11 @@ export const CheckoutConfirm = React.memo((props: CheckoutConfirmProps) => {
   const { attendanceDetail, location, onConfirm, onCancel } = props;
 
   const globalStore = useGlobalContext();
+  const authStore = useAuthContext();
+  const user = authStore.use.user();
   const projectCheckinFlow = globalStore.use.projectCheckinFlow();
   const projectMetadata = globalStore.use.projectMetadata();
+  const userRoles = React.useMemo(() => getAllRoles(user), [user]);
 
   const [validationErrors, setValidationErrors] = React.useState<string[]>([]);
   const [isValidating, setIsValidating] = React.useState(false);
@@ -37,11 +42,12 @@ export const CheckoutConfirm = React.memo((props: CheckoutConfirmProps) => {
       attendanceId: attendanceDetail.id,
       projectCheckinFlow,
       projectMetadata,
+      userRoles,
     }).then(({ errors }) => {
       setValidationErrors(errors);
       setIsValidating(false);
     });
-  }, [attendanceDetail.id, projectCheckinFlow, projectMetadata]);
+  }, [attendanceDetail.id, projectCheckinFlow, projectMetadata, userRoles]);
 
   const handleConfirm = React.useCallback(() => {
     if (validationErrors.length > 0 || isValidating) return;
@@ -111,11 +117,11 @@ export const CheckoutConfirm = React.memo((props: CheckoutConfirmProps) => {
         )}
 
         {!isValidating && validationErrors.length > 0 && (
-          <div className="mt-3 rounded border border-red-30 bg-red-10 p-3">
-            <p className="mb-1 text-sm font-medium text-red-60">Chưa hoàn thành các công việc sau ca:</p>
+          <div className="mt-3 border border-red-30 bg-white p-3">
+            <p className="mb-1 text-sm font-medium text-red-60">Lỗi khi kết thúc ca:</p>
             <ul className="list-disc pl-4">
               {validationErrors.map((err, idx) => (
-                <li key={idx} className="text-sm text-red-50">
+                <li key={idx} className="text-sm">
                   {err}
                 </li>
               ))}
