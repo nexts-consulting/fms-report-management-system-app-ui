@@ -21,6 +21,7 @@ import { useTenantProjectPath } from "@/hooks/use-tenant-project-path";
 import { ILocation } from "@/types/model";
 import { useQueryLocationByAdminDivision } from "@/services/api/application/location/list-by-admin-division";
 import { useQueryAdminDivisionList } from "@/services/api/application/admin-division/list";
+import { Search } from "@/kits/components/search";
 import {
   buildAdminDivisionTree,
   getAllChildDivisionIds,
@@ -51,6 +52,7 @@ export const Entry = () => {
   >([]);
 
   const [selectedLocation, setSelectedLocation] = React.useState<ILocation | null>(null);
+  const [searchKeyword, setSearchKeyword] = React.useState("");
 
   const adminDivisionListQuery = useQueryAdminDivisionList({
     params: {
@@ -181,6 +183,7 @@ export const Entry = () => {
         }
         // Reset location when division changes
         setSelectedLocation(null);
+        setSearchKeyword("");
         return newLevels;
       });
     },
@@ -219,6 +222,34 @@ export const Entry = () => {
     locationListQuery.isFetching,
     locationListQuery.data,
   ]);
+
+  const filteredLocations = React.useMemo(() => {
+    const locationList = locationListQuery.data?.data ?? [];
+    const normalizeText = (value?: string | null) =>
+      (value ?? "")
+        .normalize("NFD")
+        .replace(/\p{Diacritic}/gu, "")
+        .toLowerCase()
+        .trim();
+
+    const normalizedKeyword = normalizeText(searchKeyword);
+
+    if (!normalizedKeyword) {
+      return locationList;
+    }
+
+    return locationList.filter((location) => {
+      const normalizedName = normalizeText(location.name);
+      const normalizedCode = normalizeText(location.code);
+      const normalizedAddress = normalizeText(location.address);
+
+      return (
+        normalizedName.includes(normalizedKeyword) ||
+        normalizedCode.includes(normalizedKeyword) ||
+        normalizedAddress.includes(normalizedKeyword)
+      );
+    });
+  }, [locationListQuery.data, searchKeyword]);
 
   const handleConfirm = () => {
     if (selectedLocation && finalSelectedDivision) {
@@ -264,7 +295,7 @@ export const Entry = () => {
         />
 
         {/* Tile - Dynamic Division Dropdowns */}
-        <div className="mt-4 w-full space-y-4 bg-white px-4 py-12">
+        <div className="mt-4 w-full space-y-4 bg-white px-4 py-6">
           {maxLevel > 0 &&
             Array.from({ length: maxLevel }, (_, index) => {
               const level = index + 1;
@@ -305,15 +336,24 @@ export const Entry = () => {
 
         {/* Tile */}
         {isDisplayLocationList && (
-          <div className="mt-4 w-full bg-white px-4 py-12">
+          <div className="mt-4 w-full bg-white px-4 py-4 space-y-4">
+            <Search
+              value={searchKeyword}
+              onChange={setSearchKeyword}
+              placeholder="Tìm theo tên, mã hoặc địa chỉ"
+              aria-label="Tìm kiếm địa điểm"
+            />
             <div>
-              {locationListQuery.data?.data.map((location: ILocation, index: number) => (
+              {filteredLocations.map((location: ILocation, index: number) => (
                 <LocationCard
                   key={`location-${location.id}-${index}`}
                   location={location}
                   onClick={() => setSelectedLocation(location)}
                 />
               ))}
+              {filteredLocations.length === 0 && (
+                <p className="mt-4 text-sm text-gray-70">Không tìm thấy địa điểm phù hợp.</p>
+              )}
             </div>
           </div>
         )}
