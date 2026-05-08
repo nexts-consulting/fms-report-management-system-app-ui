@@ -14,10 +14,14 @@ import { FormConfig } from "@/components/DynamicForm/types";
 import { ReportEntryDetailView } from "@/components/ReportEntryDetailView";
 import { Icons } from "@/kits/components/icons";
 import { useGlobalContext } from "@/contexts/global.context";
+import { useMutationDeleteReportEntry } from "@/services/api/application/report-entry/delete";
+import { useNotification } from "@/kits/components/notification";
+import { ConfirmationDialog } from "@/components/shared/ConfirmationDialog";
 
 export default function ReportPage() {
   const router = useRouter();
   const globalStore = useGlobalContext();
+  const notification = useNotification();
   const currentAttendance = globalStore.use.currentAttendance();
 
   const params = useParams();
@@ -26,6 +30,7 @@ export default function ReportPage() {
   const [pageSize, setPageSize] = useState(INITIAL_PAGE_SIZE);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedEntry, setSelectedEntry] = useState<ReportEntry | null>(null);
+  const [showDeleteConfirmDialog, setShowDeleteConfirmDialog] = useState(false);
 
   const reportId = params?.report_id as string;
   const { buildPath } = useTenantProjectPath();
@@ -59,7 +64,7 @@ export default function ReportPage() {
   const {
     data: entriesData,
     isLoading: isLoadingEntries,
-    isFetching,
+    refetch,
   } = useQueryReportEntries({
     params: {
       tableName: dataSourceConfig?.table_name || "",
@@ -82,6 +87,8 @@ export default function ReportPage() {
   }, [entriesData]);
 
   const totalEntries = entriesData?.total || 0;
+
+  const deleteReportEntryMutation = useMutationDeleteReportEntry();
 
   // Generate label from entry data using entryLabelColumn
   const getEntryLabel = (entry: ReportEntry): string => {
@@ -110,6 +117,36 @@ export default function ReportPage() {
 
   const handleRefresh = () => {
     setPageSize(INITIAL_PAGE_SIZE);
+    refetch();
+  };
+
+  const handleDeleteEntry = async () => {
+    if (!selectedEntry || !dataSourceConfig?.table_name) return;
+
+    try {
+      await deleteReportEntryMutation.mutateAsync({
+        tableName: dataSourceConfig.table_name,
+        schema: dataSourceConfig.schema || "public",
+        id: selectedEntry.id,
+      });
+
+      notification.success({
+        title: "Thành công",
+        description: "Đã xóa dữ liệu báo cáo.",
+      });
+
+      setSelectedEntry(null);
+      setShowDeleteConfirmDialog(false);
+      await refetch();
+    } catch (deleteError) {
+      notification.error({
+        title: "Xóa thất bại",
+        description:
+          deleteError instanceof Error
+            ? deleteError.message
+            : "Không thể xóa dữ liệu báo cáo. Vui lòng thử lại.",
+      });
+    }
   };
 
   useEffect(() => {
@@ -256,7 +293,15 @@ export default function ReportPage() {
             </div>
 
             {/* Footer */}
-            <div className="border-t border-gray-200 p-4">
+            <div className="flex gap-3 border-t border-gray-200 p-4">
+              <Button
+                variant="danger"
+                onClick={() => setShowDeleteConfirmDialog(true)}
+                className="w-full"
+                disabled={deleteReportEntryMutation.isLoading}
+              >
+                {deleteReportEntryMutation.isLoading ? "Đang xóa..." : "Xóa dữ liệu"}
+              </Button>
               <Button variant="tertiary" onClick={() => setSelectedEntry(null)} className="w-full">
                 Đóng
               </Button>
@@ -264,6 +309,16 @@ export default function ReportPage() {
           </div>
         </div>
       )}
+      <ConfirmationDialog
+        isOpen={showDeleteConfirmDialog}
+        title="Xác nhận xóa dữ liệu"
+        description="Bạn có chắc chắn muốn xóa dữ liệu báo cáo này không?"
+        confirmLabel="Xóa dữ liệu"
+        cancelLabel="Hủy bỏ"
+        loading={deleteReportEntryMutation.isLoading}
+        onCancel={() => setShowDeleteConfirmDialog(false)}
+        onConfirm={handleDeleteEntry}
+      />
     </>
   );
 }

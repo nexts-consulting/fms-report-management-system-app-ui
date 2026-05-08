@@ -10,6 +10,9 @@ export interface IframeInitPayload {
   currentAttendance: IAttendance | null;
 }
 
+const INIT_RETRY_INTERVAL_MS = 400;
+const MAX_INIT_RETRIES = 10;
+
 interface UseIframeCommunicationOptions {
   iframeRef: React.RefObject<HTMLIFrameElement>;
   targetOrigin: string;
@@ -26,7 +29,9 @@ export const useIframeCommunication = ({
   onIframeError,
 }: UseIframeCommunicationOptions) => {
   const [isIframeReady, setIsIframeReady] = useState(false);
-  const initSentRef = useRef(false);
+  const initAckedRef = useRef(false);
+  const initRetryCountRef = useRef(0);
+  const initRetryTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   /**
    * Send message to iframe
@@ -54,8 +59,6 @@ export const useIframeCommunication = ({
    * Send initialization data to iframe
    */
   const sendInitData = useCallback(() => {
-    if (initSentRef.current) return;
-
     const initPayload: IframeInitPayload = {
       currentAttendance,
     };
@@ -64,11 +67,49 @@ export const useIframeCommunication = ({
       type: "INIT_FORM_DATA",
       payload: initPayload,
     });
+  }, [currentAttendance, sendMessageToIframe]);
 
-    initSentRef.current = true;
-    setIsIframeReady(true);
-    onIframeReady?.();
-  }, [currentAttendance, sendMessageToIframe, onIframeReady]);
+  const clearInitRetry = useCallback(() => {
+    if (initRetryTimerRef.current) {
+      clearInterval(initRetryTimerRef.current);
+      initRetryTimerRef.current = null;
+    }
+  }, []);
+
+  const markIframeReady = useCallback(() => {
+    setIsIframeReady((prev) => {
+      if (!prev) {
+        onIframeReady?.();
+      }
+      return true;
+    });
+  }, [onIframeReady]);
+
+  const startInitHandshake = useCallback(() => {
+    if (initRetryTimerRef.current) return;
+
+    // Hybrid mode:
+    // - Legacy child forms: parent does not block on ACK
+    // - Updated child forms: parent still listens for ACK and stops retries early
+    sendInitData();
+    markIframeReady();
+
+    initRetryCountRef.current = 0;
+    initRetryTimerRef.current = setInterval(() => {
+      if (initAckedRef.current) {
+        clearInitRetry();
+        return;
+      }
+
+      initRetryCountRef.current += 1;
+      if (initRetryCountRef.current >= MAX_INIT_RETRIES) {
+        clearInitRetry();
+        return;
+      }
+
+      sendInitData();
+    }, INIT_RETRY_INTERVAL_MS);
+  }, [clearInitRetry, markIframeReady, sendInitData]);
 
   /**
    * Handle messages from iframe (if needed in the future)
@@ -85,8 +126,14 @@ export const useIframeCommunication = ({
 
       switch (message.type) {
         case "FORM_READY":
-          // Iframe is ready, send init data
-          sendInitData();
+          // Iframe is ready, start retry-until-ack handshake
+          startInitHandshake();
+          break;
+
+        case "INIT_ACK":
+          initAckedRef.current = true;
+          clearInitRetry();
+          markIframeReady();
           break;
 
         case "FORM_SUBMITTED":
@@ -106,27 +153,28 @@ export const useIframeCommunication = ({
           console.log("Unknown message type from iframe:", message.type);
       }
     },
-    [targetOrigin, sendInitData, onIframeError]
+    [clearInitRetry, markIframeReady, onIframeError, startInitHandshake, targetOrigin]
   );
 
   /**
    * Handle iframe load event
    */
   const handleIframeLoad = useCallback(() => {
-    // Reset init sent flag
-    initSentRef.current = false;
+    // Reset handshake state whenever iframe loads/reloads
+    initAckedRef.current = false;
+    initRetryCountRef.current = 0;
+    clearInitRetry();
+    setIsIframeReady(false);
 
-    // Wait a bit for iframe to be fully ready, then send init data
-    // If iframe sends FORM_READY, we'll send init data in response
-    // Otherwise, send after a short delay as fallback
+    // Fallback: if FORM_READY is missed, still start handshake
     const timeoutId = setTimeout(() => {
-      if (!initSentRef.current) {
-        sendInitData();
+      if (!initRetryTimerRef.current && !initAckedRef.current) {
+        startInitHandshake();
       }
     }, 500);
 
     return () => clearTimeout(timeoutId);
-  }, [sendInitData]);
+  }, [clearInitRetry, startInitHandshake]);
 
   /**
    * Setup message listener
@@ -135,20 +183,22 @@ export const useIframeCommunication = ({
     window.addEventListener("message", handleMessage);
 
     return () => {
+      clearInitRetry();
       window.removeEventListener("message", handleMessage);
     };
-  }, [handleMessage]);
+  }, [clearInitRetry, handleMessage]);
 
   /**
    * Reset when currentAttendance changes
    */
   useEffect(() => {
-    if (isIframeReady && initSentRef.current) {
-      // Re-send init data if attendance changes
-      initSentRef.current = false;
-      sendInitData();
+    if (isIframeReady) {
+      // Re-run handshake if attendance changes after initial init
+      initAckedRef.current = false;
+      clearInitRetry();
+      startInitHandshake();
     }
-  }, [currentAttendance, isIframeReady, sendInitData]);
+  }, [clearInitRetry, currentAttendance, isIframeReady, startInitHandshake]);
 
   return {
     isIframeReady,
