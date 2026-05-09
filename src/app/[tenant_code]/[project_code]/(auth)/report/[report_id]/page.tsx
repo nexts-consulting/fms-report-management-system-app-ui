@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { ScreenHeader } from "@/components/ScreenHeader";
 import { LoadingOverlay } from "@/kits/components/loading-overlay";
 import { useParams, useRouter } from "next/navigation";
@@ -30,7 +30,13 @@ export default function ReportPage() {
   const [pageSize, setPageSize] = useState(INITIAL_PAGE_SIZE);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedEntry, setSelectedEntry] = useState<ReportEntry | null>(null);
+  const [entryToDelete, setEntryToDelete] = useState<ReportEntry | null>(null);
   const [showDeleteConfirmDialog, setShowDeleteConfirmDialog] = useState(false);
+  const [openActionEntryId, setOpenActionEntryId] = useState<string | null>(null);
+  const touchStartXRef = useRef(0);
+  const touchStartYRef = useRef(0);
+  const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const preventClickRef = useRef(false);
 
   const reportId = params?.report_id as string;
   const { buildPath } = useTenantProjectPath();
@@ -120,14 +126,75 @@ export default function ReportPage() {
     refetch();
   };
 
+  const clearLongPressTimer = () => {
+    if (!longPressTimerRef.current) return;
+    clearTimeout(longPressTimerRef.current);
+    longPressTimerRef.current = null;
+  };
+
+  const startLongPress = (entryId: string) => {
+    clearLongPressTimer();
+    longPressTimerRef.current = setTimeout(() => {
+      preventClickRef.current = true;
+      setOpenActionEntryId(entryId);
+    }, 500);
+  };
+
+  const handleEntryClick = (entry: ReportEntry) => {
+    if (preventClickRef.current) {
+      preventClickRef.current = false;
+      return;
+    }
+
+    if (openActionEntryId === entry.id) {
+      setOpenActionEntryId(null);
+      return;
+    }
+
+    setSelectedEntry(entry);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent, entryId: string) => {
+    const touch = e.touches[0];
+    touchStartXRef.current = touch.clientX;
+    touchStartYRef.current = touch.clientY;
+    preventClickRef.current = false;
+    startLongPress(entryId);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent, entryId: string) => {
+    const touch = e.touches[0];
+    const deltaX = touch.clientX - touchStartXRef.current;
+    const deltaY = touch.clientY - touchStartYRef.current;
+
+    // Stop long press detection if user starts moving.
+    if (Math.abs(deltaX) > 8 || Math.abs(deltaY) > 8) {
+      clearLongPressTimer();
+    }
+
+    if (Math.abs(deltaX) < Math.abs(deltaY)) return;
+
+    if (deltaX < -50) {
+      preventClickRef.current = true;
+      setOpenActionEntryId(entryId);
+    } else if (deltaX > 40 && openActionEntryId === entryId) {
+      preventClickRef.current = true;
+      setOpenActionEntryId(null);
+    }
+  };
+
+  const handleTouchEnd = () => {
+    clearLongPressTimer();
+  };
+
   const handleDeleteEntry = async () => {
-    if (!selectedEntry || !dataSourceConfig?.table_name) return;
+    if (!entryToDelete || !dataSourceConfig?.table_name) return;
 
     try {
       await deleteReportEntryMutation.mutateAsync({
         tableName: dataSourceConfig.table_name,
         schema: dataSourceConfig.schema || "public",
-        id: selectedEntry.id,
+        id: entryToDelete.id,
       });
 
       notification.success({
@@ -135,7 +202,7 @@ export default function ReportPage() {
         description: "Đã xóa dữ liệu báo cáo.",
       });
 
-      setSelectedEntry(null);
+      setEntryToDelete(null);
       setShowDeleteConfirmDialog(false);
       await refetch();
     } catch (deleteError) {
@@ -152,6 +219,10 @@ export default function ReportPage() {
   useEffect(() => {
     setPageSize(INITIAL_PAGE_SIZE);
   }, [dateString]);
+
+  useEffect(() => {
+    return () => clearLongPressTimer();
+  }, []);
 
   return (
     <>
@@ -196,28 +267,69 @@ export default function ReportPage() {
                   </div>
                 )}
 
-                {entries.map((entry) => (
-                  <div
-                    key={entry.id}
-                    className="200 cursor-pointer border bg-white p-4 transition-shadow hover:shadow-md"
-                    onClick={() => setSelectedEntry(entry)}
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <h3 className="mb-1 text-sm font-semibold text-gray-600">
-                          {getEntryLabel(entry)}
-                        </h3>
-                        <p className="mb-2 text-xs text-gray-800">Người tạo: {entry.created_by}</p>
+                {entries.map((entry) => {
+                  const isActionOpen = openActionEntryId === entry.id;
+
+                  return (
+                    <div
+                      key={entry.id}
+                      className="relative overflow-hidden border bg-white"
+                      onTouchStart={(e) => handleTouchStart(e, entry.id)}
+                      onTouchMove={(e) => handleTouchMove(e, entry.id)}
+                      onTouchEnd={handleTouchEnd}
+                      onMouseDown={() => startLongPress(entry.id)}
+                      onMouseUp={clearLongPressTimer}
+                      onMouseLeave={clearLongPressTimer}
+                    >
+                      <div className="absolute inset-y-0 right-0 flex w-36">
+                        <button
+                          type="button"
+                          className="flex-1 bg-gray-500 text-xs font-medium text-white"
+                          onClick={() => router.push(buildPath(`/report/${reportId}/edit/${entry.id}`))}
+                        >
+                          Chỉnh sửa
+                        </button>
+                        <button
+                          type="button"
+                          className="flex-1 bg-red-500 text-xs font-medium text-white"
+                          onClick={() => {
+                            setEntryToDelete(entry);
+                            setShowDeleteConfirmDialog(true);
+                            setOpenActionEntryId(null);
+                          }}
+                        >
+                          Xóa
+                        </button>
                       </div>
-                      <div className="flex items-center gap-2 text-right">
-                        <p className="text-xs text-gray-500">
-                          {format(new Date(entry.created_at), "dd/MM/yyyy HH:mm")}
-                        </p>
-                        <Icons.ChevronRight className="h-4 w-4 text-gray-400" />
+
+                      <div
+                        className={`cursor-pointer bg-white p-4 transition-transform duration-200 hover:shadow-md ${
+                          isActionOpen ? "-translate-x-36" : "translate-x-0"
+                        }`}
+                        onClick={() => handleEntryClick(entry)}
+                        onContextMenu={(e) => {
+                          e.preventDefault();
+                          setOpenActionEntryId(entry.id);
+                        }}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <h3 className="mb-1 text-sm font-semibold text-gray-600">
+                              {getEntryLabel(entry)}
+                            </h3>
+                            <p className="mb-2 text-xs text-gray-800">Người tạo: {entry.created_by}</p>
+                          </div>
+                          <div className="flex items-center gap-2 text-right">
+                            <p className="text-xs text-gray-500">
+                              {format(new Date(entry.created_at), "dd/MM/yyyy HH:mm")}
+                            </p>
+                            <Icons.ChevronRight className="h-4 w-4 text-gray-400" />
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
 
                 {/* Show total count */}
                 {entries.length > 0 && (
@@ -296,12 +408,26 @@ export default function ReportPage() {
             <div className="flex gap-3 border-t border-gray-200 p-4">
               <Button
                 variant="danger"
-                onClick={() => setShowDeleteConfirmDialog(true)}
+                onClick={() => {
+                  setEntryToDelete(selectedEntry);
+                  setShowDeleteConfirmDialog(true);
+                }}
                 className="w-full"
                 disabled={deleteReportEntryMutation.isLoading}
               >
-                {deleteReportEntryMutation.isLoading ? "Đang xóa..." : "Xóa dữ liệu"}
+                {deleteReportEntryMutation.isLoading ? "Đang xóa..." : "Xóa"}
               </Button>
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  router.push(buildPath(`/report/${reportId}/edit/${selectedEntry.id}`));
+                  setSelectedEntry(null);
+                }}
+                className="w-full"
+              >
+                Sửa
+              </Button>
+              
               <Button variant="tertiary" onClick={() => setSelectedEntry(null)} className="w-full">
                 Đóng
               </Button>
@@ -316,7 +442,10 @@ export default function ReportPage() {
         confirmLabel="Xóa dữ liệu"
         cancelLabel="Hủy bỏ"
         loading={deleteReportEntryMutation.isLoading}
-        onCancel={() => setShowDeleteConfirmDialog(false)}
+        onCancel={() => {
+          setShowDeleteConfirmDialog(false);
+          setEntryToDelete(null);
+        }}
         onConfirm={handleDeleteEntry}
       />
     </>
