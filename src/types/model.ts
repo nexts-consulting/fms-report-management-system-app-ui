@@ -88,6 +88,7 @@ export interface ILocation {
   checkin_radius_meters: number;
   admin_division_id: number | null;
   metadata: Record<string, any>;
+  configs: Record<string, any>;
   created_at: string;
   updated_at: string;
 }
@@ -180,6 +181,7 @@ export interface ILocationWorkshift {
   location_checkin_radius_meters?: number;
   location_admin_division_id?: number;
   location_metadata?: Record<string, any>;
+  location_configs?: Record<string, any>;
   location_created_at?: string;
   location_updated_at?: string;
   workshift_name?: string;
@@ -217,6 +219,7 @@ export interface IUserWorkshift {
   location_checkin_radius_meters?: number;
   location_admin_division_id?: number;
   location_metadata?: Record<string, any>;
+  location_configs?: Record<string, any>;
 }
 
 export interface GetUserWorkshiftsParams {

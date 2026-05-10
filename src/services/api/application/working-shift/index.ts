@@ -233,7 +233,7 @@ export const httpRequestGetLocationWorkshiftsByDateRange = async (
         .select(
           `
           *,
-          fms_mst_locations!inner(id, name, code, address, latitude, longitude, checkin_radius_meters, admin_division_id, metadata, created_at, updated_at),
+          fms_mst_locations!inner(id, name, code, address, latitude, longitude, checkin_radius_meters, admin_division_id, metadata, configs, created_at, updated_at),
           fms_app_data_workshifts!inner(id, name, start_time, end_time, status)
         `,
         )

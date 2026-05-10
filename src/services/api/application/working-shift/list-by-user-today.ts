@@ -35,6 +35,7 @@ const mapUserWorkshiftToWorkingShift = (
     updated_at: userWorkshift.updated_at,
     admin_division_id: userWorkshift.location_admin_division_id ?? null,
     metadata: userWorkshift.location_metadata || {},
+    configs: userWorkshift.location_configs || {},
   };
 
   return {

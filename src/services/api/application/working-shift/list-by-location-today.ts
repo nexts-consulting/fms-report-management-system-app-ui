@@ -35,6 +35,7 @@ const mapLocationToModel = (location: ILocation): ILocationModel => {
     updated_at: location.updated_at,
     admin_division_id: location.admin_division_id,
     metadata: location.metadata,
+    configs: location.configs,
   };
 };
 
@@ -89,6 +90,7 @@ export const httpRequestWorkingShiftListByLocationToday = async (
       checkin_radius_meters: filtered[0]?.location_checkin_radius_meters || 100,
       admin_division_id: filtered[0]?.location_admin_division_id || null,
       metadata: filtered[0]?.location_metadata || {},
+      configs: filtered[0]?.location_configs || {},
       created_at: filtered[0]?.location_created_at || "",
       updated_at: filtered[0]?.location_updated_at || "",
     };
