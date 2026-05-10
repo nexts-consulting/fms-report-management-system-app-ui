@@ -4,6 +4,7 @@ import React from "react";
 import { useAuthContext } from "@/contexts/auth.context";
 import { useQueryAppMenus } from "@/services/api/application/app-menu";
 import { IAppMenu } from "@/types/model";
+import { getClientRoles } from "@/utils/auth";
 
 interface AppMenuContextValue {
   menuItems: IAppMenu[];
@@ -24,26 +25,47 @@ interface AppMenuProviderProps {
 export const AppMenuProvider = (props: AppMenuProviderProps) => {
   const { children } = props;
   const authStore = useAuthContext();
+  const tenant = authStore.use.tenant();
   const project = authStore.use.project();
+  const user = authStore.use.user();
 
   const projectCode = project?.code || "";
+  const tenantClientKey = tenant?.code;
 
   const { data: menuItems, isLoading, error } = useQueryAppMenus({
     params: {
       projectCode,
     },
     config: {
-      enabled: !!projectCode, // Only fetch when project code is available
+      enabled: !!projectCode,
     },
   });
 
+  const visibleMenuItems = React.useMemo(() => {
+    const list = menuItems || [];
+    const userRoles = new Set(
+      tenantClientKey
+        ? getClientRoles({ clientRoles: user?.clientRoles }, tenantClientKey)
+        : [],
+    );
+    return list.filter((item) => {
+      const required = item.metadata?.roles;
+      if (!Array.isArray(required) || required.length === 0) {
+        return true;
+      }
+      return required.some(
+        (role) => typeof role === "string" && userRoles.has(role),
+      );
+    });
+  }, [menuItems, user?.clientRoles, tenantClientKey]);
+
   const value: AppMenuContextValue = React.useMemo(
     () => ({
-      menuItems: menuItems || [],
+      menuItems: visibleMenuItems,
       isLoading,
       error: error as Error | null,
     }),
-    [menuItems, isLoading, error],
+    [visibleMenuItems, isLoading, error],
   );
 
   return <AppMenuContext.Provider value={value}>{children}</AppMenuContext.Provider>;
