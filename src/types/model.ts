@@ -245,6 +245,7 @@ export interface IAttendance {
   id: number;
   project_code: string;
   username: string;
+  full_name: string | null;
   workshift_id: number | null;
   workshift_name: string;
   shift_start_time: string | null;
@@ -402,6 +403,7 @@ export interface KeycloakUser {
   email?: string;
   firstName?: string;
   lastName?: string;
+  fullName?: string;
   enabled: boolean;
   emailVerified?: boolean;
   createdTimestamp?: number;

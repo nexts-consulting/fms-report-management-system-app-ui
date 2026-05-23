@@ -2,6 +2,8 @@
  * Utility functions for authentication and token handling
  */
 
+import type { KeycloakUser } from "@/types/model";
+
 export interface DecodedToken {
   exp: number;
   iat: number;
@@ -123,6 +125,14 @@ export function hasAllClientRoles(
   }
   const userRoles = new Set(getClientRoles(claims, clientId));
   return roles.every((role) => userRoles.has(role));
+}
+
+/**
+ * Resolve display full name from auth user (Keycloak).
+ */
+export function getUserFullName(user: Pick<KeycloakUser, "fullName" | "firstName" | "lastName" | "username">): string {
+  const fromParts = [user.firstName, user.lastName].filter(Boolean).join(" ").trim();
+  return user.fullName?.trim() || fromParts || user.username;
 }
 
 /**

@@ -8,6 +8,7 @@ import type { IProjectCheckinFlow } from "@/types/model";
 import type { IWorkingShiftLocation, IUserProfile, KeycloakUser } from "@/types/model";
 import { CHECKIN_SUCCESS_REDIRECT_DELAY } from "../../app/[tenant_code]/[project_code]/(auth)/checkin/common/config";
 import { useMutationAttendanceCheckin } from "@/services/api/application/attendance/checkin";
+import { getUserFullName } from "@/utils/auth";
 
 interface UseCheckinSubmitOptions {
   user: KeycloakUser;
@@ -136,6 +137,7 @@ export const useCheckinSubmit = ({
         profilePortraitUrl: userProfile?.portrait_image_url || null,
         projectCode,
         username: user.username,
+        fullName: getUserFullName(user),
         workshiftName: workingShiftLocation.name,
         locationId: location.id,
         locationCode: location.code,

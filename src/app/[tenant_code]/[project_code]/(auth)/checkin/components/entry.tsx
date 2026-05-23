@@ -13,6 +13,7 @@ import { CheckinCaptureStep } from "./CheckinCaptureStep";
 import { CheckinSubmitStep } from "./CheckinSubmitStep";
 import { CheckinSurveyStep } from "./CheckinSurveyStep";
 import { buildAttendancePhotoTimeMarkConfig } from "@/utils/attendance-photo-timemark.util";
+import { getUserFullName } from "@/utils/auth";
 
 /**
  * Main entry component for check-in process
@@ -61,7 +62,7 @@ export const Entry = () => {
   const checkinTimeMarkConfig = buildAttendancePhotoTimeMarkConfig({
     actionLabel: "Check in",
     shiftName: selectedWorkingShift?.name,
-    employeeName: [user.firstName, user.lastName].filter(Boolean).join(" ") || user.username,
+    employeeName: getUserFullName(user),
     locationName: selectedLocation?.name || selectedWorkingShift?.location?.name,
   });
 

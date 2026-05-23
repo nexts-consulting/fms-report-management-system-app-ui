@@ -12,6 +12,7 @@ export type CheckinMutationParams = {
   profilePortraitUrl?: string | null;
   projectCode: string;
   username: string;
+  fullName: string;
   workshiftName: string;
   locationId: number;
   locationCode: string;
@@ -60,6 +61,7 @@ export const httpRequestAttendanceCheckin = async (
   try {
     const {
       username,
+      fullName,
       projectCode,
       shiftId,
       location,
@@ -85,6 +87,7 @@ export const httpRequestAttendanceCheckin = async (
       .insert({
         project_code: projectCode,
         username: username,
+        full_name: fullName,
         workshift_id: shiftId,
         workshift_name: workshiftName,
         shift_start_time: workshiftStartTime,

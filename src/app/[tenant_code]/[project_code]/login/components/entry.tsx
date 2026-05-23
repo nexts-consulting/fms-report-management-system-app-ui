@@ -218,6 +218,7 @@ export const Entry = () => {
           email: userFromAccessToken.email || "",
           firstName: userFromAccessToken.firstName || "",
           lastName: userFromAccessToken.lastName || "",
+          fullName: userFromAccessToken.fullName || "",
           enabled: true,
           emailVerified: userFromAccessToken.emailVerified || false,
           createdTimestamp: userFromAccessToken.createdTimestamp || 0,
