@@ -334,7 +334,7 @@ export const Entry = () => {
           <div className="mt-4 divide-y divide-gray-30">
             {workshiftList.map((workingShift, index) => (
               <WorkingShiftCard
-                key={workingShift.id || `workshift-${index}`}
+                key={`workshift-${index}`}
                 workingShift={workingShift}
                 config={projectWorkshiftConfig}
                 onClick={() => setSelectedWorkingShift(workingShift)}
