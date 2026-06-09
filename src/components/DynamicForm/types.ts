@@ -28,7 +28,9 @@ export type FieldType =
   | "imageCapture"
   | "multipleImagesCapture"
   | "inputGroup"
-  | "groupedInputGroup";
+  | "groupedInputGroup"
+  | "rateInput"
+  | "rateInputGroup";
 
 /**
  * Mask types for MaskedInput
@@ -607,6 +609,36 @@ export interface GroupedInputGroupFieldConfig extends BaseFieldConfig {
 }
 
 /**
+ * Rate input display variant
+ */
+export type RateInputVariant = "star" | "number";
+
+/**
+ * Rate input field configuration
+ */
+export interface RateInputFieldConfig extends BaseFieldConfig {
+  type: "rateInput";
+  min?: number;
+  max?: number;
+  count?: number;
+  variant?: RateInputVariant;
+  allowClear?: boolean;
+}
+
+/**
+ * Rate input group field configuration
+ */
+export interface RateInputGroupFieldConfig extends BaseFieldConfig {
+  type: "rateInputGroup";
+  items: InputGroupItem[] | (() => Promise<InputGroupItem[]>);
+  min?: number;
+  max?: number;
+  count?: number;
+  variant?: RateInputVariant;
+  allowClear?: boolean;
+}
+
+/**
  * Union type for all field configurations
  */
 export type FieldConfig =
@@ -629,7 +661,9 @@ export type FieldConfig =
   | ImageCaptureFieldConfig
   | MultipleImagesCaptureFieldConfig
   | InputGroupFieldConfig
-  | GroupedInputGroupFieldConfig;
+  | GroupedInputGroupFieldConfig
+  | RateInputFieldConfig
+  | RateInputGroupFieldConfig;
 
 /**
  * Form section configuration

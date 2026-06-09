@@ -52,6 +52,57 @@ const formatFieldValue = (
       const decimals = (field as any).decimals || 0;
       return `${percentageValue.toFixed(decimals)}%`;
 
+    case "rateInput": {
+      const rateValue = typeof value === "number" ? value : parseFloat(String(value));
+      if (Number.isNaN(rateValue)) return "–";
+      const count = (field as any).count ?? (field as any).max ?? 5;
+      return `${rateValue}/${count}`;
+    }
+
+    case "rateInputGroup":
+      if (typeof value === "object" && value !== null) {
+        const fieldConfig = field as any;
+        const configItems = Array.isArray(fieldConfig.items) ? fieldConfig.items : [];
+        const entries = Object.entries(value as Record<string, unknown>).filter(
+          ([, score]) => typeof score === "number" && !Number.isNaN(score as number),
+        );
+
+        if (entries.length === 0) {
+          return "Không có dữ liệu";
+        }
+
+        const count = fieldConfig.count ?? fieldConfig.max ?? 5;
+
+        return (
+          <div className="mt-2">
+            <table className="min-w-full border divide-y divide-gray-200">
+              <thead>
+                <tr>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">Mục</th>
+                  <th className="px-3 py-2 text-right text-xs font-medium text-gray-500">Điểm</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {entries.map(([code, score]) => {
+                  const configItem = configItems.find((item: any) => item.code === code);
+                  return (
+                    <tr key={code}>
+                      <td className="px-3 py-2 text-sm text-gray-900">
+                        {configItem?.name || code}
+                      </td>
+                      <td className="px-3 py-2 text-sm text-right font-medium text-gray-900">
+                        {score}/{count}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        );
+      }
+      return "–";
+
     case "select":
     case "multiselect":
       // Assume label = value (as per user requirement)
@@ -254,6 +305,7 @@ const renderField = (
     "multipleImagesCapture",
     "inputGroup",
     "groupedInputGroup",
+    "rateInputGroup",
   ];
 
   const isFullWidth = fullWidthFields.includes(field.type);

@@ -20,6 +20,8 @@ import { DateTimePickerInput } from "./fields/DateTimePickerInput";
 import { DateRangePickerInput } from "./fields/DateRangePickerInput";
 import { InputGroup, InputGroupItem } from "./fields/InputGroup";
 import { GroupedInputGroup } from "./fields/GroupedInputGroup";
+import { RateInput } from "./fields/RateInput";
+import { RateInputGroup, RateInputGroupItem } from "./fields/RateInputGroup";
 
 import { TextInput } from "@/kits/components/text-input";
 import { TextArea } from "@/kits/components/text-area";
@@ -341,6 +343,60 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
           layout={field.layout}
           showButtons={field.showButtons}
           buttonStep={field.buttonStep}
+        />
+      );
+    }
+
+    case "rateInput":
+      return (
+        <RateInput
+          label={field.label}
+          helperText={field.helperText}
+          error={!!error}
+          value={value ?? null}
+          onChange={onChange}
+          min={field.min}
+          max={field.max}
+          count={field.count}
+          variant={field.variant}
+          allowClear={field.allowClear}
+          disabled={disabled || field.disabled}
+          readonly={field.readonly}
+        />
+      );
+
+    case "rateInputGroup": {
+      const [items, setItems] = React.useState<RateInputGroupItem[]>(
+        Array.isArray(field.items) ? field.items : [],
+      );
+
+      React.useEffect(() => {
+        if (typeof field.items === "function") {
+          field.items()
+            .then((loadedItems) => {
+              setItems(loadedItems);
+            })
+            .catch(() => setItems([]));
+        } else {
+          setItems(field.items);
+        }
+      }, [field.items]);
+
+      return (
+        <RateInputGroup
+          label={field.label}
+          helperText={field.helperText}
+          error={!!error}
+          items={items}
+          value={value || {}}
+          onChange={onChange}
+          min={field.min}
+          max={field.max}
+          count={field.count}
+          variant={field.variant}
+          allowClear={field.allowClear}
+          disabled={disabled || field.disabled}
+          readonly={field.readonly}
         />
       );
     }
