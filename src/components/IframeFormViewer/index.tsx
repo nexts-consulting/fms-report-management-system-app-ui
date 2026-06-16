@@ -9,6 +9,7 @@ import { Button } from "@/kits/components/button";
 interface IframeFormViewerProps {
   appUrl: string;
   currentAttendance: IAttendance | null;
+  userFullName?: string | null;
   formName?: string;
 }
 
@@ -17,6 +18,7 @@ const IFRAME_LOAD_TIMEOUT = 15000; // 15 seconds
 export const IframeFormViewer: React.FC<IframeFormViewerProps> = ({
   appUrl,
   currentAttendance,
+  userFullName,
   formName,
 }) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -39,6 +41,7 @@ export const IframeFormViewer: React.FC<IframeFormViewerProps> = ({
     iframeRef,
     targetOrigin,
     currentAttendance,
+    userFullName,
     onIframeReady: () => {
       setIsLoading(false);
       setLoadTimeout(false);

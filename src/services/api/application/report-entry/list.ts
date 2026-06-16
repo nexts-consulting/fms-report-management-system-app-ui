@@ -24,6 +24,7 @@ export type ReportEntry = {
   location_name: string;
   attendance_id: string;
   created_by: string;
+  user_full_name?: string | null;
   updated_by?: string | null;
   created_at: string;
   updated_at: string;

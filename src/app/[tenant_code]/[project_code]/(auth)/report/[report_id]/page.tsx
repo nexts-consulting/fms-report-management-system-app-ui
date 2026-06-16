@@ -317,7 +317,9 @@ export default function ReportPage() {
                             <h3 className="mb-1 text-sm font-semibold text-gray-600">
                               {getEntryLabel(entry)}
                             </h3>
-                            <p className="mb-2 text-xs text-gray-800">Người tạo: {entry.created_by}</p>
+                            <p className="mb-2 text-xs text-gray-800">
+                              Người tạo: {entry.user_full_name || entry.created_by}
+                            </p>
                           </div>
                           <div className="flex items-center gap-2 text-right">
                             <p className="text-xs text-gray-500">
@@ -368,7 +370,7 @@ export default function ReportPage() {
                     <div className="flex justify-between">
                       <span className="text-sm text-gray-600">Người tạo:</span>
                       <span className="text-sm font-medium text-gray-900">
-                        {selectedEntry.created_by}
+                        {selectedEntry.user_full_name || selectedEntry.created_by}
                       </span>
                     </div>
                     <div className="flex justify-between">

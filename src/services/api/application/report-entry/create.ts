@@ -13,6 +13,7 @@ export type CreateReportEntryParams = {
   data: Record<string, any>;
   uniqueValue?: string;
   createdBy: string;
+  userFullName?: string;
   additionalData1?: Record<string, any>;
   additionalData2?: Record<string, any>;
   workshiftId?: number;
@@ -35,6 +36,7 @@ export type CreateReportEntryResponse = {
   location_name: string;
   attendance_id: string;
   created_by: string;
+  user_full_name?: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -56,6 +58,7 @@ export const httpRequestCreateReportEntry = async (
       data,
       uniqueValue,
       createdBy,
+      userFullName,
       additionalData1,
       additionalData2,
       workshiftId,
@@ -81,6 +84,7 @@ export const httpRequestCreateReportEntry = async (
       location_name: locationName,
       attendance_id: attendanceId,
       created_by: createdBy,
+      user_full_name: userFullName || null,
     };
 
     // Build table reference with schema if provided

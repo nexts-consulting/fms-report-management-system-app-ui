@@ -6,7 +6,9 @@ import { LoadingOverlay } from "@/kits/components/loading-overlay";
 import { useParams, useRouter } from "next/navigation";
 import { useFormDefinition } from "@/contexts/form-definition.context";
 import { useGlobalContext } from "@/contexts/global.context";
+import { useAuthContext } from "@/contexts/auth.context";
 import { IframeFormViewer } from "@/components/IframeFormViewer";
+import { getUserFullName } from "@/utils/auth";
 
 export default function FormPage() {
   const router = useRouter();
@@ -16,9 +18,18 @@ export default function FormPage() {
   // Get form definition
   const { data: formDefinition, isLoading, error } = useFormDefinition(formId);
 
-  // Get current attendance from global store
   const globalStore = useGlobalContext();
+  const authStore = useAuthContext();
   const currentAttendance = globalStore.use.currentAttendance();
+  const user = authStore.use.user();
+  const userProfile = authStore.use.userProfile();
+
+  const userFullName =
+    userProfile?.fullname ||
+    currentAttendance?.full_name ||
+    (user ? getUserFullName(user) : null) ||
+    user?.username ||
+    null;
 
   const hasError = !!error;
   const hasData = !!formDefinition;
@@ -63,6 +74,7 @@ export default function FormPage() {
           <IframeFormViewer
             appUrl={formDefinition.app_url}
             currentAttendance={currentAttendance}
+            userFullName={userFullName}
             formName={formDefinition.name}
           />
         )}

@@ -8,6 +8,7 @@ export interface IframeMessageData {
 
 export interface IframeInitPayload {
   currentAttendance: IAttendance | null;
+  user_full_name: string | null;
 }
 
 const INIT_RETRY_INTERVAL_MS = 400;
@@ -17,6 +18,7 @@ interface UseIframeCommunicationOptions {
   iframeRef: React.RefObject<HTMLIFrameElement>;
   targetOrigin: string;
   currentAttendance: IAttendance | null;
+  userFullName?: string | null;
   onIframeReady?: () => void;
   onIframeError?: (error: Error) => void;
 }
@@ -25,6 +27,7 @@ export const useIframeCommunication = ({
   iframeRef,
   targetOrigin,
   currentAttendance,
+  userFullName,
   onIframeReady,
   onIframeError,
 }: UseIframeCommunicationOptions) => {
@@ -61,13 +64,14 @@ export const useIframeCommunication = ({
   const sendInitData = useCallback(() => {
     const initPayload: IframeInitPayload = {
       currentAttendance,
+      user_full_name: userFullName ?? currentAttendance?.full_name ?? null,
     };
 
     sendMessageToIframe({
       type: "INIT_FORM_DATA",
       payload: initPayload,
     });
-  }, [currentAttendance, sendMessageToIframe]);
+  }, [currentAttendance, userFullName, sendMessageToIframe]);
 
   const clearInitRetry = useCallback(() => {
     if (initRetryTimerRef.current) {
@@ -198,7 +202,7 @@ export const useIframeCommunication = ({
       clearInitRetry();
       startInitHandshake();
     }
-  }, [clearInitRetry, currentAttendance, isIframeReady, startInitHandshake]);
+  }, [clearInitRetry, currentAttendance, userFullName, isIframeReady, startInitHandshake]);
 
   return {
     isIframeReady,

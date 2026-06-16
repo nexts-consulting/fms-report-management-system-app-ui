@@ -12,6 +12,7 @@ import { useAuthContext } from "@/contexts/auth.context";
 import { useNotification } from "@/kits/components/notification";
 import { httpRequestCreateReportEntry } from "@/services/api/application/report-entry/create";
 import { useGlobalContext } from "@/contexts/global.context";
+import { getUserFullName } from "@/utils/auth";
 
 export default function ReportPage() {
   const [formData, setFormData] = React.useState<Record<string, any>>({});
@@ -23,6 +24,7 @@ export default function ReportPage() {
   const authStore = useAuthContext();
   const globalStore = useGlobalContext();
   const user = authStore.use.user();
+  const userProfile = authStore.use.userProfile();
   const currentAttendance = globalStore.use.currentAttendance();
   const notification = useNotification();
 
@@ -80,6 +82,11 @@ export default function ReportPage() {
         schema: dataSourceConfig.schema || "public",
         data,
         createdBy: user.username,
+        userFullName:
+          userProfile?.fullname ||
+          currentAttendance?.full_name ||
+          getUserFullName(user) ||
+          user.username,
         additionalData1: {},
         additionalData2: {},
         workshiftId: currentAttendance?.workshift_id ?? 0,
