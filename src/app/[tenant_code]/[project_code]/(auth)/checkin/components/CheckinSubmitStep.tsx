@@ -4,6 +4,7 @@ import { LoadingBar } from "@/kits/components/loading-bar";
 import { AnimatedEllipsis } from "@/kits/components/animated-ellipsis";
 import type { IWorkingShiftLocation } from "@/types/model";
 import { CHECKIN_TIPS } from "../common/config";
+import dayjs from "dayjs";
 
 interface CheckinSubmitStepProps {
   workingShift: IWorkingShiftLocation;
@@ -34,6 +35,13 @@ export const CheckinSubmitStep: React.FC<CheckinSubmitStepProps> = ({
         </div>
       </div>
       <LoadingBar active={isSubmitting || isUploadingPhoto} size="medium" />
+      <div className="mt-4 rounded bg-white p-3 text-center text-sm text-gray-700">
+        <p className="font-medium">{workingShift.name}</p>
+        <p className="mt-1 text-gray-500">
+          Ca làm: {dayjs(workingShift.start_time).format("HH:mm")} -{" "}
+          {dayjs(workingShift.end_time).format("HH:mm")}
+        </p>
+      </div>
       <div className="mt-4">
         <p className="text-center text-sm font-medium text-gray-50">
           <span dangerouslySetInnerHTML={{ __html: CHECKIN_TIPS[currentTipIndex] }} />
