@@ -531,6 +531,7 @@ export interface ILeaveRequest {
   id: number;
   project_code: string;
   username: string;
+  full_name: string | null;
   workshift_id: number;
   workshift_name: string;
   location_id: number;

@@ -6,6 +6,7 @@ import { useMutation } from "react-query";
 export type CreateLeaveRequestParams = {
   projectCode: string;
   username: string;
+  fullName?: string;
   workshiftId: number;
   workshiftName: string;
   locationId: number;
@@ -37,6 +38,7 @@ export const httpRequestCreateLeaveRequest = async (
       .insert({
         project_code: params.projectCode,
         username: params.username,
+        full_name: params.fullName || null,
         workshift_id: params.workshiftId,
         workshift_name: params.workshiftName,
         location_id: params.locationId,

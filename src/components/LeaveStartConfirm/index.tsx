@@ -17,6 +17,7 @@ import { FormErrorMessage } from "../FormErrorMessage";
 import { useQueryClient } from "react-query";
 import { useMutationCreateLeaveRequest } from "@/services/api/application/leave-request/create";
 import { useParams } from "next/navigation";
+import { getUserFullName } from "@/utils/auth";
 
 const leaveTypeOptions = [
   { value: "LUNCH_BREAK", label: "Đi ăn trưa/tối" },
@@ -115,6 +116,7 @@ export const LeaveStartConfirm = React.memo(() => {
     createLeaveRequestMutation.mutate({
       projectCode: projectCode,
       username: user.username,
+      fullName: getUserFullName(user),
       workshiftId: currentAttendance.workshift_id ?? 0,
       workshiftName: currentAttendance.workshift_name ?? "",
       locationId: currentAttendance.location_id ?? 0,
