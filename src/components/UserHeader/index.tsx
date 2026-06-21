@@ -10,7 +10,7 @@ import { useAuthContext } from "@/contexts/auth.context";
 
 const constants = {
   INSTANCE_NAME: "UserHeader",
-  DEFAULT_LOGO: "/images/nextsystem-logo.webp",
+  DEFAULT_LOGO: "/images/nexts-fms-logo.png",
 } as const;
 
 interface UserHeaderProps {

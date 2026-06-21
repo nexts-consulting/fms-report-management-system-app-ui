@@ -389,7 +389,7 @@ export const Entry = () => {
   }
 
   // Get logo URL - prioritize project logo, fallback to tenant logo, then default
-  const logoUrl = project?.logo_url || tenant?.logo_url || "/images/nextsystem-logo.webp";
+  const logoUrl = project?.logo_url || tenant?.logo_url || "/images/nexts-fms-logo.png";
 
   return (
     <>
