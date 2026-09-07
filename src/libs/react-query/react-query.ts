@@ -7,6 +7,7 @@ import {
   DefaultOptions,
   UseInfiniteQueryOptions,
 } from "react-query";
+import { logQueryError } from "@/libs/observability";
 
 /**
  * Check if error is an API error (AxiosError or Supabase/PostgREST error)
@@ -49,6 +50,9 @@ const queryConfig: DefaultOptions = {
     },
     refetchOnWindowFocus: false,
     retry: false,
+    onError: (error: unknown) => {
+      logQueryError(error, "query");
+    },
   },
   mutations: {
     // Don't throw API errors to error boundary - they're handled by onError callbacks
@@ -61,6 +65,9 @@ const queryConfig: DefaultOptions = {
       }
       // Only throw non-API errors (like render errors) to error boundary
       return true;
+    },
+    onError: (error: unknown) => {
+      logQueryError(error, "mutation");
     },
   },
 };

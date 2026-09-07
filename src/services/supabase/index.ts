@@ -1,6 +1,9 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import moment from "moment";
 import { getAccessTokenCookie } from "@/utils/cookie";
+import { createObservedFetch } from "@/libs/observability";
+
+const observedFetch = createObservedFetch(fetch);
 
 type SupabaseRoute = string | undefined;
 
@@ -110,7 +113,7 @@ class SupabaseService {
           headers.set("x-tenant-code", tenantCode);
         }
 
-        return fetch(url, {
+        return observedFetch(url, {
           ...options,
           headers,
         });

@@ -7,6 +7,12 @@ import { Button } from "@/kits/components/button";
 import { ScreenHeader } from "@/components/ScreenHeader";
 import { useNotification } from "@/kits/components/notification";
 import { TrashCan, Copy, View, ViewOff } from "@carbon/icons-react";
+import { logger, logged, getLogContext } from "@/libs/observability";
+import {
+  clearLocalStorageKeepAuth as clearLocalStorageKeepAuthRaw,
+  ingestClearLocalStorageEvent,
+  listLocalStorageKeys,
+} from "@/libs/data-refresh";
 
 const styles = {
   container: StyleUtil.cn("min-h-screen bg-gray-10"),
@@ -26,6 +32,11 @@ const styles = {
   debugValue: StyleUtil.cn("text-gray-70 break-all whitespace-pre-wrap"),
   successText: StyleUtil.cn("text-xs text-green-50 mt-2"),
 };
+
+const clearLocalStorageKeepAuth = logged(clearLocalStorageKeepAuthRaw, "handleClearLocalStorage", {
+  category: "app",
+  logResult: true,
+});
 
 export default function ConfigurationPage() {
   const router = useRouter();
@@ -103,30 +114,38 @@ export default function ConfigurationPage() {
   };
 
   const handleClearLocalStorage = async () => {
+    const keysBefore = listLocalStorageKeys();
+    const actor = getLogContext();
+
     try {
       setIsClearing(true);
 
-      // Lưu lại auth-storage trước khi xóa
-      const authStorage = localStorage.getItem("auth-storage");
-
-      // Xóa tất cả dữ liệu trong local storage
-      localStorage.clear();
-
-      // Khôi phục lại auth-storage để giữ phiên đăng nhập
-      if (authStorage) {
-        localStorage.setItem("auth-storage", authStorage);
-      }
+      const result = clearLocalStorageKeepAuth();
+      await ingestClearLocalStorageEvent(actor, result, "manual");
 
       notification.success({
         title: "Đã xóa dữ liệu",
         description: "Dữ liệu cấu hình đã được xóa. Trang sẽ tải lại...",
       });
 
-      // Chờ 1 giây để người dùng thấy thông báo rồi reload
       setTimeout(() => {
         window.location.reload();
-      }, 1000);
+      }, 800);
     } catch (error) {
+      logger.error(
+        "Failed to clear localStorage",
+        error,
+        {
+          action: "clear_local_storage",
+          actorUserId: actor.userId,
+          actorUsername: actor.username,
+          actorFullName: actor.fullName,
+          keysBefore,
+        },
+        "app",
+      );
+      await logger.flush();
+
       notification.error({
         title: "Lỗi",
         description: "Không thể xóa dữ liệu. Vui lòng thử lại.",

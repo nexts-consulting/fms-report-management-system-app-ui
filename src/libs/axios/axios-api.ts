@@ -1,6 +1,7 @@
 import Axios, { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from "axios";
 import moment from "moment";
 import { getAccessTokenCookie } from "@/utils/cookie";
+import { weaveAxios } from "@/libs/observability";
 
 export const axios = Axios.create();
 
@@ -53,3 +54,4 @@ const onResponseError = (error: AxiosError): Promise<AxiosError> => {
 
 axios.interceptors.request.use(onRequest, onRequestError);
 axios.interceptors.response.use(onResponse, onResponseError);
+weaveAxios(axios);

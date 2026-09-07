@@ -50,6 +50,7 @@ export const Modal = React.memo((props: ModalProps) => {
 
   // Handle click outside
   const handleBackdropClick = (e: React.MouseEvent) => {
+    if (!closeable) return;
     if (e.target === e.currentTarget) {
       onClose?.();
     }
@@ -58,6 +59,7 @@ export const Modal = React.memo((props: ModalProps) => {
   // Handle ESC key
   React.useEffect(() => {
     const handleEsc = (event: KeyboardEvent) => {
+      if (!closeable) return;
       if (event.key === "Escape") onClose?.();
     };
 
@@ -70,7 +72,7 @@ export const Modal = React.memo((props: ModalProps) => {
       document.removeEventListener("keydown", handleEsc);
       document.body.style.overflow = "unset";
     };
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, closeable]);
 
   if (!isOpen) return <></>;
 
