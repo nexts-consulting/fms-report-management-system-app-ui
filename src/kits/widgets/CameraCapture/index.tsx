@@ -271,7 +271,7 @@ export const CameraCapture = (props: CameraCaptureProps) => {
             className={StyleUtil.cn(
               "group bg-white p-6",
               "active:bg-primary-60 active:outline active:outline-2 active:-outline-offset-2 active:outline-primary-60",
-              { "cursor-not-allowed bg-gray-30": !enableUpload },
+              { "pointer-events-none cursor-not-allowed bg-gray-30": !enableUpload },
             )}
           >
             <Icons.Image className="h-8 w-8 text-gray-70 group-active:text-white" />

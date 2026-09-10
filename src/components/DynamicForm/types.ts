@@ -451,6 +451,11 @@ export interface ImageCaptureFieldConfig extends BaseFieldConfig {
    * Default camera facing mode
    */
   defaultFacingMode?: "user" | "environment";
+  /**
+   * Disable picking images from the device library.
+   * Library upload is allowed by default.
+   */
+  disableLibraryUpload?: boolean;
 }
 
 /**
@@ -482,6 +487,11 @@ export interface MultipleImagesCaptureFieldConfig extends BaseFieldConfig {
    * Show image index badge
    */
   showImageIndex?: boolean;
+  /**
+   * Disable picking images from the device library.
+   * Library upload is allowed by default.
+   */
+  disableLibraryUpload?: boolean;
 }
 
 /**

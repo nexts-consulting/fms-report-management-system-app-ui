@@ -20,6 +20,11 @@ export interface MultipleImagesCaptureInputProps {
   value?: File[];
   onChange?: (files: File[]) => void;
   defaultFacingMode?: "user" | "environment";
+  /**
+   * Allow picking images from the device library
+   * @default true
+   */
+  enableUpload?: boolean;
 }
 
 export const MultipleImagesCaptureInput = React.memo(
@@ -33,6 +38,7 @@ export const MultipleImagesCaptureInput = React.memo(
       value: valueProp,
       onChange: onChangeProp,
       defaultFacingMode = "environment",
+      enableUpload = true,
     } = props;
 
     const instanceId = React.useRef(CommonUtil.nanoid("alphaLower"));
@@ -172,7 +178,7 @@ export const MultipleImagesCaptureInput = React.memo(
 
         {showCamera && (
           <CameraCapture
-            enableUpload={false}
+            enableUpload={enableUpload}
             enableCancel={true}
             defaultFacingMode={defaultFacingMode}
             onConfirm={handleConfirmCapture}

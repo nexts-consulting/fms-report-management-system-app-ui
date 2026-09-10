@@ -225,6 +225,7 @@ export const LeaveEndConfirm = React.memo(() => {
                   defaultFacingMode="user"
                   value={checkinPhotoUrl}
                   onChange={(url) => setCheckinPhotoUrl(url)}
+                  enableUpload={false}
                 />
               </div>
             </div>

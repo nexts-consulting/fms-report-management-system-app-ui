@@ -167,6 +167,7 @@ export const LeaveStartConfirm = React.memo(() => {
                 value={checkoutPhotoUrl || null}
                 onChange={(url) => setValue("checkoutPhotoUrl", url || "", { shouldValidate: true })}
                 error={!!errors.checkoutPhotoUrl}
+                enableUpload={false}
               />
               <FormErrorMessage name="checkoutPhotoUrl" errors={errors} />
             </div>

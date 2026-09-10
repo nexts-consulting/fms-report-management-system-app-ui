@@ -117,8 +117,8 @@ export interface MultipleImagesCaptureInputUploadProps {
    */
   showImageIndex?: boolean;
   /**
-   * Allow upload form library
-   * @default false
+   * Allow picking images from the device library
+   * @default true
    */
   enableUpload?: boolean;
 }
@@ -141,7 +141,7 @@ export const MultipleImagesCaptureInputUpload = React.memo(
       onUploadSuccess,
       disabled = false,
       showImageIndex = true,
-      enableUpload = false,
+      enableUpload = true,
     } = props;
 
     const instanceId = React.useRef(CommonUtil.nanoid("alphaLower"));

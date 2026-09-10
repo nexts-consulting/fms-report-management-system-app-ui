@@ -236,6 +236,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
           defaultFacingMode={field.defaultFacingMode}
           error={!!error}
           disabled={disabled || field.disabled}
+          enableUpload={!field.disableLibraryUpload}
         />
       );
 
@@ -254,6 +255,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
           minImages={field.minImages}
           gridColumns={field.gridColumns}
           showImageIndex={field.showImageIndex}
+          enableUpload={!field.disableLibraryUpload}
         />
       );
 

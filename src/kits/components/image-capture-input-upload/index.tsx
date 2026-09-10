@@ -136,8 +136,8 @@ export interface ImageCaptureInputWithUploadProps {
   disabled?: boolean;
 
   /**
-   * Allow upload form library
-   * @default false
+   * Allow picking an image from the device library
+   * @default true
    */
   enableUpload?: boolean;
 }
@@ -156,7 +156,7 @@ export const ImageCaptureInputWithUpload = React.memo(
       onUploadError,
       onUploadSuccess,
       disabled,
-      enableUpload = false,
+      enableUpload = true,
     } = props;
 
     const instanceId = React.useRef(CommonUtil.nanoid("alphaLower"));
