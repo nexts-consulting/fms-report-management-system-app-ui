@@ -1,11 +1,19 @@
 import "@/styles/globals.scss";
-import { Metadata } from "next";
+import { Metadata, Viewport } from "next";
 import { fontVariables } from "@/fonts";
 import { ProvidersWrapper } from "@/layouts/providers-wrapper";
 
 export const metadata: Metadata = {
   title: "Nexts System - FMS Report",
   description: "Provided by Nexts",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: "cover",
 };
 
 interface RootLayoutProps {

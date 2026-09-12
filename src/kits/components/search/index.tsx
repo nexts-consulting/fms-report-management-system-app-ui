@@ -16,7 +16,7 @@ const styles = {
     "flex items-center justify-between cursor-text border-b bg-gray-10 border-b-gray-60 ",
     "has-[input:focus]:outline has-[input:focus]:outline-2 has-[input:focus]:outline-primary-60 has-[input:focus]:-outline-offset-2",
   ),
-  input: StyleUtil.cn("text-sm bg-transparent h-10 w-full text-gray-100 placeholder:text-gray-50"),
+  input: StyleUtil.cn("text-base bg-transparent h-10 w-full text-gray-100 placeholder:text-gray-50"),
 };
 
 export interface SearchProps

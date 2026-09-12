@@ -17,7 +17,7 @@ const styles = {
       },
     ),
   input: StyleUtil.cn(
-    "text-sm px-4 h-10 w-full bg-transparent text-gray-100 placeholder:text-gray-50",
+    "text-base px-4 h-10 w-full bg-transparent text-gray-100 placeholder:text-gray-50",
   ),
   helperText: StyleUtil.cn("text-sm mt-1 text-gray-70 line-clamp-3"),
 };

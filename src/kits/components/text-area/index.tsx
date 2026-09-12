@@ -15,7 +15,7 @@ const styles = {
       },
     ),
   textarea: StyleUtil.cn(
-    "text-sm px-4 py-3 w-full bg-transparent text-gray-100 placeholder:text-gray-50 resize-none min-h-[100px] !border-none !outline-none",
+    "text-base px-4 py-3 w-full bg-transparent text-gray-100 placeholder:text-gray-50 resize-none min-h-[100px] !border-none !outline-none",
   ),
   helperText: StyleUtil.cn("text-sm mt-1 text-gray-70 line-clamp-3"),
 };

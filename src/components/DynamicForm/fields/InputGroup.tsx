@@ -23,7 +23,7 @@ const styles = {
   itemUnit: StyleUtil.cn("text-sm text-gray-500"),
   input: (hasError: boolean, hasValue: boolean, showButtons: boolean) =>
     StyleUtil.cn(
-      "border px-3 py-2 text-right font-medium",
+      "border px-3 py-2 text-base text-right font-medium",
       "focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-primary-50",
       {
         "w-20": !showButtons,

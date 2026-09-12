@@ -9,7 +9,7 @@
   font-family: "IBM Plex Sans", sans-serif;
   // font-family: "Open Sans", sans-serif;
   font-optical-sizing: auto;
-  
+
   // Project theme colors (default values, will be overridden by useProjectTheme hook)
   --project-primary-color: #1d35e0;
   --project-primary-hover: #1426b5;
@@ -24,6 +24,24 @@
   --project-secondary-color: #3c52ff;
   --project-secondary-hover: #1d35e0;
   --project-secondary-active: #1426b5;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+html,
+body {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+/* iOS Safari auto-zooms the page when a focused form control is < 16px */
+input,
+textarea,
+select {
+  font-size: 16px !important;
 }
 
 input:focus {
